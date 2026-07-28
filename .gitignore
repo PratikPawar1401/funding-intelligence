@@ -1,0 +1,54 @@
+# Environment
+.env
+.envrc
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+*.egg-info/
+dist/
+build/
+
+# Data (generated at runtime)
+data/raw/*.jsonl
+data/normalised/*.jsonl
+data/normalised/*.csv
+data/queues/*.db
+data/queues/*.db-wal
+data/queues/*.db-shm
+data/db/*.db
+data/db/*.db-wal
+data/db/*.db-shm
+data/app.db
+data/pdfs/
+data/embeddings/*.npy
+data/embeddings/*.json
+data/embeddings/*.faiss
+data/evaluation/eval_results.json
+
+# Testing
+.pytest_cache/
+htmlcov/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
+
+# Model caches (large files)
+models/
+*.bin
+*.safetensors

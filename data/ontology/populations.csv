@@ -1,0 +1,21 @@
+concept_id,label,category,parent_id,description
+pop_01,Rural Communities,population,,People and communities living in rural and non-metropolitan areas
+pop_02,Urban Communities,population,,People and communities living in urban and metropolitan areas
+pop_03,Low-Income Populations,population,,Individuals and families with income below poverty thresholds or economically disadvantaged
+pop_04,Children and Youth,population,,Young people from birth through adolescence including at-risk youth
+pop_05,Older Adults,population,,Aging populations including elderly individuals and senior citizens
+pop_06,Veterans,population,,Former military service members and their families
+pop_07,Indigenous Peoples,population,,Native American Alaska Native Native Hawaiian and other indigenous populations
+pop_08,Racial and Ethnic Minorities,population,,Underrepresented racial and ethnic groups including African Americans Hispanic and Latino populations
+pop_09,Women and Girls,population,,Female populations including gender-specific health education and economic issues
+pop_10,People with Disabilities,population,,Individuals with physical cognitive sensory or developmental disabilities
+pop_11,Immigrants and Refugees,population,,Foreign-born populations including asylum seekers refugees and undocumented immigrants
+pop_12,Students,population,,Individuals enrolled in educational institutions from K-12 through graduate school
+pop_13,LGBTQ+ Populations,population,,Lesbian gay bisexual transgender queer and other sexual and gender minority populations
+pop_14,Incarcerated Populations,population,,Individuals in correctional facilities including formerly incarcerated persons and reentry populations
+pop_15,Homeless Populations,population,,Individuals and families experiencing homelessness or housing instability
+pop_16,Agricultural Workers,population,,Farmworkers agricultural laborers and rural agricultural communities
+pop_17,Healthcare Workers,population,,Medical professionals nurses allied health workers and healthcare support staff
+pop_18,First Responders,population,,Emergency medical technicians firefighters police officers and disaster response personnel
+pop_19,Small Business Owners,population,,Entrepreneurs and owners of small and medium enterprises including minority-owned businesses
+pop_20,Tribal Communities,population,,Federally recognized tribal nations and their member communities

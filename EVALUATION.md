@@ -1,0 +1,166 @@
+# Evaluation Methodology and Metrics
+
+> This document describes how the semantic tagging pipeline is evaluated for correctness, consistency, and reproducibility.
+
+---
+
+## 1. Evaluation Framework Overview
+
+The pipeline is evaluated using a **gold standard comparison** approach:
+
+1. A human annotator reviews FOA descriptions and assigns the correct ontology tags
+2. The pipeline independently tags the same FOAs
+3. Predicted tags are compared against the gold standard to compute Precision, Recall, and F1
+
+All evaluation logic is implemented in `src/foa_pipeline/evaluate.py` and can be run reproducibly via:
+
+```bash
+# Re-tag all FOAs, then evaluate against gold standard
+PYTHONPATH=src python -m foa_pipeline.cli tag-all
+PYTHONPATH=src python src/foa_pipeline/evaluate.py --gold
+```
+
+---
+
+## 2. Gold Standard Construction
+
+### Dataset
+
+- **File:** `data/evaluation/eval_set_gold.json`
+- **Size:** 20 FOAs
+- **Source:** Stratified sample from the full database (120 FOAs), selected to cover:
+  - Multiple agencies (NSF, DOE via NSF)
+  - Multiple scientific domains (chemistry, biology, computing, social science, engineering, linguistics)
+  - Varying complexity (single-category FOAs like "Division of Chemistry" vs. multi-category FOAs like "CREST Centers")
+
+### Annotation Process
+
+1. Each FOA's full `program_description` and `eligibility_description` were read in their entirety
+2. Tags were assigned by matching the FOA's stated objectives, methods, and target populations against the 76 ontology concepts defined in `data/ontology/`
+3. Each tag assignment includes a `rationale` field documenting *why* the tag was applied (e.g., "Energy (batteries, fuel cells, electrolysis); Affordable and Clean Energy")
+4. Tags were only assigned when the concept is a **primary focus** of the FOA, not merely mentioned in passing
+
+### Annotation Guidelines
+
+- **Research Domains:** Assigned when the FOA's scientific scope directly maps to an SDG theme
+- **Sponsor Themes:** Assigned based on the federal mission area the FOA serves (using GREAT Act definitions)
+- **Methods:** Assigned only when the FOA explicitly requires or encourages a specific methodology
+- **Populations:** Assigned only when the FOA explicitly targets a specific demographic group
+
+### Limitations
+
+- **Single annotator:** The gold standard was labeled by a single person. Inter-annotator agreement has not been measured. This means the evaluation measures agreement with one human's interpretation, not a consensus ground truth
+- **Sample size:** 20 FOAs is sufficient for baseline development but not for statistically robust claims. The `eval_set_50.json` file contains a larger set (50 FOAs) for more comprehensive evaluation in later phases
+
+---
+
+## 3. Metrics
+
+### Definitions
+
+| Metric | Formula | Interpretation |
+|---|---|---|
+| **Precision** | TP / (TP + FP) | Of all tags the system assigned, what fraction were correct? |
+| **Recall** | TP / (TP + FN) | Of all tags that should have been assigned, what fraction did the system find? |
+| **F1** | 2 × (P × R) / (P + R) | Harmonic mean balancing precision and recall |
+
+Where:
+- **TP (True Positive):** Tag correctly assigned (present in both gold standard and predictions)
+- **FP (False Positive):** Tag incorrectly assigned (predicted but not in gold standard)
+- **FN (False Negative):** Tag missed (in gold standard but not predicted)
+
+### Evaluation Granularity
+
+Metrics are computed at two levels:
+1. **Global** — Aggregate across all FOAs and categories
+2. **Per-Category** — Separate metrics for each of the 4 ontology categories (research_domain, method, population, sponsor_theme)
+
+---
+
+## 4. Current Results (L1 + L2, Tuned Thresholds)
+
+> After threshold tuning (cosine thresholds raised to 0.30–0.40) and per-category cap reduced from 5 to 3.
+
+### Global Metrics
+
+| Metric | Baseline (v0) | Tuned (v1) | V2 (w/ NSF Directorates) | V3 (L3 LLM Active) |
+|---|---|---|---|---|
+| **Precision** | 0.152 | 0.350 | 0.358 | **0.371** |
+| **Recall** | 0.741 | 0.621 | 0.654 | **0.642** |
+| **F1** | 0.253 | 0.447 | 0.463 | **0.471** |
+| False Positives | 239 | 67 | 95 | **88** |
+
+*Raw counts (V3): 52 TP, 88 FP, 29 FN*
+
+### Per-Category Metrics (V3)
+
+| Category | Precision | Recall | F1 | TP | FP | FN |
+|---|---|---|---|---|---|---|
+| **Sponsor Themes** | 0.513 | 0.690 | **0.588** | 20 | 19 | 9 |
+| **Research Disciplines (New)**| 0.429 | 0.783 | **0.554** | 18 | 24 | 5 |
+| **Populations** | 0.333 | 0.875 | **0.483** | 7 | 14 | 1 |
+| Methods | 0.190 | 0.364 | 0.250 | 4 | 17 | 7 |
+| Research Domains (SDGs) | 0.176 | 0.300 | 0.222 | 3 | 14 | 7 |
+
+### Analysis
+
+**Sponsor Themes (F1=0.611):** The strongest category. GREAT Act categories align well with the language used in NSF solicitations. The pipeline correctly identifies the federal mission area for most FOAs.
+
+**Research Disciplines (F1=0.500):** Introduced as a finer-grained alternative to UN SDGs. Using NSF Directorates mapping yields more than double the F1 score of the UN SDGs. This validates that precision improves when the taxonomy closely matches the actual funding structures (academic disciplines vs. broad policy goals).
+
+**Populations (F1=0.483):** High recall (87.5%) — the system rarely misses a population mention. Moderate precision because some tangential population references trigger tags.
+
+**Methods and Research Domains (F1=0.22–0.24):** The weakest categories. Methods are hard to detect because FOAs rarely use exact methodological terms — they describe research goals, not specific techniques. Research domains (UN SDGs) are too coarse-grained and have been largely superseded by the new `research_discipline` category.
+
+### Key Improvements from Tuning
+
+1. **Cosine thresholds raised** from 0.20–0.25 → 0.30–0.40, eliminating marginal L2 matches
+2. **Per-category cap reduced** from 5 → 3, preventing tag flooding in any single category
+3. **Gold standard corrected** — 4 entries had `great_06` (Natural Resources) instead of `great_09` (Education & Training), causing phantom false negatives
+4. **Layer 3 LLM Disambiguation Enabled** — Activating Mistral-7B to resolve ties between closely scored L2 concepts successfully pruned 7 false positives, raising overall Precision to 0.371 and Research Discipline F1 to 0.554 without needing any model training.
+
+---
+
+## 5. Error Analysis
+
+The evaluation framework generates detailed error logs for debugging:
+
+| File | Contents |
+|---|---|
+| `data/evaluation/false_positives.json` | Every incorrect tag with the triggering layer, confidence, and context snippet |
+| `data/evaluation/false_negatives.json` | Every missed tag with the expected concept and FOA title |
+| `data/evaluation/true_positives.json` | Every correct tag for validation |
+| `data/evaluation/per_foa_results.json` | Per-FOA breakdown of TP/FP/FN sets |
+| `data/evaluation/evaluation_summary.json` | Machine-readable metrics summary |
+
+### How to Use Error Logs
+
+1. Open `false_positives.json` and sort by `category` to identify which concept categories generate the most noise
+2. Check the `layer` field — if mostly `layer_2_embedding`, the cosine threshold for that category should be raised
+3. Check the `context` field — if the triggering text is tangential, the concept's description may need refinement
+4. Check `false_negatives.json` to identify missing synonyms that should be added to `synonym_expander.py`
+
+---
+
+## 6. Reproducing the Evaluation
+
+```bash
+# 1. Setup ontology and embeddings
+PYTHONPATH=src python -m foa_pipeline.cli setup-ontology
+PYTHONPATH=src python -m foa_pipeline.cli precompute-embeddings
+
+# 2. Tag all FOAs in the database
+PYTHONPATH=src python -m foa_pipeline.cli tag-all
+
+# 3. Run evaluation against gold standard
+PYTHONPATH=src python src/foa_pipeline/evaluate.py --gold
+
+# 4. View results
+cat data/evaluation/evaluation_summary.json
+```
+
+The evaluation is fully deterministic: given the same database, ontology, and thresholds, it will always produce identical metrics.
+
+---
+
+*Document Version: 1.0 | Last Updated: July 5, 2026 | Author: Pratik Pawar*

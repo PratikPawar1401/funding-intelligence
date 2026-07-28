@@ -1,0 +1,28 @@
+[project]
+name = "issr-funding-intelligence"
+version = "1.0.0"
+description = "AI-Powered Funding Intelligence for ISSR — FOA Ingestion, Semantic Tagging & Discovery"
+requires-python = ">=3.11"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Pratik Ramchandra Pawar", email = "pratikpawar1565@gmail.com"},
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-v --tb=short"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "N", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
