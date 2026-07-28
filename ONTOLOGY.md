@@ -46,9 +46,23 @@ The ontology organises concepts into four categories. Each category captures a d
 
 **Known Limitation:** SDGs are policy-oriented categories (e.g., "No Poverty", "Climate Action"), not scientific disciplines. They are intentionally broad to capture thematic alignment rather than narrow disciplinary matching. For downstream grant matching, these should be supplemented with faculty expertise keywords.
 
+**Status: superseded for domain classification.** This limitation was empirically confirmed, not just theorized: gold-standard evaluation shows `research_domain` (SDGs) at F1=0.222, while the `research_discipline` category (§2.1a, added later using NSF Directorates) reaches F1=0.554 on the same evaluation set — better than double. `research_domain` is retained as a secondary/legacy taxonomy for policy-level thematic framing (useful for "which SDG does this align with" reporting), but `research_discipline` should be treated as the primary signal for actual subject-matter/domain classification.
+
 **Concepts:** 17 top-level goals (sdg_01 through sdg_17), each with a natural-language description used for embedding-based matching.
 
 **Inclusion Criteria:** A concept belongs in this category if it describes *what the research is about* (the subject matter), not *how it is done* (that belongs in Methods) or *who it serves* (that belongs in Populations).
+
+### 2.1a Research Disciplines (`research_discipline`)
+
+**Definition:** The academic/scientific discipline or directorate under which the funding opportunity is organised.
+
+**Source:** NSF Directorates and Divisions (e.g., Engineering, Geosciences, Biological Sciences, Computer and Information Science and Engineering).
+
+**Design Decision:** Added after the initial four-category design (§2.1–2.4) to address the UN SDGs' known coarseness for domain classification (see §2.1 above). NSF's own directorate structure is the vocabulary NSF solicitations are actually organised around, so it maps far more directly onto how program officers and researchers describe a funding opportunity's discipline than a policy framework like the SDGs does.
+
+**Concepts:** 8 directorate-level concepts.
+
+**Inclusion Criteria:** Same subject-matter criterion as Research Domains (§2.1) — this category is a finer-grained, NSF-specific alternative for the same "what is this research about" question, not a distinct dimension.
 
 ### 2.2 Methods and Approaches (`method`)
 
@@ -218,16 +232,17 @@ The ontology is versioned alongside the data schema (`schema_version: "1.0"` in 
 | Sponsor Themes | `great_act_categories.csv` | 14 |
 | Methods | `research_methods.csv` | 25 |
 | Populations | `populations.csv` | 20 |
-| **Total** | | **76** |
+| Research Disciplines | `nsf_directorates.csv` | 8 |
+| **Total** | | **84** |
 
 ---
 
 ## 7. Known Limitations and Future Work
 
-1. **Research domain granularity** — UN SDGs are policy-oriented, not discipline-specific. A future version should supplement these with NSF Directorate/Division taxonomies or OECD Fields of Science classifications for finer-grained domain matching
-2. **No inter-annotator agreement** — The gold standard was labeled by a single annotator. Future work should measure inter-annotator reliability to validate the ontology's conceptual clarity
+1. **Research domain granularity — addressed.** UN SDGs are policy-oriented, not discipline-specific. This is no longer purely theoretical: the `research_discipline` category (§2.1a, NSF Directorates) was added and empirically outperforms `research_domain`/SDGs by more than 2x F1 (0.554 vs 0.222) on the gold evaluation set. `research_domain` remains for policy-level thematic framing but should not be relied on for primary domain classification. OECD Fields of Science remains a possible future addition for non-NSF sources.
+2. **No inter-annotator agreement** — The gold standard was labeled by a single annotator. An LLM-generated silver-standard set (`eval_set_50.json`) exists for threshold-tuning validation, but it cannot substitute for a second human annotator (see `EVALUATION.md` §2a) — it would be circular, since it uses the same model family as Layer 3 disambiguation. Genuine inter-annotator agreement remains unmeasured; future work should add a real second human annotation pass.
 3. **Flat hierarchy** — The current ontology is effectively flat (no parent-child relationships defined). The hierarchy propagation mechanism is implemented but unused. Future work should define sub-domain and sub-method hierarchies
-4. **Method detection is context-dependent** — Merely mentioning "machine learning" in an FOA does not mean the FOA *requires* ML. Future work should distinguish between "mentioned" and "required" methods
+4. **Method detection is context-dependent** — Merely mentioning "machine learning" in an FOA does not mean the FOA *requires* ML. Future work should distinguish between "mentioned" and "required" methods. Partial mitigation applied: false-positive-prone concepts (e.g. Citizen Science) now support per-concept cosine thresholds (`config.py`'s `cosine_thresholds`, checked before the category default) instead of only per-category ones, and false-negative-prone concept descriptions were enriched with paraphrases observed in real false negatives — but distinguishing "mentioned in passing" from "required" still needs deeper work (e.g. a requirement-cue heuristic keyed on nearby verbs like "require"/"must").
 
 ---
 
