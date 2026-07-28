@@ -32,11 +32,11 @@ ABBREVIATIONS: Dict[str, List[str]] = {
     "no poverty": ["poverty reduction", "anti-poverty", "economic disadvantage"],
     "zero hunger": ["food security", "food insecurity", "nutrition"],
     "good health and well-being": ["public health", "healthcare", "health outcomes"],
-    "quality education": ["educational outcomes", "learning", "literacy"],
+    "quality education": ["educational outcomes", "literacy"],
     "gender equality": ["gender equity", "women empowerment", "gender parity"],
     "affordable and clean energy": ["renewable energy", "solar", "wind energy"],
-    "decent work and economic growth": ["employment", "labor market", "job creation"],
-    "reduced inequalities": ["inequality", "disparity", "equity"],
+    "decent work and economic growth": ["employment", "labor market"],
+    "reduced inequalities": ["inequality", "disparity"],
     "sustainable cities and communities": ["urban sustainability", "smart cities"],
     "responsible consumption and production": ["circular economy", "waste reduction"],
     "life below water": ["marine", "ocean", "fisheries", "coral reef"],
@@ -50,7 +50,7 @@ ABBREVIATIONS: Dict[str, List[str]] = {
     "survey research": ["survey", "questionnaire", "poll"],
     "mixed methods research": ["mixed methods", "multimethod"],
     "longitudinal study": ["longitudinal", "panel study", "cohort study"],
-    "statistical modeling": ["regression", "statistics", "econometrics"],
+    "statistical modeling": ["regression", "econometrics"],
     "data science": ["data analytics", "big data", "data mining"],
     "clinical trial": ["clinical study", "medical trial", "phase trial"],
     "policy analysis": ["policy evaluation", "policy research", "public policy"],
@@ -106,10 +106,15 @@ def expand_synonyms_for_store(store: OntologyStore) -> Dict[str, int]:
             if verb_lemma != word and len(verb_lemma) > 2:
                 synonyms.add(verb_lemma)
 
-        # Manual abbreviations
+        # Manual abbreviations. Exact match only - a substring check here
+        # (e.g. "health" in "good health and well-being") previously let a
+        # concept silently inherit synonyms authored for an unrelated
+        # concept in a different category (great_02 "Health" inheriting
+        # sdg_03's "healthcare" synonym), causing cross-category false
+        # positives.
         label_lower = concept.label.lower()
         for full_form, abbrevs in ABBREVIATIONS.items():
-            if full_form == label_lower or label_lower in full_form:
+            if full_form == label_lower:
                 synonyms.update(a.lower() for a in abbrevs)
 
         # (Description-derived synonyms removed to prevent noise)
@@ -143,6 +148,12 @@ def expand_synonyms_for_store(store: OntologyStore) -> Dict[str, int]:
             "descriptive anthropology",  # Ethnography synonym too broad
             "factory farm",  # Agriculture synonym
             "clinical test",  # Too broad for Clinical Trial
+            # Confirmed false-positive triggers (removed from ABBREVIATIONS
+            # above; blacklisted too so WordNet can't reintroduce them)
+            "equity",  # Financial/ownership homonym of DEI "equity"
+            "learning",  # Matches inside "machine learning"/"deep learning"
+            "statistics",  # Matches org names like "...Center for ... Statistics"
+            "job creation",
         }
         
         # Filter 2: Minimum length — short synonyms cause too many false positives

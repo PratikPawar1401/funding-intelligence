@@ -124,10 +124,15 @@ class L1Tagger:
                 "security", "learning", "education", "equity", "housing",
                 "survey", "poverty", "energy", "health", "defense",
                 "rural", "urban", "student", "veteran",
+                "statistics", "transportation", "transport",
             }
             if is_valid and root_token.text.lower() in ambiguous_terms:
-                # If the match is a single token used as a modifier/compound, reject it
-                if root_token.dep_ in {"amod", "compound", "nmod", "pobj"} or \
+                # If the match is a single token used as a modifier/compound, reject it.
+                # "npadvmod" catches hyphenated compound-adjective patterns like
+                # "energy-efficient system components", where "energy" modifies
+                # "efficient" rather than standing for the National Defense/Energy
+                # concept itself.
+                if root_token.dep_ in {"amod", "compound", "nmod", "pobj", "npadvmod"} or \
                    any(child.dep_ in {"amod", "compound"} for child in root_token.children):
                     is_valid = False
 

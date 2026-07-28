@@ -365,6 +365,13 @@ def _run_setup_ontology(config) -> None:
     stats = store.load_all_ontologies(config.ontology_dir)
     logging.info("Ontology load stats: %s", stats)
 
+    # Clear existing synonyms before regenerating. add_synonyms() uses
+    # INSERT OR IGNORE, so without this, any synonym removed from
+    # synonym_expander.py (e.g. a governance fix) would persist forever
+    # as a stale row instead of actually being removed.
+    store.conn.execute("DELETE FROM ontology_synonyms")
+    store.conn.commit()
+
     logging.info("Running synonym expansion...")
     syn_stats = expand_synonyms_for_store(store)
     total_syns = sum(syn_stats.values())
