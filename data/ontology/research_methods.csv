@@ -1,10 +1,10 @@
 concept_id,label,category,parent_id,description
-method_01,Machine Learning,method,,Computational methods that use statistical techniques to give computers the ability to learn from data
+method_01,Machine Learning,method,,Computational methods that use statistical techniques to give computers the ability to learn from data; includes artificial intelligence and algorithmic approaches that let a system make decisions or solve problems from learned patterns rather than fixed rules
 method_02,Deep Learning,method,,Neural network based approaches with multiple layers for representation learning
 method_03,Natural Language Processing,method,,Computational techniques for analyzing and understanding human language text and speech
-method_04,Computer Vision,method,,Automated extraction of information from images and video using computational methods
+method_04,Computer Vision,method,,Automated extraction of information from images and video using computational methods; includes visual perception and scene understanding for robots or other embodied systems that sense and interpret their surroundings
 method_05,Randomized Controlled Trial,method,,Experimental study design with random assignment to treatment and control groups
-method_06,Survey Research,method,,Systematic data collection through questionnaires and interviews from sampled populations
+method_06,Survey Research,method,,Systematic data collection through questionnaires and interviews from sampled populations; includes original quantitative data collection instruments administered to a study population
 method_07,Qualitative Research,method,,Research methodology using non-numerical data including interviews focus groups and observations
 method_08,Mixed Methods Research,method,,Research combining quantitative and qualitative data collection and analysis approaches
 method_09,Community-Based Participatory Research,method,,Collaborative research approach partnering researchers with community members throughout the process
@@ -12,7 +12,7 @@ method_10,Longitudinal Study,method,,Research design involving repeated observat
 method_11,Geospatial Analysis,method,,Analysis of geographic and spatial data using mapping and location-based techniques including GIS
 method_12,Statistical Modeling,method,,Mathematical frameworks for describing relationships between variables and making predictions
 method_13,Simulation and Modeling,method,,Computer-based models that simulate real-world processes and systems for analysis
-method_14,Field Experiment,method,,Experimental research conducted in natural settings outside laboratory environments
+method_14,Field Experiment,method,,Experimental research conducted in natural settings outside laboratory environments; includes fieldwork and field-based data collection carried out in the real-world setting under study
 method_15,Ethnography,method,,Qualitative research method involving systematic study of people and cultures through observation
 method_16,Meta-Analysis,method,,Statistical technique combining results from multiple studies to identify patterns and effects
 method_17,Data Science,method,,Interdisciplinary field using scientific methods and algorithms to extract knowledge from data

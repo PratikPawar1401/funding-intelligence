@@ -2,13 +2,6 @@
   {
     "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
     "title": "Foundational Research in Robotics",
-    "concept": "method_01",
-    "label": "Machine Learning",
-    "category": "method"
-  },
-  {
-    "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
-    "title": "Foundational Research in Robotics",
     "concept": "nsf_cise",
     "label": "Computer and Information Science and Engineering",
     "category": "research_discipline"
@@ -16,13 +9,6 @@
   {
     "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
     "title": "Foundational Research in Robotics",
-    "concept": "method_04",
-    "label": "Computer Vision",
-    "category": "method"
-  },
-  {
-    "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
-    "title": "Circuits and Systems for Communications and Sensing (CSCS)",
     "concept": "method_01",
     "label": "Machine Learning",
     "category": "method"
@@ -33,6 +19,13 @@
     "concept": "great_05",
     "label": "General Science",
     "category": "sponsor_theme"
+  },
+  {
+    "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
+    "title": "Circuits and Systems for Communications and Sensing (CSCS)",
+    "concept": "method_01",
+    "label": "Machine Learning",
+    "category": "method"
   },
   {
     "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
@@ -51,6 +44,13 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
+    "concept": "method_14",
+    "label": "Field Experiment",
+    "category": "method"
+  },
+  {
+    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
+    "title": "Sociology",
     "concept": "sdg_10",
     "label": "Reduced Inequalities",
     "category": "research_domain"
@@ -63,13 +63,6 @@
     "category": "method"
   },
   {
-    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
-    "title": "Sociology",
-    "concept": "method_14",
-    "label": "Field Experiment",
-    "category": "method"
-  },
-  {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
     "concept": "sdg_04",
@@ -79,8 +72,8 @@
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
-    "concept": "sdg_04",
-    "label": "Quality Education",
+    "concept": "sdg_10",
+    "label": "Reduced Inequalities",
     "category": "research_domain"
   },
   {
@@ -93,8 +86,8 @@
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
-    "concept": "sdg_10",
-    "label": "Reduced Inequalities",
+    "concept": "sdg_04",
+    "label": "Quality Education",
     "category": "research_domain"
   },
   {
@@ -142,15 +135,15 @@
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
     "title": "Electrochemical Systems",
-    "concept": "great_04",
-    "label": "Energy",
+    "concept": "great_05",
+    "label": "General Science",
     "category": "sponsor_theme"
   },
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
     "title": "Electrochemical Systems",
-    "concept": "great_05",
-    "label": "General Science",
+    "concept": "great_04",
+    "label": "Energy",
     "category": "sponsor_theme"
   },
   {
