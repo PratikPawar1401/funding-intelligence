@@ -98,12 +98,17 @@ def call_ollama(base_url, model, prompt, max_retries=2):
             
             parsed = json.loads(result_text)
             
-            # Handle dict wrapper (e.g. {"tags": ["..."]})
+            # Handle dict responses. Two shapes observed from the model:
+            #   {"tags": ["great_01", "great_05"]}        -> concept IDs in a list value
+            #   {"great_05": ["chemical synthesis", ...]}  -> concept ID as the key itself
+            # Collect candidates from both shapes; the caller filters against
+            # valid_ids, so over-collecting here is harmless.
             if isinstance(parsed, dict):
+                candidates = list(parsed.keys())
                 for v in parsed.values():
                     if isinstance(v, list):
-                        return [str(x) for x in v]
-                return []
+                        candidates.extend(str(x) for x in v)
+                return candidates
             
             if isinstance(parsed, list):
                 return [str(x) for x in parsed]
@@ -179,11 +184,22 @@ def annotate_foas():
             prompt = prompt_template.format(concepts=concept_list, text=text_truncated)
             
             tags = call_ollama(base_url, model, prompt)
-            
+
             # Validate that returned tags are actual concept IDs in this category
             valid_ids = {c["id"] for c in concepts_by_cat[cat]}
-            validated = [t for t in tags if t in valid_ids]
-            
+            validated = list(dict.fromkeys(t for t in tags if t in valid_ids))
+
+            # Sanity guard: a model that echoes back most/all of the category's
+            # concept list (seen in practice on long/complex FOA text) is a
+            # failure mode, not a genuine multi-label judgement. Discard it
+            # rather than let it pollute the silver-standard set.
+            if len(valid_ids) >= 4 and len(validated) > 0.5 * len(valid_ids):
+                logging.warning(
+                    "  [%s] discarded %d/%d concepts (looks like a full-list echo, not a real selection)",
+                    cat, len(validated), len(valid_ids),
+                )
+                continue
+
             all_tags.extend(validated)
         
         foa["human_tags"] = all_tags
