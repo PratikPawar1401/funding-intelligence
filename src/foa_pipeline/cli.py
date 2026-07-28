@@ -392,8 +392,15 @@ def _run_tag_all(config, args) -> None:
     db = Database(config.app_db_path)
     store = OntologyStore(config.app_db_path)
     pipeline = TaggerPipeline(config, store)
-    
+
     pipeline.initialize()
+
+    # Clear existing tags before re-tagging. Without this, INSERT OR REPLACE
+    # (keyed on foa_id+concept_id+source_layer) leaves stale rows behind for
+    # any concept that a config/threshold/synonym change causes to no longer
+    # be emitted, silently corrupting every subsequent evaluation run.
+    db.conn.execute("DELETE FROM foa_tags")
+    db.conn.commit()
 
     # Get all untagged FOAs (or all FOAs if forcing)
     # For simplicity here, we re-tag everything that is open
@@ -504,7 +511,7 @@ def _run_mine_synonyms(config, args) -> None:
     
     query = """
     SELECT concept_id, label, category, confidence, context_snippet
-    FROM tag_evidence
+    FROM foa_tags
     WHERE source_layer = 'layer_2_embedding'
       AND confidence >= ?
     ORDER BY category, confidence DESC
