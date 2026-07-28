@@ -162,11 +162,18 @@ class L2Tagger:
                 sim = cosine_similarity(chunk_emb, concept_emb)
                 
                 concept = self.concept_lookup[concept_id]
-                
-                # Determine threshold for this category
-                cat_threshold = self.thresholds.get(concept.category, self.thresholds.get("default", 0.75))
-                
-                if sim >= cat_threshold:
+
+                # Determine threshold: per-concept override takes priority
+                # over the category default (e.g. a concept that is
+                # persistently over-triggered by generic boilerplate can
+                # be tightened without raising the threshold for its whole
+                # category and losing recall on other concepts in it).
+                threshold = self.thresholds.get(
+                    concept_id,
+                    self.thresholds.get(concept.category, self.thresholds.get("default", 0.75)),
+                )
+
+                if sim >= threshold:
                     # Keep the chunk that gave the highest similarity for this concept
                     if concept_id not in evidence_dict or sim > evidence_dict[concept_id].confidence:
                         # Truncate snippet if too long
