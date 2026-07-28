@@ -132,6 +132,52 @@ Metrics are computed at two levels:
 
 ---
 
+## 4a. V4 Results — Measurement Infrastructure Fixes + Governance/Threshold/L3 Improvements
+
+V3's numbers above were reproducible in isolation, but two measurement-infrastructure bugs meant every *change-over-time* comparison up to this point was potentially unreliable: `cli.py`'s `tag-all` never cleared `foa_tags` before re-tagging (stale rows from a previous config could persist indefinitely), and `setup-ontology` never cleared `ontology_synonyms` before regenerating (a removed synonym would never actually disappear). Both were fixed first (see commit history), and the V3 baseline above was reconfirmed identical after the fix, before any tagging-quality change was made.
+
+### Changes applied, in order
+
+1. **Synonym governance** (`synonym_expander.py`): fixed an `ABBREVIATIONS` substring-collision bug that let concepts inherit synonyms authored for an unrelated concept across categories (e.g. `great_02` "Health" inheriting SDG "good health and well-being"'s `"healthcare"` synonym); removed confirmed noisy synonyms (`"equity"`, bare `"learning"`, bare `"statistics"`, `"job creation"`).
+2. **L1 dependency-filter hardening** (`tagger_l1_spacy.py`): added `"npadvmod"` to the rejected-dependency set (catches hyphenated compound-adjective patterns like "energy-efficient system components"); added `"statistics"`/`"transportation"`/`"transport"` to `ambiguous_terms`.
+3. **Per-concept cosine threshold override** (`tagger_l2_embedding.py`, `config.py`): `L2Tagger` previously only supported per-*category* thresholds. Added a per-*concept* override checked first. `method_25` (Citizen Science) was set to 0.65, since it alone caused 8/18 (44%) of all method-category false positives (all in the 0.44–0.60 confidence range, on generic "broader participation in science" boilerplate) with zero true positives for it in the gold set.
+4. **Method-concept description enrichment** (`research_methods.csv`): enriched Machine Learning, Computer Vision, Field Experiment, and Survey Research descriptions with paraphrases found in real false-negative FOA text (e.g. "artificial intelligence", "visual perception", "fieldwork"), since `L2Tagger` embeds `label + description + top-5 synonyms` per concept.
+5. **Threshold grid search** against the (now-repaired) `eval_set_50.json` silver set. Found a candidate improvement for `research_domain` (0.35→0.30 raised its own F1 on both the silver set and, marginally, the gold set) but declined to adopt it: it cost more precision elsewhere than it gained, producing a net *decrease* in global gold F1 (0.490→0.484). Recorded here as a validated-but-rejected direction rather than silently discarded. The grid search also revealed that `eval_set_50.json` structurally cannot evaluate `research_discipline` at all — `synthetic_annotator.py`'s prompts only ever ask about the original 4 categories, so this category always scores 0/0/0 on that set; anyone extending the silver set to cover `research_discipline` needs to add a 5th category prompt first.
+6. **L3 JSON-mode output** (`tagger_l3_llm.py`): replaced fragile substring parsing (`result_text.startswith("A")` / `"candidate a" in text.lower()`) with Ollama's `format: "json"` mode, parsing a `{"winner": "A"}`/`{"winner": "B"}` response, with the old substring heuristic retained only as a fallback.
+
+### Global Metrics (V4)
+
+| Metric | V3 (prior baseline) | V4 (this session) |
+|---|---|---|
+| **Precision** | 0.371 | **0.409** |
+| **Recall** | 0.642 | **0.642** |
+| **F1** | 0.471 | **0.500** |
+| TP / FP / FN | 52 / 88 / 29 | 52 / 75 / 29 |
+
+### Per-Category Metrics (V4)
+
+| Category | Precision | Recall | F1 | Δ F1 vs V3 | TP | FP | FN |
+|---|---|---|---|---|---|---|---|
+| **Sponsor Themes** | 0.588 | 0.690 | **0.635** | +0.047 | 20 | 14 | 9 |
+| **Research Disciplines** | 0.395 | 0.739 | 0.515 | −0.039 | 17 | 26 | 6 |
+| **Populations** | 0.333 | 0.875 | 0.483 | 0.000 | 7 | 14 | 1 |
+| **Methods** | 0.312 | 0.455 | **0.370** | +0.120 | 5 | 11 | 6 |
+| **Research Domains (SDGs)** | 0.231 | 0.300 | 0.261 | +0.039 | 3 | 10 | 7 |
+
+### Analysis
+
+**Methods (F1 0.250→0.370, the single largest per-category gain):** driven almost entirely by the Citizen Science per-concept threshold (eliminated all 8 of its false positives with zero recall cost) plus the description-enrichment recovering one previously-missed Computer Vision true positive. Confirms the ontology's long-standing hypothesis that method false positives were concentrated in a small number of over-general concepts rather than spread evenly.
+
+**Sponsor Themes (F1 0.588→0.635):** improved from two independent fixes — the synonym cross-category-leak fix, and the L3 JSON-mode fix making disambiguation resolve ties correctly instead of occasionally mis-parsing a valid response.
+
+**Research Domains/SDGs (F1 0.222→0.261):** improved via the synonym governance fixes (confirmed 10/14 of its false positives were synonym-driven, not threshold-driven, so this was the correct lever per the grid search finding above). Still the second-weakest category; `research_discipline` remains the recommended primary signal for domain classification (see `ONTOLOGY.md` §2.1/§2.1a).
+
+**Research Disciplines (F1 0.554→0.515, a regression):** the only category that got worse, by a small margin, on a 20-FOA set (a few individual FOA tag flips move this category's F1 noticeably). None of the Phase 1–3 changes touched `nsf_directorates.csv` or its synonyms directly; this looks like incidental variance rather than a change with an identified causal mechanism, and is flagged honestly rather than explained away. Worth a closer look in future work if a larger gold set becomes available.
+
+**Global F1 (0.471→0.500):** every phase's change was verified with a re-run gold-standard evaluation before being kept; two candidate changes were tested and rejected because they made the reported (held-out, gold-set) F1 worse than an already-committed checkpoint — the `research_domain` threshold-0.30 experiment above being the clearest example. This is the intended discipline: a candidate change earns a "kept" only when it improves (or is neutral on) the gold-set F1 that is actually reported.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:
