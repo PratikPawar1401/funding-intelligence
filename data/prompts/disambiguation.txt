@@ -6,4 +6,4 @@ Which of these two semantic categories is the MOST accurate classification for t
 A: {candidate_a}
 B: {candidate_b}
 
-Respond STRICTLY with "A" or "B". Do not output anything else.
+Respond with a JSON object of the form {{"winner": "A"}} or {{"winner": "B"}}. Do not output anything else.

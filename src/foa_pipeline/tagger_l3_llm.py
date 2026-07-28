@@ -5,6 +5,7 @@ Uses local Ollama (Mistral-7b) to resolve ambiguous tag assignments from Layer 2
 Triggers when two concepts in the same category have very close similarity scores.
 """
 
+import json
 import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
@@ -88,22 +89,38 @@ class L3Tagger:
                     "model": self.model,
                     "prompt": prompt,
                     "stream": False,
+                    "format": "json",
                     "options": {"temperature": 0.1},
                 },
                 timeout=30.0,
             )
             resp.raise_for_status()
             result_text = resp.json().get("response", "").strip()
-            
-            # Simple heuristic parsing (expects "A: ..." or "B: ...")
-            if result_text.startswith("A") or "candidate a" in result_text.lower():
+
+            winner_letter = None
+            try:
+                parsed = json.loads(result_text)
+                if isinstance(parsed, dict):
+                    winner_letter = str(parsed.get("winner", "")).strip().upper()
+            except json.JSONDecodeError:
+                logger.debug("L3 response was not valid JSON, falling back to substring parsing: %r", result_text)
+
+            if winner_letter not in ("A", "B"):
+                # Fallback: substring heuristic, for models/responses that
+                # don't respect JSON mode.
+                if result_text.startswith("A") or "candidate a" in result_text.lower():
+                    winner_letter = "A"
+                elif result_text.startswith("B") or "candidate b" in result_text.lower():
+                    winner_letter = "B"
+
+            if winner_letter == "A":
                 winner = evidence_a
                 loser = evidence_b
-            elif result_text.startswith("B") or "candidate b" in result_text.lower():
+            elif winner_letter == "B":
                 winner = evidence_b
                 loser = evidence_a
             else:
-                # Fallback to score if parser fails
+                # Fallback to score if parsing failed entirely
                 winner = evidence_a if evidence_a.confidence >= evidence_b.confidence else evidence_b
                 loser = evidence_b if winner == evidence_a else evidence_a
 
