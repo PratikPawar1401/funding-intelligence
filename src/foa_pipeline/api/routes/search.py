@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
-from ..deps import get_db
+from ..deps import get_db, get_vector_index
 from ...database import Database
 
 router = APIRouter()
@@ -63,22 +63,19 @@ def semantic_search(
     Semantic similarity search using FAISS.
     Requires FAISS index to be built (run `precompute-embeddings` and `tag-all` first).
     """
-    from ...config import get_config
-    from ...vector_index import VectorIndex
+    index = get_vector_index()
 
-    config = get_config()
-    index = VectorIndex(db, config.embedding_model, config.embeddings_cache_dir)
-    
-    if not index.load_index():
+    if index.index is None:
         return {
             "items": [],
             "total": 0,
             "message": "FAISS index not found. Run `make precompute-embeddings` then `make tag`.",
             "query_length": len(req.profile_text),
         }
-        
-    results = index.search(req.profile_text, k=req.k, threshold=req.threshold)
-    
+
+    results = index.search(req.profile_text, k=req.k, threshold=req.threshold, db=db)
+
+
     # Filter by status if requested
     if req.status:
         results = [r for r in results if r.get("status") == req.status]

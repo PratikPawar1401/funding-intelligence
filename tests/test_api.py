@@ -1,0 +1,279 @@
+"""Tests for the FastAPI layer (routes, dependency wiring, validation)."""
+
+import copy
+
+import pytest
+from fastapi.testclient import TestClient
+
+from foa_pipeline.api import deps
+from foa_pipeline.api.app import create_app
+from foa_pipeline.database import Database
+
+
+@pytest.fixture
+def api_db_path(tmp_path, sample_foa):
+    """Path to a populated temp database.
+
+    Returns a path rather than a live connection: TestClient dispatches sync
+    routes on a worker thread, and SQLite forbids using a connection from a
+    thread other than the one that created it.
+    """
+    db_path = tmp_path / "api_test.db"
+    db = Database(db_path)
+
+    open_foa = copy.deepcopy(sample_foa)
+    open_foa["foa_id"] = "api-foa-open"
+    open_foa["source_id"] = "open-1"
+    open_foa["title"] = "Rural Health Machine Learning Initiative"
+    open_foa["status"] = "open"
+    db.upsert_foa(open_foa)
+
+    closed_foa = copy.deepcopy(sample_foa)
+    closed_foa["foa_id"] = "api-foa-closed"
+    closed_foa["source_id"] = "closed-1"
+    closed_foa["title"] = "Archived Coastal Erosion Study"
+    closed_foa["status"] = "closed"
+    closed_foa["agency"] = "Department of Energy"
+    db.upsert_foa(closed_foa)
+
+    db.save_tags(
+        "api-foa-open",
+        [
+            {
+                "tag_id": "layer_1_terminological:method_01",
+                "label": "Machine Learning",
+                "category": "method",
+                "source_layer": "layer_1_terminological",
+                "confidence": 1.0,
+                "context_snippet": "machine learning approaches",
+                "ontology_concept_id": "method_01",
+            },
+            {
+                "tag_id": "layer_2_embedding:pop_01",
+                "label": "Rural Communities",
+                "category": "population",
+                "source_layer": "layer_2_embedding",
+                "confidence": 0.62,
+                "context_snippet": "rural communities",
+                "ontology_concept_id": "pop_01",
+            },
+        ],
+    )
+
+    db.close()
+    return db_path
+
+
+@pytest.fixture
+def client(api_db_path):
+    """TestClient with the DB dependency pointed at the temp database."""
+    app = create_app()
+
+    def override_get_db():
+        db = Database(api_db_path)
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app.dependency_overrides[deps.get_db] = override_get_db
+    with TestClient(app) as c:
+        yield c
+    app.dependency_overrides.clear()
+
+
+class TestHealth:
+    def test_health_reports_stats(self, client):
+        resp = client.get("/api/health")
+        assert resp.status_code == 200
+
+        body = resp.json()
+        assert body["status"] == "healthy"
+        assert body["total_foas"] == 2
+        assert body["open_foas"] == 1
+        assert body["total_tags"] == 2
+
+
+class TestOpportunities:
+    def test_list_returns_paginated_envelope(self, client):
+        body = client.get("/api/opportunities").json()
+        assert body["total"] == 2
+        assert body["page"] == 1
+        assert len(body["items"]) == 2
+
+    def test_list_filters_by_status(self, client):
+        body = client.get("/api/opportunities", params={"status": "open"}).json()
+        assert body["total"] == 1
+        assert body["items"][0]["foa_id"] == "api-foa-open"
+
+    def test_list_respects_page_size(self, client):
+        body = client.get("/api/opportunities", params={"size": 1}).json()
+        assert len(body["items"]) == 1
+        assert body["total"] == 2
+
+    def test_get_single_opportunity(self, client):
+        body = client.get("/api/opportunities/api-foa-open").json()
+        assert body["foa_id"] == "api-foa-open"
+        assert body["title"] == "Rural Health Machine Learning Initiative"
+
+    def test_unknown_opportunity_returns_404(self, client):
+        assert client.get("/api/opportunities/does-not-exist").status_code == 404
+
+    def test_raw_payload_is_never_exposed(self, client):
+        """raw_payload is bulky source data and must be stripped from responses."""
+        assert "raw_payload" not in client.get("/api/opportunities/api-foa-open").json()
+        for item in client.get("/api/opportunities").json()["items"]:
+            assert "raw_payload" not in item
+
+    def test_recent_endpoint_is_not_shadowed_by_id_route(self, client):
+        """/recent must resolve to the recent handler, not /{foa_id}."""
+        resp = client.get("/api/opportunities/recent")
+        assert resp.status_code == 200
+        assert "items" in resp.json()
+
+    def test_rejects_invalid_pagination(self, client):
+        assert client.get("/api/opportunities", params={"page": 0}).status_code == 422
+        assert client.get("/api/opportunities", params={"size": 0}).status_code == 422
+
+
+class TestKeywordSearch:
+    def test_finds_matching_record(self, client):
+        body = client.post("/api/search/keyword", json={"query": "rural"}).json()
+        assert body["total"] >= 1
+        assert any("Rural" in i["title"] for i in body["items"])
+
+    def test_returns_empty_for_no_match(self, client):
+        body = client.post(
+            "/api/search/keyword", json={"query": "zzzznonexistentterm"}
+        ).json()
+        assert body["total"] == 0
+        assert body["items"] == []
+
+    def test_echoes_query_and_pagination(self, client):
+        body = client.post(
+            "/api/search/keyword", json={"query": "rural", "page": 1, "size": 5}
+        ).json()
+        assert body["query"] == "rural"
+        assert body["size"] == 5
+
+    def test_rejects_empty_query(self, client):
+        assert client.post("/api/search/keyword", json={"query": ""}).status_code == 422
+
+    def test_rejects_missing_query(self, client):
+        assert client.post("/api/search/keyword", json={}).status_code == 422
+
+    def test_strips_raw_payload(self, client):
+        body = client.post("/api/search/keyword", json={"query": "rural"}).json()
+        for item in body["items"]:
+            assert "raw_payload" not in item
+
+
+class TestSemanticSearch:
+    def test_reports_missing_index_gracefully(self, client, tmp_path, monkeypatch):
+        """With no FAISS index built, the endpoint explains rather than erroring."""
+        from foa_pipeline.api.routes import search as search_route
+        from foa_pipeline.vector_index import VectorIndex
+
+        empty_index = VectorIndex(
+            db=None, model_name="unused", cache_dir=tmp_path / "no-index"
+        )
+        # Patch the name bound inside the route module, not deps: the route
+        # imported it directly, so patching deps would have no effect.
+        monkeypatch.setattr(search_route, "get_vector_index", lambda: empty_index)
+
+        resp = client.post(
+            "/api/search/semantic",
+            json={"profile_text": "machine learning for rural health"},
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["items"] == []
+        assert "FAISS index not found" in body["message"]
+
+    def test_rejects_too_short_profile(self, client):
+        resp = client.post("/api/search/semantic", json={"profile_text": "short"})
+        assert resp.status_code == 422
+
+    def test_rejects_out_of_range_k(self, client):
+        resp = client.post(
+            "/api/search/semantic",
+            json={"profile_text": "a sufficiently long research profile", "k": 0},
+        )
+        assert resp.status_code == 422
+
+
+class TestTags:
+    def test_list_tags(self, client):
+        body = client.get("/api/tags").json()
+        assert body["total"] == 2
+        labels = {t["label"] for t in body["tags"]}
+        assert {"Machine Learning", "Rural Communities"} <= labels
+
+    def test_filter_tags_by_category(self, client):
+        body = client.get("/api/tags", params={"category": "method"}).json()
+        assert body["total"] == 1
+        assert body["tags"][0]["category"] == "method"
+
+    def test_categories_aggregate_counts(self, client):
+        cats = {c["category"]: c for c in client.get("/api/tags/categories").json()["categories"]}
+        assert cats["method"]["concept_count"] == 1
+        assert cats["population"]["concept_count"] == 1
+
+    def test_tag_detail_lists_tagged_foas(self, client):
+        body = client.get("/api/tags/method_01").json()
+        assert body["concept_id"] == "method_01"
+        assert body["total"] == 1
+        assert body["foas"][0]["foa_id"] == "api-foa-open"
+
+    def test_unknown_concept_returns_empty_not_error(self, client):
+        body = client.get("/api/tags/nonexistent_concept").json()
+        assert body["total"] == 0
+        assert body["foas"] == []
+
+
+class TestExport:
+    def test_csv_export_has_header_and_rows(self, client):
+        resp = client.get("/api/export/csv")
+        assert resp.status_code == 200
+        assert "text/csv" in resp.headers["content-type"]
+
+        lines = [ln for ln in resp.text.splitlines() if ln.strip()]
+        assert len(lines) >= 3  # header + 2 records
+        assert "foa_id" in lines[0]
+
+    def test_json_export_returns_records(self, client):
+        body = client.get("/api/export/json").json()
+        assert body["total"] == 2
+        assert len(body["foas"]) == 2
+
+    def test_json_export_strips_raw_payload(self, client):
+        for record in client.get("/api/export/json").json()["foas"]:
+            assert "raw_payload" not in record
+
+    def test_export_respects_status_filter(self, client):
+        resp = client.get("/api/export/csv", params={"status": "open"})
+        lines = [ln for ln in resp.text.splitlines() if ln.strip()]
+        assert len(lines) == 2  # header + 1 open record
+
+
+class TestAppWiring:
+    def test_openapi_schema_documents_all_route_groups(self, client):
+        paths = client.get("/openapi.json").json()["paths"]
+        for expected in [
+            "/api/health",
+            "/api/opportunities",
+            "/api/opportunities/{foa_id}",
+            "/api/search/keyword",
+            "/api/search/semantic",
+            "/api/tags",
+            "/api/export/csv",
+        ]:
+            assert expected in paths, f"{expected} missing from OpenAPI schema"
+
+    def test_vector_index_is_cached_across_calls(self):
+        """The FAISS index must not be rebuilt per request (was ~3.3s each)."""
+        deps.get_vector_index.cache_clear()
+        try:
+            assert deps.get_vector_index() is deps.get_vector_index()
+        finally:
+            deps.get_vector_index.cache_clear()
