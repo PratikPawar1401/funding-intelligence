@@ -61,7 +61,7 @@ This means the set:
 - **Should only be used as a validation set for threshold tuning** (grid search, config sweeps) — never as a reported, held-out metric. All headline P/R/F1 numbers in this document are, and must remain, computed against the 20-FOA hand-labeled `eval_set_gold.json` only.
 - Required two bug fixes to populate correctly: (1) `synthetic_annotator.py`'s Ollama response parser only read dict *values*, but the model sometimes returns `{concept_id: [description, ...]}` with the ID as the *key* — every tag failed ID validation and silently came back empty (only 16/46 entries had any tags before this fix); (2) a sanity guard was added to discard any category response that echoes back more than half of that category's full concept list, a failure mode observed on 4 FOAs with long or complex text.
 
-**Inter-annotator agreement remains unmeasured** for this project. A genuine second human annotation pass is the only valid way to close this gap and has not been performed.
+**Inter-annotator agreement remains unmeasured** for this project. A genuine second human annotation pass is the only valid way to close this gap and has not been performed. See [ANNOTATION_CODEBOOK.md](ANNOTATION_CODEBOOK.md) for the guidelines and protocol needed to run one.
 
 ---
 
