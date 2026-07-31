@@ -12,6 +12,7 @@ better coverage.
 import json
 import logging
 from pathlib import Path
+
 import requests
 
 from foa_pipeline.config import get_config
@@ -68,7 +69,7 @@ def get_concepts_by_category(db: Database):
     """Get all concepts grouped by category."""
     query = "SELECT concept_id, label, category FROM ontology_concepts ORDER BY category, concept_id"
     rows = db.conn.execute(query).fetchall()
-    
+
     by_cat = {}
     for r in rows:
         cat = r["category"]
@@ -95,9 +96,9 @@ def call_ollama(base_url, model, prompt, max_retries=2):
             )
             resp.raise_for_status()
             result_text = resp.json().get("response", "").strip()
-            
+
             parsed = json.loads(result_text)
-            
+
             # Handle dict responses. Two shapes observed from the model:
             #   {"tags": ["great_01", "great_05"]}        -> concept IDs in a list value
             #   {"great_05": ["chemical synthesis", ...]}  -> concept ID as the key itself
@@ -109,12 +110,12 @@ def call_ollama(base_url, model, prompt, max_retries=2):
                     if isinstance(v, list):
                         candidates.extend(str(x) for x in v)
                 return candidates
-            
+
             if isinstance(parsed, list):
                 return [str(x) for x in parsed]
-            
+
             return []
-            
+
         except json.JSONDecodeError:
             if attempt < max_retries:
                 logging.debug("JSON parse failed, retrying (%d/%d)", attempt + 1, max_retries)
@@ -131,29 +132,29 @@ def call_ollama(base_url, model, prompt, max_retries=2):
 def annotate_foas():
     config = get_config()
     db = Database(config.app_db_path)
-    
+
     eval_file = config.evaluation_dir / "eval_set_50.json"
     if not eval_file.exists():
         logging.error(f"{eval_file} not found. Run curate-eval-set first.")
         return
-        
-    with open(eval_file, "r") as f:
+
+    with open(eval_file) as f:
         foas = json.load(f)
-    
+
     concepts_by_cat = get_concepts_by_category(db)
-    
+
     base_url = config.ollama_base_url
     model = config.ollama_model
-    
+
     logging.info("Annotating %d FOAs using %s with per-category prompts...", len(foas), model)
-    
+
     for i, foa in enumerate(foas):
         # Skip if already annotated with non-empty tags
         if foa.get("human_tags") and len(foa["human_tags"]) > 0:
-            logging.info("[%d/%d] FOA %s: SKIPPED (already has %d tags)", 
+            logging.info("[%d/%d] FOA %s: SKIPPED (already has %d tags)",
                         i + 1, len(foas), foa["foa_id"][:8], len(foa["human_tags"]))
             continue
-        
+
         # Build text from all available fields (enriched content)
         text_parts = [
             foa.get("title", ""),
@@ -162,27 +163,27 @@ def annotate_foas():
             foa.get("additional_info", ""),
         ]
         text = " ".join(p for p in text_parts if p)
-        
+
         if not text.strip():
             foa["human_tags"] = []
             continue
-        
+
         # Truncate to keep prompt manageable
         text_truncated = text[:4000]
-        
+
         all_tags = []
-        
+
         # Run one prompt per category
         for cat, prompt_template in CATEGORY_PROMPTS.items():
             if cat not in concepts_by_cat:
                 continue
-                
+
             concept_list = "\n".join(
                 f"- {c['id']}: {c['label']}" for c in concepts_by_cat[cat]
             )
-            
+
             prompt = prompt_template.format(concepts=concept_list, text=text_truncated)
-            
+
             tags = call_ollama(base_url, model, prompt)
 
             # Validate that returned tags are actual concept IDs in this category
@@ -201,20 +202,20 @@ def annotate_foas():
                 continue
 
             all_tags.extend(validated)
-        
+
         foa["human_tags"] = all_tags
-        
+
         logging.info("[%d/%d] FOA %s: %s", i + 1, len(foas), foa["foa_id"][:8], all_tags)
-        
+
         # Checkpoint every 5 FOAs
         if (i + 1) % 5 == 0:
             with open(eval_file, "w") as f:
                 json.dump(foas, f, indent=2)
-    
+
     # Final save
     with open(eval_file, "w") as f:
         json.dump(foas, f, indent=2)
-    
+
     # Print summary
     labelled = sum(1 for f in foas if f.get("human_tags"))
     total_tags = sum(len(f.get("human_tags", [])) for f in foas)

@@ -12,10 +12,10 @@ from typing import Any, Dict, List, Set, Tuple
 from .config import Config
 from .evidence_logger import TagEvidence
 from .ontology_store import OntologyStore
+from .tagger_cfda_crosswalk import apply_cfda_crosswalk
 from .tagger_l1_spacy import L1Tagger
 from .tagger_l2_embedding import L2Tagger
 from .tagger_l3_llm import L3Tagger
-from .tagger_cfda_crosswalk import apply_cfda_crosswalk
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ class TaggerPipeline:
     def __init__(self, config: Config, store: OntologyStore):
         self.config = config
         self.store = store
-        
+
         self.l1 = L1Tagger(spacy_model=config.spacy_model)
         self.l2 = L2Tagger(
             model_name=config.embedding_model,
@@ -38,25 +38,25 @@ class TaggerPipeline:
             model=config.ollama_model,
             prompt_template_path=config.raw_output_dir.parent / "prompts" / "disambiguation.txt"
         )
-        
+
         self.is_initialized = False
 
     def initialize(self) -> None:
         """Load models and build indices. Call before tag_record."""
         if self.is_initialized:
             return
-            
+
         logger.info("Initializing TaggerPipeline...")
         self.l1.build_matcher(self.store)
         self.l2.build_embeddings(self.store)
-        
+
         if self.config.enable_layer3_llm:
             if self.l3.is_available():
                 logger.info("L3 LLM Tagging enabled and available.")
             else:
                 logger.warning("L3 LLM Tagging enabled but Ollama is not available.")
                 self.config.enable_layer3_llm = False
-                
+
         self.is_initialized = True
 
     def tag_record(self, record: Dict[str, Any]) -> List[Dict[str, Any]]:
@@ -80,16 +80,16 @@ class TaggerPipeline:
 
         # 1. Run L1 (Exact/Synonyms)
         l1_evidence = self.l1.tag_text(full_text)
-        
+
         # 2. Run L2 (Semantic Embedding)
         l2_evidence = self.l2.tag_text(full_text)
-        
+
         # 3. Merge and Disambiguate
         merged = self._merge_and_disambiguate(l1_evidence, l2_evidence, full_text)
-        
+
         # 4. Propagate Hierarchies
         final_evidence = self._propagate_hierarchies(merged)
-        
+
         # 5. Recall Backstop (CFDA Crosswalk)
         has_sponsor_theme = any(ev.category == "sponsor_theme" for ev in final_evidence)
         if not has_sponsor_theme:
@@ -108,7 +108,7 @@ class TaggerPipeline:
                             ontology_concept_id=concept.concept_id,
                         )
                     )
-        
+
         # Return serialized tags
         return [ev.to_tag_record() for ev in final_evidence]
 
@@ -127,12 +127,12 @@ class TaggerPipeline:
         """
         merged_dict: Dict[str, TagEvidence] = {}
         l1_concept_ids: Set[str] = set()
-        
+
         # Add L1 first (highest priority)
         for ev in l1_evidence:
             merged_dict[ev.concept_id] = ev
             l1_concept_ids.add(ev.concept_id)
-            
+
         # Group L2 by category to detect ambiguities
         l2_by_cat: Dict[str, List[TagEvidence]] = {}
         for ev in l2_evidence:
@@ -140,27 +140,27 @@ class TaggerPipeline:
             if ev.concept_id in l1_concept_ids:
                 continue
             l2_by_cat.setdefault(ev.category, []).append(ev)
-                
+
         for cat, ev_list in l2_by_cat.items():
             # Sort by confidence
             ev_list.sort(key=lambda x: x.confidence, reverse=True)
-            
+
             # Check for ambiguity (top 2 are very close)
             if len(ev_list) >= 2 and self.config.enable_layer3_llm:
                 top_1 = ev_list[0]
                 top_2 = ev_list[1]
-                
+
                 # If within 0.05 similarity, it's ambiguous
                 if (top_1.confidence - top_2.confidence) < 0.05:
                     logger.debug("Ambiguity detected in %s: %s vs %s", cat, top_1.label, top_2.label)
                     resolved = self.l3.disambiguate(top_1, top_2, full_text)
                     merged_dict[resolved.concept_id] = resolved
-                    
+
                     # Add remaining non-ambiguous tags
                     for ev in ev_list[2:]:
                         merged_dict[ev.concept_id] = ev
                     continue
-            
+
             # No ambiguity or L3 disabled, just add them all
             for ev in ev_list:
                 merged_dict[ev.concept_id] = ev
@@ -170,7 +170,7 @@ class TaggerPipeline:
         final_by_cat: Dict[str, List[TagEvidence]] = {}
         for ev in merged_dict.values():
             final_by_cat.setdefault(ev.category, []).append(ev)
-            
+
         for cat, ev_list in final_by_cat.items():
             # Sort by confidence (L1 = 1.0 always wins within the cap)
             ev_list.sort(key=lambda x: x.confidence, reverse=True)
@@ -186,7 +186,7 @@ class TaggerPipeline:
         """
         final_dict: Dict[str, TagEvidence] = {ev.concept_id: ev for ev in evidence}
         parents_to_add: Dict[str, TagEvidence] = {}
-        
+
         for ev in evidence:
             parent_chain = self.store.get_parent_chain(ev.concept_id)
             for parent_id in parent_chain:
@@ -202,6 +202,6 @@ class TaggerPipeline:
                             context_snippet=f"[Propagated from {ev.label}]",
                             ontology_concept_id=parent_concept.concept_id,
                         )
-                        
+
         final_dict.update(parents_to_add)
         return list(final_dict.values())

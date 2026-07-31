@@ -28,10 +28,10 @@ class L3Tagger:
     ):
         self.base_url = base_url
         self.model = model
-        
+
         self.prompt_template = ""
         if prompt_template_path and prompt_template_path.exists():
-            with open(prompt_template_path, "r", encoding="utf-8") as f:
+            with open(prompt_template_path, encoding="utf-8") as f:
                 self.prompt_template = f.read()
         else:
             # Fallback template
@@ -70,7 +70,7 @@ class L3Tagger:
         context = evidence_a.context_snippet
         if not context and evidence_b.context_snippet:
             context = evidence_b.context_snippet
-        
+
         if not context:
             context = foa_text[:1000]
 

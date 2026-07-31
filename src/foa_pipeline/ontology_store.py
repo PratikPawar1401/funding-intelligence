@@ -16,10 +16,9 @@ import csv
 import json
 import logging
 import sqlite3
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional
-
-from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 

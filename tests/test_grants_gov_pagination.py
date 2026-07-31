@@ -1,4 +1,5 @@
 import dataclasses
+
 from foa_pipeline.config import Config
 from foa_pipeline.grants_gov import GrantsGovClient, poll_grants
 
@@ -25,14 +26,14 @@ class DummyClient(GrantsGovClient):
 
 def test_poll_grants_pagination(test_config, monkeypatch):
     monkeypatch.setattr("foa_pipeline.grants_gov.GrantsGovClient", DummyClient)
-    
+
     # Set page size to match the test mock using replace since it's frozen
     test_config = dataclasses.replace(test_config, grants_gov_page_size=2)
-    
+
     # Store globally for DummyClient to access
     global config
     config = test_config
-    
+
     stats = poll_grants(test_config, dry_run=True)
 
     assert stats["pages"] == 2

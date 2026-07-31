@@ -274,7 +274,7 @@ class Database:
                WHERE raw_payload IS NOT NULL 
                AND raw_payload NOT LIKE '%"pdf_processed": true%'"""
         ).fetchall()
-        
+
         foas = []
         for row in rows:
             try:
@@ -283,7 +283,7 @@ class Database:
                 payload = json.loads(raw)
                 if isinstance(payload, str):
                     payload = json.loads(payload)
-                    
+
                 if payload.get("pdf_links") and not payload.get("pdf_processed"):
                     foas.append({
                         "foa_id": row["foa_id"],
@@ -301,9 +301,9 @@ class Database:
         row = self.conn.execute("SELECT program_description, raw_payload FROM foa_records WHERE foa_id = ?", (foa_id,)).fetchone()
         if not row:
             return
-            
+
         new_desc = (row["program_description"] or "") + "\n\n" + appended_text
-        
+
         payload = {}
         if mark_pdf_processed and row["raw_payload"]:
             try:
@@ -311,7 +311,7 @@ class Database:
                 payload["pdf_processed"] = True
             except json.JSONDecodeError:
                 pass
-                
+
         new_payload = json.dumps(payload) if payload else row["raw_payload"]
 
         self.conn.execute(

@@ -6,8 +6,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from pydantic import BaseModel, Field
 
-from ..deps import get_db, get_vector_index
 from ...database import Database
+from ..deps import get_db, get_vector_index
 
 router = APIRouter()
 

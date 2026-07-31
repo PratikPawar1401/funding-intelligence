@@ -2,18 +2,18 @@
 
 from functools import lru_cache
 
-from ..config import get_config, Config
+from ..config import Config, get_config
 from ..database import Database
 from ..vector_index import VectorIndex
 
 
-@lru_cache()
+@lru_cache
 def get_app_config() -> Config:
     """Get the application configuration (cached)."""
     return get_config()
 
 
-@lru_cache()
+@lru_cache
 def get_vector_index() -> VectorIndex:
     """
     Load the FAISS index and embedding model once per process.

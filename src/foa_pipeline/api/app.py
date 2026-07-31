@@ -4,15 +4,20 @@ FastAPI application factory.
 Serves the FOA data through a REST API consumed by the web frontend.
 """
 
-from fastapi import FastAPI
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 from pathlib import Path
 
-from .routes import health, opportunities, search, tags, export
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+
+from .deps import get_app_config
+from .middleware import RateLimitMiddleware
+from .routes import export, health, opportunities, search, tags
 
 
 def create_app() -> FastAPI:
+    config = get_app_config()
+
     app = FastAPI(
         title="ISSR Funding Intelligence API",
         description="AI-Powered Funding Opportunity Discovery for ISSR",
@@ -21,12 +26,22 @@ def create_app() -> FastAPI:
         redoc_url="/api/redoc",
     )
 
-    # CORS for frontend
+    # Health is exempt so uptime checks can't be throttled out.
+    app.add_middleware(
+        RateLimitMiddleware,
+        requests_per_minute=config.api_rate_limit_per_minute,
+        exempt_paths={"/api/health"},
+    )
+
+    # CORS for separately hosted frontends. Origins come from config rather than
+    # "*": a wildcard cannot be combined with credentialed requests, and the
+    # bundled frontend is same-origin so it needs no exception at all.
+    allow_credentials = "*" not in config.api_cors_origins
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
+        allow_origins=config.api_cors_origins,
+        allow_credentials=allow_credentials,
+        allow_methods=["GET", "POST", "OPTIONS"],
         allow_headers=["*"],
     )
 

@@ -2,8 +2,9 @@
 
 import json
 import sqlite3
-import pytest
 from pathlib import Path
+
+import pytest
 
 from foa_pipeline.config import Config
 
@@ -37,6 +38,9 @@ def test_config(tmp_path):
         api_host="127.0.0.1",
         api_port=8000,
         api_reload=False,
+        api_cors_origins=["http://localhost:8000"],
+        api_rate_limit_per_minute=120,
+        api_export_max_rows=10000,
         log_level="DEBUG",
         user_agent="test-agent",
         schema_version="1.0",

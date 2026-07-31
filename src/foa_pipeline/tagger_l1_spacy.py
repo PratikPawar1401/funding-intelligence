@@ -15,14 +15,14 @@ from spacy.matcher import PhraseMatcher
 from spacy.tokens import Doc
 
 from .evidence_logger import TagEvidence
-from .ontology_store import OntologyStore, OntologyConcept
+from .ontology_store import OntologyConcept, OntologyStore
 
 logger = logging.getLogger(__name__)
 
 
 class L1Tagger:
     """Terminological tagger using spaCy PhraseMatcher."""
-    
+
     NEGATION_TERMS = {"not", "no", "excluding", "without", "except", "outside", "non"}
 
     def __init__(self, spacy_model: str = "en_core_web_lg"):
@@ -62,7 +62,7 @@ class L1Tagger:
 
             # Match label
             patterns = [self.nlp.make_doc(concept.label)]
-            
+
             # Match synonyms
             for syn in concept.synonyms:
                 if syn:
@@ -101,16 +101,16 @@ class L1Tagger:
 
             # Contextual Dependency Checks
             is_valid = True
-            
+
             # 1. Dependency Negation Check
             # Look at the root of the match and its ancestors/children
             match_span = doc[start:end]
             root_token = match_span.root
-            
+
             # Check immediate children of the root for a negation modifier ('neg')
             if any(child.dep_ == "neg" for child in root_token.children):
                 is_valid = False
-                
+
             # Also check if the head of the root is negated (e.g., "does not fund housing")
             if any(child.dep_ == "neg" for child in root_token.head.children):
                 is_valid = False

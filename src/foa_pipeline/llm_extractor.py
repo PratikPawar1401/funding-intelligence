@@ -24,7 +24,7 @@ class BudgetTierExtractor:
     ):
         self.base_url = base_url
         self.model = model
-        
+
         self.system_prompt = (
             "You are an expert grant data extractor. Extract funding budget tiers from the provided text.\n"
             "Output strictly valid JSON as an array of objects.\n"
@@ -71,13 +71,13 @@ class BudgetTierExtractor:
             )
             resp.raise_for_status()
             result_text = resp.json().get("response", "").strip()
-            
+
             # Clean potential markdown wrapping
             if result_text.startswith("```json"):
                 result_text = result_text[7:]
             if result_text.endswith("```"):
                 result_text = result_text[:-3]
-                
+
             parsed = json.loads(result_text.strip())
             if isinstance(parsed, list):
                 return parsed
@@ -90,7 +90,7 @@ class BudgetTierExtractor:
                 for val in parsed.values():
                     if isinstance(val, list):
                         return val
-                
+
         except Exception as exc:
             logger.warning("LLM Budget Extraction failed: %s", exc)
 

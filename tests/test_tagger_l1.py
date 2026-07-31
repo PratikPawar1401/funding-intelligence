@@ -1,12 +1,13 @@
 """Tests for the Layer 1 spaCy PhraseMatcher tagger."""
 
-import pytest
 from pathlib import Path
 
+import pytest
+
+from foa_pipeline.evidence_logger import TagEvidence
 from foa_pipeline.ontology_store import OntologyStore
 from foa_pipeline.synonym_expander import expand_synonyms_for_store
 from foa_pipeline.tagger_l1_spacy import L1Tagger
-from foa_pipeline.evidence_logger import TagEvidence
 
 
 @pytest.fixture(scope="module")

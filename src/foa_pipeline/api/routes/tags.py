@@ -4,8 +4,8 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 
-from ..deps import get_db
 from ...database import Database
+from ..deps import get_db
 
 router = APIRouter()
 

@@ -7,7 +7,7 @@ Every assigned tag carries:
 - context_snippet: The exact text that triggered the match
 """
 
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from typing import Optional
 
 

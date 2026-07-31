@@ -5,8 +5,8 @@ Maps CFDA (Assistance Listing) prefixes to Mission Categories.
 Used as a fallback if the semantic taggers fail to identify a Mission Category.
 """
 
-from typing import Dict, Optional
 import re
+from typing import Dict, Optional
 
 # Map CFDA prefixes to Great Act concept_ids
 CFDA_TO_GREAT_ACT: Dict[str, str] = {

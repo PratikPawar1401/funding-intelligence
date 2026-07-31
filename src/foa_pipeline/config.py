@@ -1,6 +1,7 @@
-from dataclasses import dataclass
-from pathlib import Path
 import os
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import List
 
 
 def _env(name: str, default: str) -> str:
@@ -49,6 +50,16 @@ class Config:
     user_agent: str
     schema_version: str
 
+    # ── API hardening (defaulted) ──
+    # These carry defaults and sit last on purpose: most of the codebase builds
+    # a Config without caring about API settings, and adding a required field
+    # here breaks every one of those call sites at once.
+    api_cors_origins: List[str] = field(
+        default_factory=lambda: ["http://localhost:8000", "http://127.0.0.1:8000"]
+    )
+    api_rate_limit_per_minute: int = 120
+    api_export_max_rows: int = 10000
+
 
 def get_config() -> Config:
     """Build Config from environment variables with sensible defaults."""
@@ -83,6 +94,18 @@ def get_config() -> Config:
         api_host=_env("API_HOST", "0.0.0.0"),
         api_port=int(_env("API_PORT", "8000")),
         api_reload=_env("API_RELOAD", "true").lower() == "true",
+        # Comma-separated origins. The bundled frontend is served from the same
+        # origin as the API, so it needs no entry here; this is for separately
+        # hosted frontends. "*" is accepted but disables credentialed requests.
+        api_cors_origins=[
+            o.strip()
+            for o in _env(
+                "API_CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000"
+            ).split(",")
+            if o.strip()
+        ],
+        api_rate_limit_per_minute=int(_env("API_RATE_LIMIT_PER_MINUTE", "120")),
+        api_export_max_rows=int(_env("API_EXPORT_MAX_ROWS", "10000")),
         # ── General ──
         log_level=_env("LOG_LEVEL", "INFO"),
         user_agent=_env("USER_AGENT", "foa-pipeline/1.0"),

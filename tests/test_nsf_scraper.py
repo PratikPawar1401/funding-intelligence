@@ -9,21 +9,21 @@ Covers:
 - Database queue draining
 """
 
-import pytest
 import sqlite3
-from bs4 import BeautifulSoup
-from unittest.mock import Mock, patch, AsyncMock
 from pathlib import Path
+from unittest.mock import AsyncMock, Mock, patch
 
+import pytest
+from bs4 import BeautifulSoup
+
+from foa_pipeline.config import Config
 from foa_pipeline.nsf_scraper import (
-    _parse_html_content,
     _extract_dates_from_html,
     _extract_nsf_id,
+    _parse_html_content,
     _run_playwright_scraper,
     drain_nsf_queue,
 )
-from foa_pipeline.config import Config
-
 
 # ═══════════════════════════════════════════════
 # _extract_nsf_id tests
@@ -155,26 +155,26 @@ class TestPlaywrightScraper:
         # Mock setup
         mock_page = AsyncMock()
         mock_page.content.return_value = "<html><body><h1>Success</h1></body></html>"
-        
+
         mock_context = AsyncMock()
         mock_context.new_page.return_value = mock_page
-        
+
         mock_browser = AsyncMock()
         mock_browser.new_context.return_value = mock_context
-        
+
         mock_p = AsyncMock()
         mock_p.chromium.launch.return_value = mock_browser
-        
+
         # async with async_playwright() as p:
         mock_async_playwright.return_value.__aenter__.return_value = mock_p
-        
+
         urls = ["https://nsf.gov/test1", "https://nsf.gov/test2"]
         results = await _run_playwright_scraper(urls, max_concurrent=1)
-        
+
         assert len(results) == 2
         assert "https://nsf.gov/test1" in results
         assert results["https://nsf.gov/test1"]["title"] == "Success"
-        
+
         # Verify calls
         assert mock_page.goto.call_count == 2
         assert mock_page.content.call_count == 2
@@ -195,7 +195,7 @@ class TestDrainNsfQueue:
     @patch("foa_pipeline.nsf_scraper._run_playwright_scraper", new_callable=AsyncMock)
     def test_drain_nsf_queue_success(self, mock_run, setup_queue_db):
         config = setup_queue_db
-        
+
         # Mock scraper result
         mock_run.return_value = {
             "https://nsf.gov/test_db": {
@@ -203,51 +203,51 @@ class TestDrainNsfQueue:
                 "title": "DB Test",
             }
         }
-        
+
         stats = drain_nsf_queue(config)
-        
+
         assert stats["total_pending"] == 1
         assert stats["scraped"] == 1
         assert stats["failed"] == 0
-        
+
         # Verify db updated
         conn = sqlite3.connect(str(config.sqlite_db_path))
         row = conn.execute("SELECT status FROM pending_urls WHERE url='https://nsf.gov/test_db'").fetchone()
         conn.close()
-        
+
         assert row[0] == "scraped"
 
     def test_drain_nsf_queue_dry_run(self, setup_queue_db):
         config = setup_queue_db
-        
+
         stats = drain_nsf_queue(config, dry_run=True)
-        
+
         assert stats["total_pending"] == 1
         assert stats["skipped"] == 1
-        
+
         # Verify db NOT updated
         conn = sqlite3.connect(str(config.sqlite_db_path))
         row = conn.execute("SELECT status FROM pending_urls WHERE url='https://nsf.gov/test_db'").fetchone()
         conn.close()
-        
+
         assert row[0] == "pending"
 
     @patch("foa_pipeline.nsf_scraper._run_playwright_scraper", new_callable=AsyncMock)
     def test_drain_nsf_queue_failed(self, mock_run, setup_queue_db):
         config = setup_queue_db
-        
+
         # Mock scraper result - no data returned for the URL
         mock_run.return_value = {}
-        
+
         stats = drain_nsf_queue(config)
-        
+
         assert stats["total_pending"] == 1
         assert stats["scraped"] == 0
         assert stats["failed"] == 1
-        
+
         # Verify db updated to failed
         conn = sqlite3.connect(str(config.sqlite_db_path))
         row = conn.execute("SELECT status FROM pending_urls WHERE url='https://nsf.gov/test_db'").fetchone()
         conn.close()
-        
+
         assert row[0] == "failed"

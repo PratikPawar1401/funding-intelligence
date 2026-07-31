@@ -256,6 +256,123 @@ class TestExport:
         assert len(lines) == 2  # header + 1 open record
 
 
+class TestExportBounds:
+    def test_reports_totals_and_no_truncation_for_small_sets(self, client):
+        resp = client.get("/api/export/csv")
+        assert resp.headers["x-total-count"] == "2"
+        assert resp.headers["x-returned-count"] == "2"
+        assert "x-export-truncated" not in resp.headers
+
+    def test_flags_truncation_when_page_is_smaller_than_total(self, client):
+        resp = client.get("/api/export/csv", params={"size": 1})
+        assert resp.headers["x-total-count"] == "2"
+        assert resp.headers["x-returned-count"] == "1"
+        assert resp.headers["x-export-truncated"] == "true"
+        assert resp.headers["x-next-page"] == "2"
+
+    def test_json_export_reports_truncation(self, client):
+        body = client.get("/api/export/json", params={"size": 1}).json()
+        assert body["total"] == 2
+        assert body["returned"] == 1
+        assert body["truncated"] is True
+
+    def test_export_paging_returns_different_records(self, client):
+        first = client.get("/api/export/json", params={"size": 1, "page": 1}).json()
+        second = client.get("/api/export/json", params={"size": 1, "page": 2}).json()
+        assert first["foas"][0]["foa_id"] != second["foas"][0]["foa_id"]
+
+    def test_size_is_capped_by_configured_maximum(self, client, monkeypatch):
+        """A caller cannot request an unbounded export."""
+        from foa_pipeline.api.routes import export as export_route
+
+        cfg = deps.get_app_config()
+        capped = cfg.__class__(**{**cfg.__dict__, "api_export_max_rows": 1})
+        monkeypatch.setattr(export_route, "get_app_config", lambda: capped)
+
+        body = client.get("/api/export/json", params={"size": 999999}).json()
+        assert body["returned"] == 1
+        assert body["size"] == 1
+
+
+class TestRateLimiting:
+    def test_requests_under_limit_are_allowed(self, api_db_path):
+        app = create_app()
+
+        def override_get_db():
+            db = Database(api_db_path)
+            try:
+                yield db
+            finally:
+                db.close()
+
+        app.dependency_overrides[deps.get_db] = override_get_db
+        with TestClient(app) as c:
+            for _ in range(5):
+                assert c.get("/api/opportunities").status_code == 200
+
+    def test_exceeding_limit_returns_429_with_retry_after(self, api_db_path, monkeypatch):
+        from foa_pipeline.api import app as app_module
+
+        cfg = deps.get_app_config()
+        strict = cfg.__class__(**{**cfg.__dict__, "api_rate_limit_per_minute": 3})
+        monkeypatch.setattr(app_module, "get_app_config", lambda: strict)
+
+        app = app_module.create_app()
+
+        def override_get_db():
+            db = Database(api_db_path)
+            try:
+                yield db
+            finally:
+                db.close()
+
+        app.dependency_overrides[deps.get_db] = override_get_db
+
+        with TestClient(app) as c:
+            statuses = [c.get("/api/opportunities").status_code for _ in range(5)]
+
+        assert statuses[:3] == [200, 200, 200]
+        assert 429 in statuses[3:]
+
+    def test_health_endpoint_is_exempt_from_limiting(self, api_db_path, monkeypatch):
+        """Uptime checks must not be throttled out."""
+        from foa_pipeline.api import app as app_module
+
+        cfg = deps.get_app_config()
+        strict = cfg.__class__(**{**cfg.__dict__, "api_rate_limit_per_minute": 2})
+        monkeypatch.setattr(app_module, "get_app_config", lambda: strict)
+
+        app = app_module.create_app()
+
+        def override_get_db():
+            db = Database(api_db_path)
+            try:
+                yield db
+            finally:
+                db.close()
+
+        app.dependency_overrides[deps.get_db] = override_get_db
+
+        with TestClient(app) as c:
+            statuses = [c.get("/api/health").status_code for _ in range(6)]
+
+        assert all(s == 200 for s in statuses)
+
+
+class TestCors:
+    def test_configured_origin_is_allowed(self, client):
+        resp = client.get(
+            "/api/health", headers={"Origin": "http://localhost:8000"}
+        )
+        assert resp.headers.get("access-control-allow-origin") == "http://localhost:8000"
+
+    def test_unlisted_origin_is_not_echoed_back(self, client):
+        """The API previously allowed any origin with credentials enabled."""
+        resp = client.get("/api/health", headers={"Origin": "http://evil.example.com"})
+        assert resp.headers.get("access-control-allow-origin") != "http://evil.example.com"
+        assert resp.headers.get("access-control-allow-origin") != "*"
+
+
 class TestAppWiring:
     def test_openapi_schema_documents_all_route_groups(self, client):
         paths = client.get("/openapi.json").json()["paths"]

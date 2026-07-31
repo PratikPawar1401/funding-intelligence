@@ -119,7 +119,7 @@ def main() -> None:
 
     elif args.command == "tag-all":
         _run_tag_all(config, args)
-        
+
     elif args.command == "mine-synonyms":
         _run_mine_synonyms(config, args)
 
@@ -157,10 +157,10 @@ def _run_download_pdfs(config, args) -> None:
 
 def _run_normalise(config, args) -> None:
     """Normalise all raw records from data/raw/ into data/normalised/."""
-    from .normaliser import normalise_record
-    from .validator import validate_record
-    from .storage import ensure_dir
     from .database import Database
+    from .normaliser import normalise_record
+    from .storage import ensure_dir
+    from .validator import validate_record
 
     ensure_dir(config.normalised_output_dir)
     db = Database(config.app_db_path)
@@ -204,9 +204,10 @@ def _run_normalise(config, args) -> None:
 def _run_enrich_foas(config) -> None:
     import urllib.request
     from pathlib import Path
+
     from .database import Database
     from .grants_gov import GrantsGovClient
-    from .pdf_parser import parse_foa_pdf, extract_structured_fields
+    from .pdf_parser import extract_structured_fields, parse_foa_pdf
 
     # Boilerplate PDFs that are generic and don't describe a specific FOA
     SKIP_URLS = {
@@ -227,7 +228,7 @@ def _run_enrich_foas(config) -> None:
     for idx, foa in enumerate(records):
         source = foa.get("source")
         raw_payload = foa.get("raw_payload", {})
-        
+
         # Handle case where raw_payload was stored as a JSON string
         if isinstance(raw_payload, str):
             try:
@@ -242,7 +243,7 @@ def _run_enrich_foas(config) -> None:
 
         all_pdf_text = []
         structured_fields = {}
-        
+
         # GRANTS.GOV LOGIC
         if source == "grants_gov":
             extracted_pdf_ids = raw_payload.get("extracted_pdf_ids", [])
@@ -250,7 +251,7 @@ def _run_enrich_foas(config) -> None:
                 continue
             logging.info("[%d/%d] Enriching Grants.gov FOA %s (%s) with %d attachments",
                          idx + 1, total, foa["foa_id"], (foa.get("title") or "")[:50], len(extracted_pdf_ids))
-            
+
             for att_id in extracted_pdf_ids:
                 out_path = pdf_dir / "grants_gov" / f"{foa['foa_id']}_{att_id}.pdf"
                 out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -259,13 +260,13 @@ def _run_enrich_foas(config) -> None:
                     if not success:
                         error_count += 1
                         continue
-                
+
                 try:
                     result = parse_foa_pdf(out_path)
                     text_content = "\n".join([sec.content for sec in result.sections])
                     if len(text_content.strip()) > 50:  # Skip trivially small PDFs
                         all_pdf_text.append(text_content)
-                    
+
                     fields = extract_structured_fields(result)
                     structured_fields.update(fields)
                 except Exception as exc:
@@ -281,7 +282,7 @@ def _run_enrich_foas(config) -> None:
                 continue
             logging.info("[%d/%d] Enriching NSF FOA %s (%s) with %d PDF links",
                          idx + 1, total, foa["foa_id"], (foa.get("title") or "")[:50], len(pdf_links))
-            
+
             for i, link in enumerate(pdf_links):
                 out_path = pdf_dir / "nsf" / f"{foa['foa_id']}_{i}.pdf"
                 out_path.parent.mkdir(parents=True, exist_ok=True)
@@ -292,13 +293,13 @@ def _run_enrich_foas(config) -> None:
                         logging.warning("Failed to download NSF PDF %s: %s", link, exc)
                         error_count += 1
                         continue
-                
+
                 try:
                     result = parse_foa_pdf(out_path)
                     text_content = "\n".join([sec.content for sec in result.sections])
                     if len(text_content.strip()) > 50:
                         all_pdf_text.append(text_content)
-                    
+
                     fields = extract_structured_fields(result)
                     structured_fields.update(fields)
                 except Exception as exc:
@@ -306,13 +307,13 @@ def _run_enrich_foas(config) -> None:
                     error_count += 1
         else:
             continue
-            
+
         # Update FOA with text and structured fields
         if all_pdf_text:
             combined_text = "\n\n=== PDF ATTACHMENT ===\n\n".join(all_pdf_text)
             existing_info = foa.get("additional_info") or ""
             foa["additional_info"] = existing_info + "\n\n=== PDF ATTACHMENTS ===\n\n" + combined_text
-            
+
             # Merge extracted structured fields (don't overwrite if already exists and is non-null)
             if "award_floor" in structured_fields and not foa.get("award_floor"):
                 foa["award_floor"] = structured_fields["award_floor"]
@@ -320,12 +321,12 @@ def _run_enrich_foas(config) -> None:
                 foa["award_ceiling"] = structured_fields["award_ceiling"]
             if "close_date_raw" in structured_fields and not foa.get("close_date"):
                 foa["close_date"] = structured_fields["close_date_raw"]
-                
+
         raw_payload["pdf_enriched"] = True
         foa["raw_payload"] = raw_payload
         db.upsert_foa(foa)
         enriched_count += 1
-        
+
     logging.info("PDF Enrichment complete: %d enriched, %d skipped (already done), %d errors", enriched_count, skipped_count, error_count)
 
 
@@ -333,10 +334,10 @@ def _run_enrich_foas(config) -> None:
 def _run_extract_budget(config) -> None:
     from .database import Database
     from .llm_extractor import BudgetTierExtractor
-    
+
     db = Database(config.app_db_path)
     extractor = BudgetTierExtractor(base_url=config.ollama_base_url, model=config.ollama_model)
-    
+
     if not extractor.is_available():
         logging.warning("Ollama is not available. Ensure it is running and model %s is pulled.", config.ollama_model)
         logging.warning("Run: ollama serve && ollama pull %s", config.ollama_model)
@@ -350,7 +351,7 @@ def _run_extract_budget(config) -> None:
         text = record.get("additional_info")
         if not text:
             continue
-            
+
         logging.info("Extracting budget tiers for FOA %s", record["foa_id"])
         tiers = extractor.extract_tiers(text)
         if tiers:
@@ -358,7 +359,7 @@ def _run_extract_budget(config) -> None:
             db.upsert_foa(record)
             count += 1
             logging.info("  Found %d tiers", len(tiers))
-            
+
     logging.info("Extracted budget tiers for %d records", count)
 
 
@@ -418,10 +419,10 @@ def _run_tag_all(config, args) -> None:
     # Get all untagged FOAs (or all FOAs if forcing)
     # For simplicity here, we re-tag everything that is open
     foas, total = db.list_foas(status="open", page=1, size=100000)
-    
+
     if args.limit > 0:
         foas = foas[:args.limit]
-        
+
     logging.info("Tagging %d open FOAs...", len(foas))
 
     tagged_count = 0
@@ -461,7 +462,7 @@ def _run_precompute_embeddings(config) -> None:
         model_name=config.embedding_model,
         cache_dir=config.embeddings_cache_dir
     )
-    
+
     logging.info("Starting embedding precomputation...")
     tagger.build_embeddings(store, force_recompute=True)
     logging.info("Embeddings precomputed and cached.")
@@ -470,8 +471,8 @@ def _run_precompute_embeddings(config) -> None:
 
 def _run_export_csv(config, args) -> None:
     """Export all FOAs from the database to CSV."""
-    from .database import Database
     from .csv_exporter import export_foas_to_csv
+    from .database import Database
 
     db = Database(config.app_db_path)
     records, total = db.list_foas(page=1, size=100000)
@@ -551,8 +552,9 @@ def _run_server(config) -> None:
 
 def _run_pdf_parse(args) -> None:
     """Parse a single PDF file and print results."""
-    from .pdf_parser import parse_foa_pdf, extract_structured_fields
     from pathlib import Path
+
+    from .pdf_parser import extract_structured_fields, parse_foa_pdf
 
     result = parse_foa_pdf(Path(args.pdf_path))
     logging.info("Parsed %s (%s)", args.pdf_path, result.parse_method)
@@ -573,10 +575,11 @@ def _run_pdf_parse(args) -> None:
 
 def _run_mine_synonyms(config, args) -> None:
     import csv
+
     from .database import Database
-    
+
     db = Database(config.app_db_path)
-    
+
     query = """
     SELECT concept_id, label, category, confidence, context_snippet
     FROM foa_tags
@@ -584,9 +587,9 @@ def _run_mine_synonyms(config, args) -> None:
       AND confidence >= ?
     ORDER BY category, confidence DESC
     """
-    
+
     results = db.conn.execute(query, (args.threshold,)).fetchall()
-    
+
     out_path = config.ontology_dir / "suggested_synonyms.csv"
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -599,33 +602,34 @@ def _run_mine_synonyms(config, args) -> None:
                 round(row["confidence"], 3),
                 row["context_snippet"].replace('\n', ' ')
             ])
-            
+
     logging.info("Mined %d potential synonyms to %s", len(results), out_path)
 
 def _run_curate_eval_set(config, args) -> None:
     import json
     import random
+
     from .database import Database
-    
+
     db = Database(config.app_db_path)
-    
+
     # Simple stratified sampling: get half from grants_gov and half from nsf_scraper
     half_size = args.size // 2
-    
+
     records = []
-    
+
     # Sample from Grants.gov
     gg_foas = db.conn.execute(
         "SELECT foa_id, title, program_description, eligibility_description, additional_info, source FROM foa_records WHERE source = 'grants_gov' ORDER BY RANDOM() LIMIT ?",
         (half_size,)
     ).fetchall()
-    
+
     # Sample from NSF
     nsf_foas = db.conn.execute(
         "SELECT foa_id, title, program_description, eligibility_description, additional_info, source FROM foa_records WHERE source = 'nsf_scraper' ORDER BY RANDOM() LIMIT ?",
         (args.size - len(gg_foas),)
     ).fetchall()
-    
+
     for r in gg_foas + nsf_foas:
         records.append({
             "foa_id": r["foa_id"],
@@ -636,15 +640,15 @@ def _run_curate_eval_set(config, args) -> None:
             "additional_info": r["additional_info"],
             "human_tags": []  # Placeholder for annotation
         })
-        
+
     random.shuffle(records)
-    
+
     config.evaluation_dir.mkdir(parents=True, exist_ok=True)
     out_path = config.evaluation_dir / f"eval_set_{args.size}.json"
-    
+
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(records, f, indent=2)
-        
+
     logging.info("Curated stratified eval set of %d FOAs to %s", len(records), out_path)
 
 if __name__ == "__main__":

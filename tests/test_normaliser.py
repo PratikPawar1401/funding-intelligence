@@ -1,16 +1,17 @@
 """Tests for the normaliser module."""
 
 import pytest
+
 from foa_pipeline.normaliser import (
-    normalise_date,
-    normalise_text,
-    parse_award_amount,
-    infer_status,
-    normalise_record,
     _extract_cfda,
     _extract_eligibility_types,
     _map_funding_instrument,
     _safe_int,
+    infer_status,
+    normalise_date,
+    normalise_record,
+    normalise_text,
+    parse_award_amount,
 )
 
 

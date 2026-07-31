@@ -13,10 +13,9 @@ detection heuristics (for encrypted or non-standard PDFs).
 
 import logging
 import re
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-
-from dataclasses import dataclass, field
 
 logger = logging.getLogger(__name__)
 
@@ -76,8 +75,8 @@ def parse_foa_pdf(pdf_path: Path) -> ParsedPDF:
 
 def _parse_with_pymupdf4llm(pdf_path: Path) -> ParsedPDF:
     """Primary parser using pymupdf4llm for layout-aware extraction."""
-    import pymupdf4llm
     import pymupdf
+    import pymupdf4llm
 
     # Convert to Markdown preserving column order
     md_text = pymupdf4llm.to_markdown(str(pdf_path))

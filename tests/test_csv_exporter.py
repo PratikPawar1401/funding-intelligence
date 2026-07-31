@@ -167,7 +167,7 @@ class TestExportToFile:
         """Exported file should be valid CSV with correct number of rows."""
         out_path = str(tmp_path / "test_export.csv")
         export_foas_to_csv([tagged_foa], output_path=out_path)
-        with open(out_path, "r") as f:
+        with open(out_path) as f:
             reader = csv.DictReader(f)
             rows = list(reader)
         assert len(rows) == 1

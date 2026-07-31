@@ -4,14 +4,15 @@ Uses a mock L2 tagger to avoid downloading the full sentence-transformers model
 in unit tests. The L1 tagger uses the real spaCy model for accuracy.
 """
 
-import pytest
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from foa_pipeline.config import Config
+from foa_pipeline.evidence_logger import TagEvidence
 from foa_pipeline.ontology_store import OntologyStore
 from foa_pipeline.synonym_expander import expand_synonyms_for_store
-from foa_pipeline.evidence_logger import TagEvidence
 from foa_pipeline.tagger_pipeline import TaggerPipeline
 
 
@@ -179,7 +180,7 @@ class TestTaggerPipelineHierarchy:
         }
         tags = pipeline.tag_record(foa_with_child)
         concept_ids = {t["ontology_concept_id"] for t in tags}
-        
+
         # If sdg_13_1 (Climate Adaptation) is tagged, sdg_13 (Climate Action) should propagate
         if "sdg_13_1" in concept_ids:
             assert "sdg_13" in concept_ids, "Parent SDG not propagated from child"

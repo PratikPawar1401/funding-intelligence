@@ -3,6 +3,7 @@ import logging
 import time
 from pathlib import Path
 from typing import Any, Dict, Iterable, Optional
+
 import requests
 
 from .config import Config

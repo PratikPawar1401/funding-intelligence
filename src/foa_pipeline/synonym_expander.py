@@ -122,7 +122,7 @@ def expand_synonyms_for_store(store: OntologyStore) -> Dict[str, int]:
         # Remove the original label and empty/short strings
         synonyms.discard(concept.label.lower())
         synonyms.discard("")
-        
+
         # ── Synonym Governance Filters ──
         # Filter 1: Noisy/ambiguous terms confirmed as false-positive triggers.
         # These are WordNet lemmas that match incidental text in FOAs.
@@ -155,12 +155,12 @@ def expand_synonyms_for_store(store: OntologyStore) -> Dict[str, int]:
             "statistics",  # Matches org names like "...Center for ... Statistics"
             "job creation",
         }
-        
+
         # Filter 2: Minimum length — short synonyms cause too many false positives
         # Filter 3: Not in noisy set
         synonyms = {
-            s for s in synonyms 
-            if len(s) >= 4 
+            s for s in synonyms
+            if len(s) >= 4
             and s.lower() not in NOISY_SYNONYMS
         }
 

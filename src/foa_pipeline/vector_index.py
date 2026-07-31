@@ -54,7 +54,7 @@ class VectorIndex:
     def initialize_index(self, dimension: int = 768) -> None:
         """Create a new FAISS IndexFlatIP (Inner Product = Cosine if normalized)."""
         import faiss
-        
+
         # Using IndexFlatIP for cosine similarity (assuming normalized vectors)
         self.index = faiss.IndexIDMap(faiss.IndexFlatIP(dimension))
         logger.info("Initialized FAISS index with dimension %d", dimension)
@@ -77,31 +77,31 @@ class VectorIndex:
 
         foas, _ = db.list_foas(status="open", page=1, size=10000)
         logger.info("Building vector index for %d open FOAs...", len(foas))
-        
+
         if not foas:
             return
-            
+
         texts = []
         foa_ids = []
-        
+
         for foa in foas:
             desc = foa.get("program_description", "")
             title = foa.get("title", "")
             if not desc and not title:
                 continue
-                
+
             texts.append(f"{title}. {desc}")
             foa_ids.append(foa["foa_id"])
-            
+
         # Encode all
         embeddings = self.model.encode(texts, convert_to_numpy=True, normalize_embeddings=True)
-        
+
         # IDs for faiss must be integers
         faiss_ids = np.arange(len(embeddings), dtype=np.int64)
-        
+
         # Add to index
         self.index.add_with_ids(embeddings, faiss_ids)
-        
+
         # Save mapping to SQLite
         for fid, foa_id in zip(faiss_ids, foa_ids):
             db.conn.execute(
@@ -109,7 +109,7 @@ class VectorIndex:
                 (int(fid), str(foa_id))
             )
         db.conn.commit()
-        
+
         # Save index to disk
         self._save_index()
 
@@ -127,7 +127,7 @@ class VectorIndex:
         path = self.cache_dir / "foa_index.faiss"
         if not path.exists():
             return False
-            
+
         try:
             self.index = faiss.read_index(str(path))
             logger.info("Loaded FAISS index with %d vectors", self.index.ntotal)
@@ -161,17 +161,17 @@ class VectorIndex:
         self.load_model()
         assert self.model is not None
         assert self.index is not None
-        
+
         query_emb = self.model.encode([query], convert_to_numpy=True, normalize_embeddings=True)
-        
+
         # Search
         scores, I = self.index.search(query_emb, k)
-        
+
         results = []
         for score, faiss_id in zip(scores[0], I[0]):
             if faiss_id == -1 or score < threshold:
                 continue
-                
+
             # Lookup FOA ID
             row = resolved_db.conn.execute(
                 "SELECT foa_id FROM faiss_metadata WHERE faiss_id = ?",
@@ -184,5 +184,5 @@ class VectorIndex:
                     foa.pop("raw_payload", None)
                     foa["similarity_score"] = round(float(score), 4)
                     results.append(foa)
-                    
+
         return results

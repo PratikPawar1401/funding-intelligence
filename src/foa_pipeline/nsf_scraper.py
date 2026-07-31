@@ -66,7 +66,7 @@ def _parse_html_content(url: str, html: str) -> Dict[str, Any]:
         if desc_el:
             description = desc_el.get_text(separator=" ", strip=True)
             break
-            
+
     if not description:
         main = soup.find("main") or soup.find("div", {"role": "main"})
         if main:
@@ -125,7 +125,7 @@ async def _run_playwright_scraper(urls: List[str], max_concurrent: int) -> Dict[
         # Process URLs concurrently in chunks
         for i in range(0, len(urls), max_concurrent):
             chunk = urls[i:i + max_concurrent]
-            
+
             async def scrape_single_url(url: str):
                 logger.debug("Playwright processing: %s", url)
                 context = await browser.new_context()
@@ -134,7 +134,7 @@ async def _run_playwright_scraper(urls: List[str], max_concurrent: int) -> Dict[
                     await page.goto(url, wait_until="networkidle", timeout=20000)
                 except Exception:
                     pass  # timeout is okay, continue extracting what we have
-                    
+
                 html = await page.content()
                 parsed_data = _parse_html_content(url, html)
                 results[url] = parsed_data
@@ -142,9 +142,9 @@ async def _run_playwright_scraper(urls: List[str], max_concurrent: int) -> Dict[
 
             # Run chunk concurrently
             await asyncio.gather(*(scrape_single_url(u) for u in chunk))
-            
+
         await browser.close()
-        
+
     return results
 
 
@@ -178,7 +178,7 @@ def drain_nsf_queue(
         return stats
 
     logger.info("Found %d pending NSF URLs to scrape", len(pending))
-    
+
     urls_to_scrape = [row["url"] for row in pending]
 
     ensure_dir(config.raw_output_dir)
@@ -194,7 +194,7 @@ def drain_nsf_queue(
             except RuntimeError:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                
+
             scraped_results = loop.run_until_complete(
                 _run_playwright_scraper(urls_to_scrape, config.nsf_scraper_max_concurrent)
             )

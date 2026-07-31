@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 from typing import Any, Dict, Optional
 
-
 SCHEMA_VERSION = "1.0"
 
 # Valid enum values for the canonical schema

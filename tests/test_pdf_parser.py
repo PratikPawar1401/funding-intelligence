@@ -8,16 +8,17 @@ Covers:
 - pdfminer fallback path
 """
 
-import pytest
 from pathlib import Path
 
+import pytest
+
 from foa_pipeline.pdf_parser import (
-    parse_foa_pdf,
     ParsedPDF,
     ParsedPDFSection,
     _extract_sections,
     _extract_tables_pdfplumber,
     extract_structured_fields,
+    parse_foa_pdf,
 )
 
 FIXTURE_DIR = Path(__file__).parent / "fixtures" / "sample_pdf"

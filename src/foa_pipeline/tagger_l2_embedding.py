@@ -16,7 +16,7 @@ from typing import Dict, List, Optional, Tuple
 import numpy as np
 
 from .evidence_logger import TagEvidence
-from .ontology_store import OntologyStore, OntologyConcept
+from .ontology_store import OntologyConcept, OntologyStore
 
 logger = logging.getLogger(__name__)
 
@@ -85,9 +85,9 @@ class L2Tagger:
             # Load from cache
             try:
                 emb_matrix = np.load(cache_path_npy)
-                with open(cache_path_json, "r") as f:
+                with open(cache_path_json) as f:
                     concept_ids = json.load(f)
-                
+
                 if len(concept_ids) == len(concepts):
                     for cid, emb in zip(concept_ids, emb_matrix):
                         self.concept_embeddings[cid] = emb
@@ -110,7 +110,7 @@ class L2Tagger:
                 text += ". " + concept.description
             if concept.synonyms:
                 text += ". Synonyms: " + ", ".join(concept.synonyms[:5])
-            
+
             texts_to_embed.append(text)
             concept_ids.append(concept.concept_id)
 
@@ -131,7 +131,7 @@ class L2Tagger:
         words = text.split()
         if not words:
             return []
-        
+
         chunks = []
         for i in range(0, len(words), chunk_size - overlap):
             chunk = " ".join(words[i:i + chunk_size])
@@ -160,7 +160,7 @@ class L2Tagger:
         for i, chunk_emb in enumerate(chunk_embs):
             for concept_id, concept_emb in self.concept_embeddings.items():
                 sim = cosine_similarity(chunk_emb, concept_emb)
-                
+
                 concept = self.concept_lookup[concept_id]
 
                 # Determine threshold: per-concept override takes priority
@@ -178,7 +178,7 @@ class L2Tagger:
                     if concept_id not in evidence_dict or sim > evidence_dict[concept_id].confidence:
                         # Truncate snippet if too long
                         snippet = chunks[i][:500] + ("..." if len(chunks[i]) > 500 else "")
-                        
+
                         evidence_dict[concept_id] = TagEvidence(
                             concept_id=concept.concept_id,
                             label=concept.label,

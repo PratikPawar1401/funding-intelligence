@@ -1,9 +1,10 @@
 """Tests for the Grants.gov API client."""
 
-import pytest
-from unittest.mock import Mock, patch, mock_open
-import requests
 from pathlib import Path
+from unittest.mock import Mock, mock_open, patch
+
+import pytest
+import requests
 
 from foa_pipeline.grants_gov import GrantsGovClient
 
@@ -35,7 +36,7 @@ class TestGrantsGovClient:
         # Setup mock to fail twice with 500, then succeed
         error_response = Mock()
         error_response.status_code = 500
-        
+
         success_response = Mock()
         success_response.status_code = 200
         success_response.json.return_value = {"success": True}

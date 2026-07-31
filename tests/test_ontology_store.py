@@ -1,6 +1,7 @@
 """Tests for the ontology store module."""
 
 from pathlib import Path
+
 from foa_pipeline.ontology_store import OntologyStore
 
 

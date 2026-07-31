@@ -1,7 +1,8 @@
 """Tests for the synonym expander module."""
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from foa_pipeline.ontology_store import OntologyStore
 from foa_pipeline.synonym_expander import (
