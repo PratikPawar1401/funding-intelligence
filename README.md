@@ -38,14 +38,15 @@ Data Sources          Ingestion             Processing              Storage     
 | **Synonym Expansion** | WordNet-based expansion for improved recall in terminological matching | ✅ Complete |
 | **Layer 1 Tagging (spaCy)** | spaCy PhraseMatcher for exact/synonym terminological matching | ✅ Complete |
 | **Layer 2 Tagging (Embeddings)** | all-mpnet-base-v2 cosine similarity for semantic gap-filling | ✅ Complete |
-| **Layer 3 Tagging (LLM)** | Mistral-7B via Ollama for ambiguous/cross-domain disambiguation (stretch goal) | ⏳ Stretch Goal |
+| **Layer 3 Tagging (LLM)** | Mistral-7B via Ollama for ambiguous/cross-domain disambiguation | ✅ Complete (was a stretch goal) |
 | **Evaluation Framework** | Gold standard P/R/F1 evaluation with per-category error analysis | ✅ Complete |
 | **PDF Downloader** | Async aiohttp downloader for linked PDFs with auto-parsing | ✅ Complete |
-| **Vector Search** | FAISS IndexFlatIP for semantic similarity search across FOA embeddings | ⏳ Stretch Goal |
+| **Vector Search** | FAISS IndexFlatIP for semantic similarity search across FOA embeddings | ✅ Complete (was a stretch goal) |
+| **Grant Matching** | Researcher profile → ranked FOAs via hybrid cosine + tag-overlap score | ✅ Complete |
 | **FastAPI Backend** | REST API with CRUD, search, tag, and export endpoints | ✅ Complete |
-| **Web Frontend** | Search interface with faceted filtering — the "Simpler Grants.gov" | 🔨 In Progress |
+| **Web Frontend** | Search interface with faceted filtering — the "Simpler Grants.gov" | ✅ Complete |
 | **CSV/JSON Export** | Structured export with tag evidence provenance | ✅ Complete |
-| **Docker Deployment** | Full-stack containerisation with docker-compose | 🔨 In Progress |
+| **Docker Deployment** | Full-stack containerisation with docker-compose | ✅ Complete |
 
 ---
 
@@ -57,8 +58,8 @@ Data Sources          Ingestion             Processing              Storage     
 | **Phase 1** | Weeks 1–3 | Hybrid ingestion engine + PDF parser + normalisation | ✅ Done |
 | **Phase 2** | Weeks 4–6 | Schema enforcement + Layer 1 spaCy tagger + evaluation | ✅ Done |
 | **Phase 3** | Weeks 7–8 | Embedding layer (L2) + merge integration | ✅ Done |
-| **Phase 4** | Week 9 | Evaluation metrics (P/R/F1) + matching foundation | 🔨 Active |
-| **Phase 5** | Weeks 10–12 | Integration testing + Docker + API + frontend | ⏳ Upcoming |
+| **Phase 4** | Week 9 | Evaluation metrics (P/R/F1) + matching foundation | ✅ Done |
+| **Phase 5** | Weeks 10–12 | Integration testing + Docker + API + frontend | 🔨 Active |
 | **Phase 6** | Week 13 | Final report + documentation + handoff | ⏳ Upcoming |
 
 ---
@@ -108,8 +109,33 @@ make ingest-nsf-rss      # Poll NSF RSS feed
 make ingest-nsf-scrape   # Scrape pending NSF URLs via Playwright
 make normalise           # Normalise + validate + load into SQLite
 make setup-ontology      # Load ontology concepts into store
-make tag                 # Run semantic tagging (L1 + L2)
+make tag                 # Run semantic tagging (L1 + L2 + L3) and build the FAISS index
 make export-csv          # Export tagged records to CSV
+```
+
+### Match a Researcher Profile to Funding Opportunities
+
+Ranks FOAs for a researcher using the hybrid relevance score
+(`0.7 × cosine similarity + 0.3 × ontology tag overlap` — see [MATCHING.md](MATCHING.md)).
+Requires the FAISS index, so run `make tag` first.
+
+```bash
+PYTHONPATH=src python -m foa_pipeline.cli search \
+    --profile "computational social science, housing policy, rural health disparities" \
+    --k 10
+```
+
+Each result shows its cosine score, tag-overlap ratio, and the specific matched
+tags, so a ranking can be explained rather than taken on trust.
+
+### Evaluate Tagging Accuracy
+
+```bash
+# Against the 20-FOA hand-labelled gold set (the reported metric)
+PYTHONPATH=src python -m foa_pipeline.cli evaluate --gold
+
+# Against the larger LLM-generated silver set (threshold tuning only)
+PYTHONPATH=src python -m foa_pipeline.cli evaluate
 ```
 
 ### Run the API Server
@@ -173,6 +199,7 @@ funding-intelligence/
 │   │
 │   ├── # ── Search & Matching ──
 │   ├── vector_index.py         # FAISS vector index
+│   ├── grant_matcher.py        # Hybrid profile → FOA relevance ranking
 │   │
 │   ├── # ── Storage & Export ──
 │   ├── database.py             # SQLite DB with FTS5
@@ -203,7 +230,7 @@ funding-intelligence/
 │   ├── embeddings/             # Cached vectors
 │   └── evaluation/             # Hand-labelled test set
 │
-├── tests/                      # 92 tests, 85%+ coverage
+├── tests/                      # 185 tests
 ├── Documentation/              # Blueprint, proposal, reports
 ├── scraper_config/             # Per-domain scraping rules (YAML)
 ├── prompts/                    # LLM prompt templates
@@ -245,7 +272,7 @@ The tagging engine uses a three-layer cascade:
 
 1. **Layer 1 — Terminological (spaCy PhraseMatcher)**: Exact and synonym matching against ontology concepts. High precision, used as ground truth.
 2. **Layer 2 — Semantic (all-mpnet-base-v2)**: Sentence-transformer embeddings with cosine similarity scoring. Fills gaps missed by exact matching.
-3. **Layer 3 — LLM Disambiguation (Mistral-7B)**: Stretch goal. Handles ambiguous cross-domain tags using structured prompting via Ollama.
+3. **Layer 3 — LLM Disambiguation (Mistral-7B)**: Resolves ambiguous cross-domain tags via Ollama using JSON-mode structured output. Triggers only when Layer 2's top two candidates in a category are within 0.05 cosine similarity. Degrades gracefully to Layer 2 scores if Ollama is unavailable.
 
 Each tag carries provenance metadata:
 ```json
@@ -264,15 +291,35 @@ Each tag carries provenance metadata:
 
 | Category | Source | Concepts |
 |---|---|---|
+| Research Disciplines | NSF Directorates | 8 directorates |
 | Research Domains | UN Sustainable Development Goals | 17 goals |
 | Sponsor Themes | GREAT Act Mission Categories | 14 categories |
 | Research Methods | Custom vocabulary | 25 method concepts |
 | Target Populations | Custom vocabulary | 20 population concepts |
-| **Total** | | **76 concepts** |
+| **Total** | | **84 concepts** |
+
+`research_discipline` (NSF Directorates) was added after the original four
+categories and measurably outperforms UN SDGs for subject classification
+(F1 0.515 vs 0.261), since NSF solicitations are organised around directorates
+rather than policy goals. SDGs are retained for policy-level thematic framing.
 
 For full design rationale, category definitions, and tagging logic, see [ONTOLOGY.md](ONTOLOGY.md).
 
-For evaluation methodology and metrics, see [EVALUATION.md](EVALUATION.md).
+## Evaluation
+
+Current accuracy against the 20-FOA hand-labelled gold standard:
+
+| Metric | Score |
+|---|---|
+| Precision | 0.409 |
+| Recall | 0.642 |
+| **F1** | **0.500** |
+
+Per-category F1 ranges from 0.635 (sponsor themes) to 0.261 (UN SDGs). The gold
+standard is single-annotator; inter-annotator agreement has not been measured —
+see [ANNOTATION_CODEBOOK.md](ANNOTATION_CODEBOOK.md) for the protocol to close
+that gap. For full methodology, per-change results, and error analysis, see
+[EVALUATION.md](EVALUATION.md).
 
 ---
 
