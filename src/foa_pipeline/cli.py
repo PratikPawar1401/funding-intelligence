@@ -64,7 +64,13 @@ def _parse_args() -> argparse.Namespace:
     subparsers.add_parser("serve", help="Start the FastAPI server")
 
     # ── Evaluation ──
-    subparsers.add_parser("evaluate", help="Run evaluation on labelled set")
+    eval_p = subparsers.add_parser("evaluate", help="Run evaluation on labelled set")
+    eval_p.add_argument(
+        "--gold",
+        action="store_true",
+        help="Evaluate DB tags against the hand-labelled gold set "
+        "(default: re-tag in-memory against the LLM-generated silver set)",
+    )
     curate_p = subparsers.add_parser("curate-eval-set", help="Generate a stratified sample of FOAs for evaluation")
     curate_p.add_argument("--size", type=int, default=50, help="Number of FOAs to sample")
 
@@ -127,13 +133,13 @@ def main() -> None:
         _run_export_csv(config, args)
 
     elif args.command == "search":
-        logging.info("Search: requires FAISS index. Build it first with tag-all")
+        _run_search(config, args)
 
     elif args.command == "serve":
         _run_server(config)
 
     elif args.command == "evaluate":
-        logging.info("Evaluation: requires labelled set at %s", config.evaluation_dir)
+        _run_evaluate(args)
 
     elif args.command == "pdf-parse":
         _run_pdf_parse(args)
@@ -474,6 +480,61 @@ def _run_export_csv(config, args) -> None:
     output = args.output or str(config.normalised_output_dir / "foa_normalised.csv")
     export_foas_to_csv(records, output)
     logging.info("Exported %d FOAs to %s", len(records), output)
+
+
+def _run_search(config, args) -> None:
+    """Match a researcher profile against the indexed FOAs."""
+    from .database import Database
+    from .grant_matcher import match_profile_to_foas
+    from .ontology_store import OntologyStore
+    from .tagger_pipeline import TaggerPipeline
+    from .vector_index import VectorIndex
+
+    db = Database(config.app_db_path)
+    index = VectorIndex(db, config.embedding_model, config.embeddings_cache_dir)
+
+    if not index.load_index():
+        logging.error(
+            "FAISS index not found at %s. Run `tag-all` first to build it.",
+            config.embeddings_cache_dir / "foa_index.faiss",
+        )
+        db.close()
+        return
+
+    store = OntologyStore(config.app_db_path)
+    tagger = TaggerPipeline(config, store)
+    tagger.initialize()
+
+    results = match_profile_to_foas(args.profile, db, index, tagger=tagger, k=args.k)
+
+    if not results:
+        logging.info("No matching FOAs found for this profile.")
+    else:
+        logging.info("Top %d matches for: %r", len(results), args.profile[:80])
+        for rank, foa in enumerate(results, 1):
+            logging.info(
+                "%2d. [hybrid %.3f] %s (%s)",
+                rank,
+                foa["hybrid_score"],
+                (foa.get("title") or "")[:70],
+                foa.get("agency") or "n/a",
+            )
+            logging.info(
+                "      cosine=%.3f  tag_overlap=%.3f  matched: %s",
+                foa["cosine_score"],
+                foa["tag_overlap_ratio"],
+                ", ".join(foa["matched_tags"]) or "none",
+            )
+
+    store.close()
+    db.close()
+
+
+def _run_evaluate(args) -> None:
+    """Run the tagging evaluation against the gold or silver eval set."""
+    from .evaluate import run_evaluation
+
+    run_evaluation(use_gold=args.gold, use_db_tags=args.gold)
 
 
 def _run_server(config) -> None:
