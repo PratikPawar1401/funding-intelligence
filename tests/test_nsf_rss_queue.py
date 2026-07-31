@@ -1,6 +1,5 @@
 import types
 
-from foa_pipeline.config import Config
 from foa_pipeline.nsf_rss import poll_nsf_rss
 
 

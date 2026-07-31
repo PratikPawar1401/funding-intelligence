@@ -1,7 +1,14 @@
+import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List
+
+DEFAULT_COSINE_THRESHOLDS = (
+    '{"method": 0.40, "population": 0.35, "research_domain": 0.35, '
+    '"research_discipline": 0.35, "sponsor_theme": 0.30, "default": 0.35, '
+    '"method_25": 0.65}'
+)
 
 
 def _env(name: str, default: str) -> str:
@@ -86,7 +93,9 @@ def get_config() -> Config:
         # ── Tagging ──
         spacy_model=_env("SPACY_MODEL", "en_core_web_lg"),
         embedding_model=_env("EMBEDDING_MODEL", "sentence-transformers/all-mpnet-base-v2"),
-        cosine_thresholds=__import__('json').loads(_env("COSINE_THRESHOLDS", '{"method": 0.40, "population": 0.35, "research_domain": 0.35, "research_discipline": 0.35, "sponsor_theme": 0.30, "default": 0.35, "method_25": 0.65}')),
+        cosine_thresholds=json.loads(
+            _env("COSINE_THRESHOLDS", DEFAULT_COSINE_THRESHOLDS)
+        ),
         enable_layer3_llm=_env("ENABLE_LAYER3_LLM", "true").lower() == "true",
         ollama_base_url=_env("OLLAMA_BASE_URL", "http://localhost:11434"),
         ollama_model=_env("OLLAMA_MODEL", "mistral:7b-instruct"),

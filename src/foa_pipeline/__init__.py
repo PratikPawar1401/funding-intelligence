@@ -13,8 +13,9 @@ import os
 # deployment can still override it.
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 
-# Include vector_index here so it's tracked in __all__
-from .vector_index import VectorIndex  # noqa: E402
+# Re-exported for convenience; not "unused" despite appearances.
+# E402: must follow the OMP_NUM_THREADS setting above to be effective.
+from .vector_index import VectorIndex  # noqa: E402,F401
 
 __all__ = [
     "config",

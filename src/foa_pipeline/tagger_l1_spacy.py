@@ -8,7 +8,7 @@ Confidence is always 1.0 for matches at this layer.
 """
 
 import logging
-from typing import Dict, List, Optional, Set
+from typing import Dict, List, Set
 
 import spacy
 from spacy.matcher import PhraseMatcher
@@ -72,7 +72,11 @@ class L1Tagger:
             self.matcher.add(concept.concept_id, patterns)
             count += len(patterns)
 
-        logger.info("Built L1 PhraseMatcher with %d patterns across %d concepts", count, len(concepts))
+        logger.info(
+            "Built L1 PhraseMatcher with %d patterns across %d concepts",
+            count,
+            len(concepts),
+        )
 
     def tag_text(self, text: str) -> List[TagEvidence]:
         """

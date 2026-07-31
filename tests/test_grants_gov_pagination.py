@@ -1,6 +1,5 @@
 import dataclasses
 
-from foa_pipeline.config import Config
 from foa_pipeline.grants_gov import GrantsGovClient, poll_grants
 
 

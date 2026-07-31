@@ -10,13 +10,11 @@ Covers:
 """
 
 import sqlite3
-from pathlib import Path
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import AsyncMock, patch
 
 import pytest
 from bs4 import BeautifulSoup
 
-from foa_pipeline.config import Config
 from foa_pipeline.nsf_scraper import (
     _extract_dates_from_html,
     _extract_nsf_id,
@@ -186,8 +184,14 @@ class TestDrainNsfQueue:
     def setup_queue_db(self, test_config):
         # Setup an SQLite queue db
         conn = sqlite3.connect(str(test_config.sqlite_db_path))
-        conn.execute("CREATE TABLE pending_urls (url TEXT PRIMARY KEY, status TEXT, scraped_at TEXT)")
-        conn.execute("INSERT INTO pending_urls (url, status) VALUES ('https://nsf.gov/test_db', 'pending')")
+        conn.execute(
+            "CREATE TABLE pending_urls "
+            "(url TEXT PRIMARY KEY, status TEXT, scraped_at TEXT)"
+        )
+        conn.execute(
+            "INSERT INTO pending_urls (url, status) "
+            "VALUES ('https://nsf.gov/test_db', 'pending')"
+        )
         conn.commit()
         conn.close()
         return test_config

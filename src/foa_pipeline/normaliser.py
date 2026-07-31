@@ -156,8 +156,20 @@ def _normalise_grants_gov(raw: Dict[str, Any]) -> Dict[str, Any]:
     raw_payload_merged = raw.get("raw_payload", {})
     raw_payload_merged["extracted_pdf_ids"] = extracted_pdf_ids
 
-    posted = normalise_date(_coalesce(raw.get("posted_date"), synopsis.get("postingDateStr"), synopsis.get("postingDate")))
-    closed = normalise_date(_coalesce(raw.get("close_date"), synopsis.get("responseDateStr"), synopsis.get("responseDate")))
+    posted = normalise_date(
+        _coalesce(
+            raw.get("posted_date"),
+            synopsis.get("postingDateStr"),
+            synopsis.get("postingDate"),
+        )
+    )
+    closed = normalise_date(
+        _coalesce(
+            raw.get("close_date"),
+            synopsis.get("responseDateStr"),
+            synopsis.get("responseDate"),
+        )
+    )
 
     # Safely extract first funding instrument if present
     funding_inst_list = synopsis.get("fundingInstruments", [])

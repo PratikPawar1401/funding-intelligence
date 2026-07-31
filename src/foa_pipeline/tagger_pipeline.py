@@ -7,7 +7,7 @@ for each FOA record.
 """
 
 import logging
-from typing import Any, Dict, List, Set, Tuple
+from typing import Any, Dict, List, Set
 
 from .config import Config
 from .evidence_logger import TagEvidence
@@ -40,6 +40,9 @@ class TaggerPipeline:
         )
 
         self.is_initialized = False
+        # Set definitively in initialize(); declared here so the attribute
+        # always exists even if a caller inspects it beforehand.
+        self.l3_active = False
 
     def initialize(self) -> None:
         """Load models and build indices. Call before tag_record."""
@@ -50,12 +53,21 @@ class TaggerPipeline:
         self.l1.build_matcher(self.store)
         self.l2.build_embeddings(self.store)
 
-        if self.config.enable_layer3_llm:
+        # Tracked on the pipeline, not the config: Config is a frozen dataclass,
+        # so assigning to it here raised FrozenInstanceError and crashed the
+        # whole run on the one path this code exists to handle — L3 enabled but
+        # Ollama unreachable, which is the default for anyone who hasn't
+        # installed Ollama.
+        self.l3_active = bool(self.config.enable_layer3_llm)
+        if self.l3_active:
             if self.l3.is_available():
                 logger.info("L3 LLM Tagging enabled and available.")
             else:
-                logger.warning("L3 LLM Tagging enabled but Ollama is not available.")
-                self.config.enable_layer3_llm = False
+                logger.warning(
+                    "L3 LLM Tagging enabled but Ollama is not available; "
+                    "continuing with Layer 1 + Layer 2 only."
+                )
+                self.l3_active = False
 
         self.is_initialized = True
 
@@ -112,10 +124,15 @@ class TaggerPipeline:
         # Return serialized tags
         return [ev.to_tag_record() for ev in final_evidence]
 
-    def _merge_and_disambiguate(self, l1_evidence: List[TagEvidence], l2_evidence: List[TagEvidence], full_text: str) -> List[TagEvidence]:
+    def _merge_and_disambiguate(
+        self,
+        l1_evidence: List[TagEvidence],
+        l2_evidence: List[TagEvidence],
+        full_text: str,
+    ) -> List[TagEvidence]:
         """
         Merge L1 and L2 evidence with revised conflict resolution.
-        
+
         Rules:
         1. If L1 found a concept, keep L1's evidence (confidence 1.0).
         2. L2 can contribute NEW concepts (not already found by L1) — even in
@@ -146,13 +163,18 @@ class TaggerPipeline:
             ev_list.sort(key=lambda x: x.confidence, reverse=True)
 
             # Check for ambiguity (top 2 are very close)
-            if len(ev_list) >= 2 and self.config.enable_layer3_llm:
+            if len(ev_list) >= 2 and self.l3_active:
                 top_1 = ev_list[0]
                 top_2 = ev_list[1]
 
                 # If within 0.05 similarity, it's ambiguous
                 if (top_1.confidence - top_2.confidence) < 0.05:
-                    logger.debug("Ambiguity detected in %s: %s vs %s", cat, top_1.label, top_2.label)
+                    logger.debug(
+                        "Ambiguity detected in %s: %s vs %s",
+                        cat,
+                        top_1.label,
+                        top_2.label,
+                    )
                     resolved = self.l3.disambiguate(top_1, top_2, full_text)
                     merged_dict[resolved.concept_id] = resolved
 
@@ -197,7 +219,8 @@ class TaggerPipeline:
                             concept_id=parent_concept.concept_id,
                             label=parent_concept.label,
                             category=parent_concept.category,
-                            source_layer="layer_1_terminological",  # Propagated implies structural certainty
+                            # Propagated implies structural certainty
+                            source_layer="layer_1_terminological",
                             confidence=ev.confidence,               # Inherit confidence of child
                             context_snippet=f"[Propagated from {ev.label}]",
                             ontology_concept_id=parent_concept.concept_id,

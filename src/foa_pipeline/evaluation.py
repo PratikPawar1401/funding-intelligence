@@ -12,7 +12,7 @@ import json
 import logging
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, Set
 
 logger = logging.getLogger(__name__)
 

@@ -10,7 +10,6 @@ import argparse
 import json
 import logging
 from collections import defaultdict
-from pathlib import Path
 
 from foa_pipeline.config import get_config
 from foa_pipeline.database import Database
@@ -130,7 +129,10 @@ def run_evaluation(use_gold=False, use_db_tags=False):
             concept = store.get_concept_by_id(t)
             if concept:
                 cat_fp[concept.category] += 1
-                evidence = next((p for p in predicted_tags_raw if p.get("ontology_concept_id") == t), None)
+                evidence = next(
+                    (p for p in predicted_tags_raw if p.get("ontology_concept_id") == t),
+                    None,
+                )
                 false_positives_log.append({
                     "foa_id": foa["foa_id"],
                     "title": foa.get("title", ""),
@@ -188,7 +190,14 @@ def run_evaluation(use_gold=False, use_db_tags=False):
     summary = {
         "eval_set": eval_file.name,
         "total_foas_evaluated": len([f for f in foas if f.get("human_tags")]),
-        "global": {"precision": round(p, 3), "recall": round(r, 3), "f1": round(f1, 3), "tp": global_tp, "fp": global_fp, "fn": global_fn},
+        "global": {
+            "precision": round(p, 3),
+            "recall": round(r, 3),
+            "f1": round(f1, 3),
+            "tp": global_tp,
+            "fp": global_fp,
+            "fn": global_fn,
+        },
         "per_category": {},
     }
     for cat in all_cats:

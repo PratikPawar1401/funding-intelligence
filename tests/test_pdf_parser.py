@@ -14,9 +14,7 @@ import pytest
 
 from foa_pipeline.pdf_parser import (
     ParsedPDF,
-    ParsedPDFSection,
     _extract_sections,
-    _extract_tables_pdfplumber,
     extract_structured_fields,
     parse_foa_pdf,
 )

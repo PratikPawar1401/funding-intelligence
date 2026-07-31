@@ -11,7 +11,7 @@ Includes precomputation utilities to cache ontology embeddings.
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 import numpy as np
 
@@ -175,7 +175,8 @@ class L2Tagger:
 
                 if sim >= threshold:
                     # Keep the chunk that gave the highest similarity for this concept
-                    if concept_id not in evidence_dict or sim > evidence_dict[concept_id].confidence:
+                    existing = evidence_dict.get(concept_id)
+                    if existing is None or sim > existing.confidence:
                         # Truncate snippet if too long
                         snippet = chunks[i][:500] + ("..." if len(chunks[i]) > 500 else "")
 

@@ -1,16 +1,15 @@
 """
 PDF Downloader Module.
 
-Asynchronously downloads PDF files found in FOA records, parses them 
-using the layout-aware parser, and appends the extracted text to 
+Asynchronously downloads PDF files found in FOA records, parses them
+using the layout-aware parser, and appends the extracted text to
 the program description in the database.
 """
 
 import asyncio
 import logging
-import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 import aiohttp
 
@@ -46,7 +45,12 @@ async def download_pdf(session: aiohttp.ClientSession, url: str, output_path: Pa
         return False
 
 
-async def process_foa_pdfs(foa: Dict[str, Any], config: Config, db: Database, session: aiohttp.ClientSession) -> bool:
+async def process_foa_pdfs(
+    foa: Dict[str, Any],
+    config: Config,
+    db: Database,
+    session: aiohttp.ClientSession,
+) -> bool:
     """Download and parse all PDFs for a single FOA."""
     foa_id = foa["foa_id"]
     pdf_links = foa["pdf_links"]
@@ -77,7 +81,9 @@ async def process_foa_pdfs(foa: Dict[str, Any], config: Config, db: Database, se
                 logger.info(f"Successfully parsed {filename} ({parsed_pdf.parse_method})")
 
                 # We append the markdown text
-                appended_text_blocks.append(f"## PDF Attachment {i+1}\n\n{parsed_pdf.full_text_markdown}")
+                appended_text_blocks.append(
+                    f"## PDF Attachment {i+1}\n\n{parsed_pdf.full_text_markdown}"
+                )
 
             except Exception as exc:
                 logger.error(f"Failed to parse PDF {filename}: {exc}")

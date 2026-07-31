@@ -13,7 +13,6 @@ The store is loaded once at startup and queried by the tagging pipeline.
 """
 
 import csv
-import json
 import logging
 import sqlite3
 from dataclasses import dataclass, field

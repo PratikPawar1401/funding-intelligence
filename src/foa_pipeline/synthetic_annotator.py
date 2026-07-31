@@ -5,13 +5,12 @@ Instead of one mega-prompt with all 76 concepts, we run 4 focused prompts
 per FOA (one per ontology category). Each prompt contains only 14-25 concepts,
 making it far easier for a 7B model to return valid JSON.
 
-Also includes the enriched text (program_description + additional_info) for 
+Also includes the enriched text (program_description + additional_info) for
 better coverage.
 """
 
 import json
 import logging
-from pathlib import Path
 
 import requests
 
@@ -53,8 +52,9 @@ CATEGORY_PROMPTS = {
         "JSON:"
     ),
     "population": (
-        "You are a demographics and equity expert. Read this grant program description and identify "
-        "which target populations are explicitly mentioned as focus groups, beneficiaries, or required "
+        "You are a demographics and equity expert. Read this grant program "
+        "description and identify which target populations are explicitly "
+        "mentioned as focus groups, beneficiaries, or required "
         "study subjects. A population applies ONLY if the grant explicitly targets that group.\n\n"
         "Available Populations:\n{concepts}\n\n"
         "Grant Description:\n{text}\n\n"
@@ -67,7 +67,10 @@ CATEGORY_PROMPTS = {
 
 def get_concepts_by_category(db: Database):
     """Get all concepts grouped by category."""
-    query = "SELECT concept_id, label, category FROM ontology_concepts ORDER BY category, concept_id"
+    query = (
+        "SELECT concept_id, label, category FROM ontology_concepts "
+        "ORDER BY category, concept_id"
+    )
     rows = db.conn.execute(query).fetchall()
 
     by_cat = {}
@@ -196,7 +199,8 @@ def annotate_foas():
             # rather than let it pollute the silver-standard set.
             if len(valid_ids) >= 4 and len(validated) > 0.5 * len(valid_ids):
                 logging.warning(
-                    "  [%s] discarded %d/%d concepts (looks like a full-list echo, not a real selection)",
+                    "  [%s] discarded %d/%d concepts "
+                    "(looks like a full-list echo, not a real selection)",
                     cat, len(validated), len(valid_ids),
                 )
                 continue
@@ -219,7 +223,12 @@ def annotate_foas():
     # Print summary
     labelled = sum(1 for f in foas if f.get("human_tags"))
     total_tags = sum(len(f.get("human_tags", [])) for f in foas)
-    logging.info("Annotation complete: %d/%d FOAs labelled, %d total tags", labelled, len(foas), total_tags)
+    logging.info(
+        "Annotation complete: %d/%d FOAs labelled, %d total tags",
+        labelled,
+        len(foas),
+        total_tags,
+    )
 
 
 if __name__ == "__main__":

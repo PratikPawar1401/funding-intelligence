@@ -17,7 +17,6 @@ import asyncio
 import logging
 import re
 import sqlite3
-import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -109,13 +108,19 @@ def _parse_html_content(url: str, html: str) -> Dict[str, Any]:
 
 
 async def _run_playwright_scraper(urls: List[str], max_concurrent: int) -> Dict[str, Any]:
-    """Execute the async scraper using raw Playwright (bypassing Crawlee due to Python 3.14 Pydantic issues)."""
+    """Execute the async scraper using raw Playwright.
+
+    Bypasses Crawlee due to Python 3.14 Pydantic incompatibilities.
+    """
     global async_playwright
     if async_playwright is None:
         try:
             from playwright.async_api import async_playwright
         except ImportError:
-            logger.error("playwright not installed. Run: pip install playwright && playwright install")
+            logger.error(
+                "playwright not installed. "
+                "Run: pip install playwright && playwright install"
+            )
             return {}
 
     results = {}

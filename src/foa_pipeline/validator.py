@@ -14,7 +14,6 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-import jsonschema
 from jsonschema import Draft7Validator, FormatChecker
 
 logger = logging.getLogger(__name__)

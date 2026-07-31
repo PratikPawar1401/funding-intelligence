@@ -4,8 +4,7 @@ Uses a mock L2 tagger to avoid downloading the full sentence-transformers model
 in unit tests. The L1 tagger uses the real spaCy model for accuracy.
 """
 
-from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
@@ -24,7 +23,8 @@ def ontology_store(tmp_path_factory):
     csv_path.write_text(
         "concept_id,label,category,parent_id,description\n"
         "sdg_13,Climate Action,research_domain,,Take urgent action to combat climate change\n"
-        "sdg_03,Good Health and Well-being,research_domain,,Ensure healthy lives and promote well-being\n"
+        "sdg_03,Good Health and Well-being,research_domain,,"
+        "Ensure healthy lives and promote well-being\n"
         "sdg_01,No Poverty,research_domain,,End poverty in all its forms everywhere\n"
         "great_02,Health,sponsor_theme,,Biomedical and public health research\n"
         "meth_ml,Machine Learning,method,,Subset of AI for learning from data\n"
@@ -77,7 +77,7 @@ def pipeline_config(tmp_path_factory):
 @pytest.fixture(scope="module")
 def pipeline(pipeline_config, ontology_store):
     """Build a TaggerPipeline with L2 mocked out.
-    
+
     We mock L2 so unit tests don't download the 420MB model.
     L1 uses the real spaCy model for accuracy.
     """

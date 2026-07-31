@@ -269,9 +269,9 @@ class Database:
     def get_foas_with_unprocessed_pdfs(self) -> List[Dict[str, Any]]:
         """Find FOAs that have PDF links in their raw payload but haven't been parsed yet."""
         rows = self.conn.execute(
-            """SELECT foa_id, raw_payload, program_description 
-               FROM foa_records 
-               WHERE raw_payload IS NOT NULL 
+            """SELECT foa_id, raw_payload, program_description
+               FROM foa_records
+               WHERE raw_payload IS NOT NULL
                AND raw_payload NOT LIKE '%"pdf_processed": true%'"""
         ).fetchall()
 
@@ -292,13 +292,20 @@ class Database:
                     })
             except Exception as e:
                 import logging
-                logging.getLogger(__name__).warning("Failed to decode payload for %s: %s", row["foa_id"], e)
+                logging.getLogger(__name__).warning(
+                    "Failed to decode payload for %s: %s", row["foa_id"], e
+                )
                 continue
         return foas
 
-    def append_to_program_description(self, foa_id: str, appended_text: str, mark_pdf_processed: bool = True) -> None:
+    def append_to_program_description(
+        self, foa_id: str, appended_text: str, mark_pdf_processed: bool = True
+    ) -> None:
         """Append text to an FOA's program description and optionally mark PDFs as processed."""
-        row = self.conn.execute("SELECT program_description, raw_payload FROM foa_records WHERE foa_id = ?", (foa_id,)).fetchone()
+        row = self.conn.execute(
+            "SELECT program_description, raw_payload FROM foa_records WHERE foa_id = ?",
+            (foa_id,),
+        ).fetchone()
         if not row:
             return
 
@@ -315,7 +322,7 @@ class Database:
         new_payload = json.dumps(payload) if payload else row["raw_payload"]
 
         self.conn.execute(
-            """UPDATE foa_records 
+            """UPDATE foa_records
                SET program_description = ?, raw_payload = ?, last_updated = CURRENT_TIMESTAMP
                WHERE foa_id = ?""",
             (new_desc, new_payload, foa_id)

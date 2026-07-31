@@ -8,7 +8,7 @@ Triggers when two concepts in the same category have very close similarity score
 import json
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
+from typing import Optional
 
 import requests
 
@@ -103,7 +103,10 @@ class L3Tagger:
                 if isinstance(parsed, dict):
                     winner_letter = str(parsed.get("winner", "")).strip().upper()
             except json.JSONDecodeError:
-                logger.debug("L3 response was not valid JSON, falling back to substring parsing: %r", result_text)
+                logger.debug(
+                    "L3 response was not valid JSON, falling back to substring parsing: %r",
+                    result_text,
+                )
 
             if winner_letter not in ("A", "B"):
                 # Fallback: substring heuristic, for models/responses that
@@ -121,7 +124,11 @@ class L3Tagger:
                 loser = evidence_a
             else:
                 # Fallback to score if parsing failed entirely
-                winner = evidence_a if evidence_a.confidence >= evidence_b.confidence else evidence_b
+                winner = (
+                    evidence_a
+                    if evidence_a.confidence >= evidence_b.confidence
+                    else evidence_b
+                )
                 loser = evidence_b if winner == evidence_a else evidence_a
 
             # Return a new evidence object representing the L3 decision

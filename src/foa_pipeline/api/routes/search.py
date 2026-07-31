@@ -3,7 +3,7 @@
 import math
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from ...database import Database

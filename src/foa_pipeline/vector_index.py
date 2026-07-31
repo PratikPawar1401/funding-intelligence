@@ -7,9 +7,8 @@ in the SQLite database.
 """
 
 import logging
-import sqlite3
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 import numpy as np
 
@@ -165,10 +164,10 @@ class VectorIndex:
         query_emb = self.model.encode([query], convert_to_numpy=True, normalize_embeddings=True)
 
         # Search
-        scores, I = self.index.search(query_emb, k)
+        scores, faiss_ids = self.index.search(query_emb, k)
 
         results = []
-        for score, faiss_id in zip(scores[0], I[0]):
+        for score, faiss_id in zip(scores[0], faiss_ids[0]):
             if faiss_id == -1 or score < threshold:
                 continue
 

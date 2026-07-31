@@ -59,7 +59,10 @@ def export_foas_to_csv(
         tag_labels = "|".join(t.get("label", "") for t in tags)
         tag_evidence = "|".join(
             f"[{t.get('source_layer', '')}:{t.get('confidence', 0):.2f}] "
-            + (t.get('context_snippet', '') or '').replace('\n', ' ').replace('\r', '').strip()[:200]
+            + (t.get('context_snippet', '') or '')
+            .replace('\n', ' ')
+            .replace('\r', '')
+            .strip()[:200]
             for t in tags
         )
 

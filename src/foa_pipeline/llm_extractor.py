@@ -7,7 +7,7 @@ Specifically built to extract complex funding budget tiers from PDF text.
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import requests
 
@@ -26,7 +26,8 @@ class BudgetTierExtractor:
         self.model = model
 
         self.system_prompt = (
-            "You are an expert grant data extractor. Extract funding budget tiers from the provided text.\n"
+            "You are an expert grant data extractor. Extract funding budget tiers "
+            "from the provided text.\n"
             "Output strictly valid JSON as an array of objects.\n"
             "Each object must have these keys exactly:\n"
             "- category: string (e.g. 'I', 'II', 'Seed', etc.)\n"
@@ -34,7 +35,8 @@ class BudgetTierExtractor:
             "- max_award: number (maximum dollar amount, 0 if not specified)\n"
             "- duration_years: number (duration in years, 0 if not specified)\n\n"
             "If no budget tiers are mentioned, return an empty array [].\n"
-            "Do NOT wrap the output in markdown code blocks, do not include explanations. Only return raw JSON."
+            "Do NOT wrap the output in markdown code blocks, do not include "
+            "explanations. Only return raw JSON."
         )
 
     def is_available(self) -> bool:

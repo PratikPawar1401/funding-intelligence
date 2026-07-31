@@ -1,6 +1,5 @@
 """Tests for the Layer 1 spaCy PhraseMatcher tagger."""
 
-from pathlib import Path
 
 import pytest
 
@@ -13,7 +12,7 @@ from foa_pipeline.tagger_l1_spacy import L1Tagger
 @pytest.fixture(scope="module")
 def ontology_with_synonyms(tmp_path_factory):
     """Build a small ontology store with concepts and synonyms.
-    
+
     Module-scoped because spaCy model loading is expensive.
     """
     tmp = tmp_path_factory.mktemp("ontology")
@@ -21,7 +20,8 @@ def ontology_with_synonyms(tmp_path_factory):
     csv_path.write_text(
         "concept_id,label,category,parent_id,description\n"
         "sdg_13,Climate Action,research_domain,,Take urgent action to combat climate change\n"
-        "sdg_03,Good Health and Well-being,research_domain,,Ensure healthy lives and promote well-being\n"
+        "sdg_03,Good Health and Well-being,research_domain,,"
+        "Ensure healthy lives and promote well-being\n"
         "sdg_01,No Poverty,research_domain,,End poverty in all its forms everywhere\n"
         "great_02,Health,sponsor_theme,,Biomedical and public health research\n"
         "meth_ml,Machine Learning,method,,Subset of AI for learning from data\n"
@@ -97,7 +97,7 @@ class TestL1TaggerMatching:
 
     def test_synonym_matching(self, l1_tagger):
         """Synonyms should trigger matches.
-        
+
         Note: 'ML' (2 chars) is filtered by the synonym expander's >2 char rule.
         We use 'deep learning' which maps to machine learning via ABBREVIATIONS,
         or 'global warming' which maps to Climate Action.

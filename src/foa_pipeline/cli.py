@@ -1,12 +1,17 @@
 import argparse
 import json
 import logging
-import sys
 
 from .config import get_config
 from .grants_gov import poll_grants
 from .logging_setup import setup_logging
 from .nsf_rss import poll_nsf_rss
+
+# Boilerplate PDFs that are generic and don't describe a specific FOA
+SKIP_URLS = {
+    "https://resources.research.gov/common/attachment/Common/"
+    "Grants_govProposal_Processing_in_Research.pdf",
+}
 
 
 def _parse_args() -> argparse.Namespace:
@@ -30,14 +35,23 @@ def _parse_args() -> argparse.Namespace:
     # ── Normalisation ──
     subparsers.add_parser("normalise", help="Normalise raw records to canonical schema")
     subparsers.add_parser("enrich-foas", help="Download and parse FOA PDFs for Grants.gov and NSF")
-    subparsers.add_parser("extract-budget", help="Extract complex budget tiers from FOA text using LLM")
+    subparsers.add_parser(
+        "extract-budget", help="Extract complex budget tiers from FOA text using LLM"
+    )
 
     # ── Ontology ──
     subparsers.add_parser(
         "setup-ontology", help="Load ontology CSVs and expand synonyms"
     )
-    mine_syn_p = subparsers.add_parser("mine-synonyms", help="Mine high-confidence L2 tags for WordNet synonyms")
-    mine_syn_p.add_argument("--threshold", type=float, default=0.88, help="Minimum L2 confidence to consider for mining")
+    mine_syn_p = subparsers.add_parser(
+        "mine-synonyms", help="Mine high-confidence L2 tags for WordNet synonyms"
+    )
+    mine_syn_p.add_argument(
+        "--threshold",
+        type=float,
+        default=0.88,
+        help="Minimum L2 confidence to consider for mining",
+    )
 
     # ── Tagging ──
     tag_all_p = subparsers.add_parser("tag-all", help="Run tagging pipeline on all FOAs")
@@ -71,14 +85,18 @@ def _parse_args() -> argparse.Namespace:
         help="Evaluate DB tags against the hand-labelled gold set "
         "(default: re-tag in-memory against the LLM-generated silver set)",
     )
-    curate_p = subparsers.add_parser("curate-eval-set", help="Generate a stratified sample of FOAs for evaluation")
+    curate_p = subparsers.add_parser(
+        "curate-eval-set", help="Generate a stratified sample of FOAs for evaluation"
+    )
     curate_p.add_argument("--size", type=int, default=50, help="Number of FOAs to sample")
 
     # ── PDF Parse ──
     sub_pdf = subparsers.add_parser("pdf-parse", help="Parse a FOA PDF")
     sub_pdf.add_argument("pdf_path", help="Path to the PDF file")
 
-    sub_dl = subparsers.add_parser("download-pdfs", help="Asynchronously download and parse pending PDFs")
+    sub_dl = subparsers.add_parser(
+        "download-pdfs", help="Asynchronously download and parse pending PDFs"
+    )
     sub_dl.add_argument("--dry-run", action="store_true", help="Do not actually download")
 
     return parser.parse_args()
@@ -209,11 +227,6 @@ def _run_enrich_foas(config) -> None:
     from .grants_gov import GrantsGovClient
     from .pdf_parser import extract_structured_fields, parse_foa_pdf
 
-    # Boilerplate PDFs that are generic and don't describe a specific FOA
-    SKIP_URLS = {
-        "https://resources.research.gov/common/attachment/Common/Grants_govProposal_Processing_in_Research.pdf",
-    }
-
     db = Database(config.app_db_path)
     client = GrantsGovClient(config)
     pdf_dir = Path("data/pdfs")
@@ -249,8 +262,14 @@ def _run_enrich_foas(config) -> None:
             extracted_pdf_ids = raw_payload.get("extracted_pdf_ids", [])
             if not extracted_pdf_ids:
                 continue
-            logging.info("[%d/%d] Enriching Grants.gov FOA %s (%s) with %d attachments",
-                         idx + 1, total, foa["foa_id"], (foa.get("title") or "")[:50], len(extracted_pdf_ids))
+            logging.info(
+                "[%d/%d] Enriching Grants.gov FOA %s (%s) with %d attachments",
+                idx + 1,
+                total,
+                foa["foa_id"],
+                (foa.get("title") or "")[:50],
+                len(extracted_pdf_ids),
+            )
 
             for att_id in extracted_pdf_ids:
                 out_path = pdf_dir / "grants_gov" / f"{foa['foa_id']}_{att_id}.pdf"
@@ -280,8 +299,14 @@ def _run_enrich_foas(config) -> None:
             pdf_links = [link for link in pdf_links if link not in SKIP_URLS]
             if not pdf_links:
                 continue
-            logging.info("[%d/%d] Enriching NSF FOA %s (%s) with %d PDF links",
-                         idx + 1, total, foa["foa_id"], (foa.get("title") or "")[:50], len(pdf_links))
+            logging.info(
+                "[%d/%d] Enriching NSF FOA %s (%s) with %d PDF links",
+                idx + 1,
+                total,
+                foa["foa_id"],
+                (foa.get("title") or "")[:50],
+                len(pdf_links),
+            )
 
             for i, link in enumerate(pdf_links):
                 out_path = pdf_dir / "nsf" / f"{foa['foa_id']}_{i}.pdf"
@@ -312,7 +337,9 @@ def _run_enrich_foas(config) -> None:
         if all_pdf_text:
             combined_text = "\n\n=== PDF ATTACHMENT ===\n\n".join(all_pdf_text)
             existing_info = foa.get("additional_info") or ""
-            foa["additional_info"] = existing_info + "\n\n=== PDF ATTACHMENTS ===\n\n" + combined_text
+            foa["additional_info"] = (
+                existing_info + "\n\n=== PDF ATTACHMENTS ===\n\n" + combined_text
+            )
 
             # Merge extracted structured fields (don't overwrite if already exists and is non-null)
             if "award_floor" in structured_fields and not foa.get("award_floor"):
@@ -327,7 +354,12 @@ def _run_enrich_foas(config) -> None:
         db.upsert_foa(foa)
         enriched_count += 1
 
-    logging.info("PDF Enrichment complete: %d enriched, %d skipped (already done), %d errors", enriched_count, skipped_count, error_count)
+    logging.info(
+        "PDF Enrichment complete: %d enriched, %d skipped (already done), %d errors",
+        enriched_count,
+        skipped_count,
+        error_count,
+    )
 
 
 
@@ -339,7 +371,10 @@ def _run_extract_budget(config) -> None:
     extractor = BudgetTierExtractor(base_url=config.ollama_base_url, model=config.ollama_model)
 
     if not extractor.is_available():
-        logging.warning("Ollama is not available. Ensure it is running and model %s is pulled.", config.ollama_model)
+        logging.warning(
+            "Ollama is not available. Ensure it is running and model %s is pulled.",
+            config.ollama_model,
+        )
         logging.warning("Run: ollama serve && ollama pull %s", config.ollama_model)
         return
 
@@ -593,7 +628,9 @@ def _run_mine_synonyms(config, args) -> None:
     out_path = config.ontology_dir / "suggested_synonyms.csv"
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["concept_id", "label", "category", "confidence", "suggested_synonym_source"])
+        writer.writerow(
+            ["concept_id", "label", "category", "confidence", "suggested_synonym_source"]
+        )
         for row in results:
             writer.writerow([
                 row["concept_id"],
@@ -620,13 +657,17 @@ def _run_curate_eval_set(config, args) -> None:
 
     # Sample from Grants.gov
     gg_foas = db.conn.execute(
-        "SELECT foa_id, title, program_description, eligibility_description, additional_info, source FROM foa_records WHERE source = 'grants_gov' ORDER BY RANDOM() LIMIT ?",
+        "SELECT foa_id, title, program_description, eligibility_description, "
+        "additional_info, source FROM foa_records WHERE source = 'grants_gov' "
+        "ORDER BY RANDOM() LIMIT ?",
         (half_size,)
     ).fetchall()
 
     # Sample from NSF
     nsf_foas = db.conn.execute(
-        "SELECT foa_id, title, program_description, eligibility_description, additional_info, source FROM foa_records WHERE source = 'nsf_scraper' ORDER BY RANDOM() LIMIT ?",
+        "SELECT foa_id, title, program_description, eligibility_description, "
+        "additional_info, source FROM foa_records WHERE source = 'nsf_scraper' "
+        "ORDER BY RANDOM() LIMIT ?",
         (args.size - len(gg_foas),)
     ).fetchall()
 

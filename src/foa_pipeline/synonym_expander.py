@@ -72,6 +72,40 @@ ABBREVIATIONS: Dict[str, List[str]] = {
 }
 
 
+# Noisy/ambiguous terms confirmed as false-positive triggers. These are mostly
+# WordNet lemmas that match incidental text in FOAs. Module level so it is built
+# once rather than rebuilt for every concept during expansion.
+NOISY_SYNONYMS = {
+    # Generic words that appear everywhere in grant text
+    "travel", "transfer", "ecosystem", "environment", "system",
+    "space", "model", "area", "field", "domain", "study",
+    "action", "target", "work", "life", "community",
+    # WordNet noise for Transportation (great_08)
+    "transport", "conveyance", "deportation", "exile",
+    "expatriation", "fare", "shipping", "transferral", "transit",
+    # WordNet noise for Energy (great_04)
+    "push", "vim", "vigor", "vigour", "vitality",
+    "zip", "get-up-and-go", "free energy",
+    # WordNet noise for Space (great_03)
+    "blank", "blank space", "distance", "place", "quad",
+    # WordNet noise for Students (pop_12)
+    "bookman", "educatee", "scholarly person", "scholar", "pupil",
+    # WordNet noise for Veterans (pop_06)
+    "old hand", "old stager", "old-timer", "oldtimer",
+    "stager", "warhorse",
+    # WordNet noise for other concepts
+    "descriptive anthropology",  # Ethnography synonym too broad
+    "factory farm",  # Agriculture synonym
+    "clinical test",  # Too broad for Clinical Trial
+    # Confirmed false-positive triggers (removed from ABBREVIATIONS above;
+    # blacklisted too so WordNet can't reintroduce them)
+    "equity",  # Financial/ownership homonym of DEI "equity"
+    "learning",  # Matches inside "machine learning"/"deep learning"
+    "statistics",  # Matches org names like "...Center for ... Statistics"
+    "job creation",
+}
+
+
 def expand_synonyms_for_store(store: OntologyStore) -> Dict[str, int]:
     """
     Generate and load synonyms for all ontology concepts.
@@ -124,38 +158,8 @@ def expand_synonyms_for_store(store: OntologyStore) -> Dict[str, int]:
         synonyms.discard("")
 
         # ── Synonym Governance Filters ──
-        # Filter 1: Noisy/ambiguous terms confirmed as false-positive triggers.
-        # These are WordNet lemmas that match incidental text in FOAs.
-        NOISY_SYNONYMS = {
-            # Generic words that appear everywhere in grant text
-            "travel", "transfer", "ecosystem", "environment", "system",
-            "space", "model", "area", "field", "domain", "study",
-            "action", "target", "work", "life", "community",
-            # WordNet noise for Transportation (great_08)
-            "transport", "conveyance", "deportation", "exile",
-            "expatriation", "fare", "shipping", "transferral", "transit",
-            # WordNet noise for Energy (great_04)
-            "push", "vim", "vigor", "vigour", "vitality",
-            "zip", "get-up-and-go", "free energy",
-            # WordNet noise for Space (great_03)
-            "blank", "blank space", "distance", "place", "quad",
-            # WordNet noise for Students (pop_12)
-            "bookman", "educatee", "scholarly person", "scholar", "pupil",
-            # WordNet noise for Veterans (pop_06)
-            "old hand", "old stager", "old-timer", "oldtimer",
-            "stager", "warhorse",
-            # WordNet noise for other concepts
-            "descriptive anthropology",  # Ethnography synonym too broad
-            "factory farm",  # Agriculture synonym
-            "clinical test",  # Too broad for Clinical Trial
-            # Confirmed false-positive triggers (removed from ABBREVIATIONS
-            # above; blacklisted too so WordNet can't reintroduce them)
-            "equity",  # Financial/ownership homonym of DEI "equity"
-            "learning",  # Matches inside "machine learning"/"deep learning"
-            "statistics",  # Matches org names like "...Center for ... Statistics"
-            "job creation",
-        }
-
+        # Filter 1: Noisy/ambiguous terms confirmed as false-positive triggers
+        #           (NOISY_SYNONYMS, module level)
         # Filter 2: Minimum length — short synonyms cause too many false positives
         # Filter 3: Not in noisy set
         synonyms = {

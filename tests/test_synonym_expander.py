@@ -1,6 +1,5 @@
 """Tests for the synonym expander module."""
 
-from pathlib import Path
 
 import pytest
 
@@ -47,7 +46,7 @@ class TestExpandSynonyms:
 
     def test_abbreviation_matching(self, ontology_store):
         """Abbreviations from the ABBREVIATIONS dict should be added.
-        
+
         Note: The expander filters synonyms <= 2 chars, so 'ai' and 'ml'
         are filtered out. We test with 'climate action' which maps to
         longer abbreviations like 'climate change', 'global warming'.

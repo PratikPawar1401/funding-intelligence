@@ -1,6 +1,5 @@
 """Shared test fixtures for the ISSR Funding Intelligence pipeline."""
 
-import json
 import sqlite3
 from pathlib import Path
 
@@ -126,10 +125,19 @@ def sample_raw_grants_gov():
                     "synopsis": {
                         "agencyName": "Department of Health and Human Services",
                         "agencyCode": "HHS",
-                        "synopsisDesc": "This program supports research on health disparities in urban communities.",
+                        "synopsisDesc": (
+                            "This program supports research on health disparities "
+                            "in urban communities."
+                        ),
                         "applicantEligibilityDesc": "Universities, Non-profits, State governments",
                         "applicantTypes": [
-                            {"id": "25", "description": "Others (see text field entitled \"Additional Information on Eligibility\" for clarification)"}
+                            {
+                                "id": "25",
+                                "description": (
+                                    "Others (see text field entitled \"Additional "
+                                    "Information on Eligibility\" for clarification)"
+                                ),
+                            }
                         ],
                         "awardFloor": "50000",
                         "awardCeiling": "500000",
