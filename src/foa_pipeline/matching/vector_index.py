@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 import numpy as np
 
-from .database import Database
+from ..storage.database import Database
 
 logger = logging.getLogger(__name__)
 

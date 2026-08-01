@@ -24,9 +24,9 @@ from typing import Any, Dict, List, Optional
 import yaml
 from bs4 import BeautifulSoup
 
-from .config import Config
-from .schema import build_raw_record
-from .storage import ensure_dir, write_jsonl
+from ..config import Config
+from ..normalisation.schema import build_raw_record
+from ..storage.jsonl import ensure_dir, write_jsonl
 
 # Lazy import playwright to avoid global startup overhead if not used
 async_playwright = None

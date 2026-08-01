@@ -37,16 +37,16 @@
   {
     "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
     "title": "SBIR/STTR: Developing Deep Technologies",
-    "concept": "great_05",
-    "label": "General Science",
-    "category": "sponsor_theme"
+    "concept": "pop_19",
+    "label": "Small Business Owners",
+    "category": "population"
   },
   {
     "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
     "title": "SBIR/STTR: Developing Deep Technologies",
-    "concept": "pop_19",
-    "label": "Small Business Owners",
-    "category": "population"
+    "concept": "great_05",
+    "label": "General Science",
+    "category": "sponsor_theme"
   },
   {
     "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
@@ -72,20 +72,13 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
-    "concept": "great_05",
-    "label": "General Science",
-    "category": "sponsor_theme"
-  },
-  {
-    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
-    "title": "Sociology",
     "concept": "nsf_sbe",
     "label": "Social Behavioral and Economic Sciences",
     "category": "research_discipline"
   },
   {
-    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
-    "title": "Centers of Research Excellence in Science and Technology (CREST)",
+    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
+    "title": "Sociology",
     "concept": "great_05",
     "label": "General Science",
     "category": "sponsor_theme"
@@ -107,6 +100,13 @@
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
+    "concept": "pop_08",
+    "label": "Racial and Ethnic Minorities",
+    "category": "population"
+  },
+  {
+    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
+    "title": "Centers of Research Excellence in Science and Technology (CREST)",
     "concept": "pop_12",
     "label": "Students",
     "category": "population"
@@ -114,6 +114,13 @@
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
+    "concept": "great_05",
+    "label": "General Science",
+    "category": "sponsor_theme"
+  },
+  {
+    "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
+    "title": "NSF INCLUDES Initiative",
     "concept": "pop_08",
     "label": "Racial and Ethnic Minorities",
     "category": "population"
@@ -124,13 +131,6 @@
     "concept": "nsf_edu",
     "label": "STEM Education",
     "category": "research_discipline"
-  },
-  {
-    "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
-    "title": "NSF INCLUDES Initiative",
-    "concept": "pop_08",
-    "label": "Racial and Ethnic Minorities",
-    "category": "population"
   },
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
@@ -158,6 +158,13 @@
     "title": "Robert Noyce Teacher Scholarship Program",
     "concept": "pop_12",
     "label": "Students",
+    "category": "population"
+  },
+  {
+    "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
+    "title": "Unleashing Tribal Energy Development",
+    "concept": "pop_07",
+    "label": "Indigenous Peoples",
     "category": "population"
   },
   {
@@ -170,13 +177,6 @@
   {
     "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
     "title": "Unleashing Tribal Energy Development",
-    "concept": "pop_07",
-    "label": "Indigenous Peoples",
-    "category": "population"
-  },
-  {
-    "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
-    "title": "Unleashing Tribal Energy Development",
     "concept": "sdg_07",
     "label": "Affordable and Clean Energy",
     "category": "research_domain"
@@ -184,16 +184,16 @@
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
     "title": "Engineering for Civil Infrastructure",
-    "concept": "great_05",
-    "label": "General Science",
-    "category": "sponsor_theme"
+    "concept": "nsf_eng",
+    "label": "Engineering",
+    "category": "research_discipline"
   },
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
     "title": "Engineering for Civil Infrastructure",
-    "concept": "nsf_eng",
-    "label": "Engineering",
-    "category": "research_discipline"
+    "concept": "great_05",
+    "label": "General Science",
+    "category": "sponsor_theme"
   },
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
@@ -219,16 +219,16 @@
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
     "title": "Electrochemical Systems",
-    "concept": "nsf_mps",
-    "label": "Mathematical and Physical Sciences",
-    "category": "research_discipline"
+    "concept": "sdg_07",
+    "label": "Affordable and Clean Energy",
+    "category": "research_domain"
   },
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
     "title": "Electrochemical Systems",
-    "concept": "sdg_07",
-    "label": "Affordable and Clean Energy",
-    "category": "research_domain"
+    "concept": "nsf_mps",
+    "label": "Mathematical and Physical Sciences",
+    "category": "research_discipline"
   },
   {
     "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
@@ -261,13 +261,6 @@
   {
     "foa_id": "42c60457-3c29-477e-8530-0a47ff782c64",
     "title": "Infrastructure Innovation for Biological Research",
-    "concept": "great_05",
-    "label": "General Science",
-    "category": "sponsor_theme"
-  },
-  {
-    "foa_id": "42c60457-3c29-477e-8530-0a47ff782c64",
-    "title": "Infrastructure Innovation for Biological Research",
     "concept": "nsf_bio",
     "label": "Biological Sciences",
     "category": "research_discipline"
@@ -278,6 +271,27 @@
     "concept": "method_19",
     "label": "Bioinformatics",
     "category": "method"
+  },
+  {
+    "foa_id": "42c60457-3c29-477e-8530-0a47ff782c64",
+    "title": "Infrastructure Innovation for Biological Research",
+    "concept": "great_05",
+    "label": "General Science",
+    "category": "sponsor_theme"
+  },
+  {
+    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
+    "title": "Science of Science: Biomedical Research Enterprise",
+    "concept": "great_02",
+    "label": "Health",
+    "category": "sponsor_theme"
+  },
+  {
+    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
+    "title": "Science of Science: Biomedical Research Enterprise",
+    "concept": "nsf_sbe",
+    "label": "Social Behavioral and Economic Sciences",
+    "category": "research_discipline"
   },
   {
     "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
@@ -294,25 +308,11 @@
     "category": "method"
   },
   {
-    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
-    "title": "Science of Science: Biomedical Research Enterprise",
-    "concept": "nsf_sbe",
-    "label": "Social Behavioral and Economic Sciences",
-    "category": "research_discipline"
-  },
-  {
-    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
-    "title": "Science of Science: Biomedical Research Enterprise",
-    "concept": "great_02",
-    "label": "Health",
-    "category": "sponsor_theme"
-  },
-  {
     "foa_id": "facd39aa-a0de-4980-bd40-a35ab68f8811",
     "title": "Correctness for Scientific Computing Systems",
-    "concept": "great_05",
-    "label": "General Science",
-    "category": "sponsor_theme"
+    "concept": "method_13",
+    "label": "Simulation and Modeling",
+    "category": "method"
   },
   {
     "foa_id": "facd39aa-a0de-4980-bd40-a35ab68f8811",
@@ -324,9 +324,9 @@
   {
     "foa_id": "facd39aa-a0de-4980-bd40-a35ab68f8811",
     "title": "Correctness for Scientific Computing Systems",
-    "concept": "method_13",
-    "label": "Simulation and Modeling",
-    "category": "method"
+    "concept": "great_05",
+    "label": "General Science",
+    "category": "sponsor_theme"
   },
   {
     "foa_id": "facd39aa-a0de-4980-bd40-a35ab68f8811",
@@ -338,16 +338,16 @@
   {
     "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
     "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
-    "concept": "great_05",
-    "label": "General Science",
-    "category": "sponsor_theme"
+    "concept": "method_17",
+    "label": "Data Science",
+    "category": "method"
   },
   {
     "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
     "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
-    "concept": "method_17",
-    "label": "Data Science",
-    "category": "method"
+    "concept": "great_05",
+    "label": "General Science",
+    "category": "sponsor_theme"
   },
   {
     "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",

@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, Depends
 
-from ...database import Database
+from ...storage.database import Database
 from ..deps import get_db
 
 router = APIRouter()

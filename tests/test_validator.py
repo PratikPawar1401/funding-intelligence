@@ -1,6 +1,6 @@
 """Tests for the validator module."""
 
-from foa_pipeline.validator import validate_batch, validate_record
+from foa_pipeline.normalisation.validator import validate_batch, validate_record
 
 
 def test_valid_record(sample_foa):

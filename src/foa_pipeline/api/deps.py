@@ -3,8 +3,8 @@
 from functools import lru_cache
 
 from ..config import Config, get_config
-from ..database import Database
-from ..vector_index import VectorIndex
+from ..matching.vector_index import VectorIndex
+from ..storage.database import Database
 
 
 @lru_cache

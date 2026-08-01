@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 
-from foa_pipeline.grants_gov import GrantsGovClient
+from foa_pipeline.ingestion.grants_gov import GrantsGovClient
 
 
 @pytest.fixture

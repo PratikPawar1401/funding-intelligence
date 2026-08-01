@@ -6,7 +6,7 @@ import os
 
 import pytest
 
-from foa_pipeline.csv_exporter import export_foas_to_csv
+from foa_pipeline.export.csv_exporter import export_foas_to_csv
 
 
 @pytest.fixture

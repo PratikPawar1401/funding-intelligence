@@ -1,7 +1,7 @@
 """Tests for the ontology store module."""
 
 
-from foa_pipeline.ontology_store import OntologyStore
+from foa_pipeline.ontology.store import OntologyStore
 
 
 def test_load_and_query(tmp_path, test_config):

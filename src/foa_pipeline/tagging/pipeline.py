@@ -9,13 +9,13 @@ for each FOA record.
 import logging
 from typing import Any, Dict, List, Set
 
-from .config import Config
-from .evidence_logger import TagEvidence
-from .ontology_store import OntologyStore
-from .tagger_cfda_crosswalk import apply_cfda_crosswalk
-from .tagger_l1_spacy import L1Tagger
-from .tagger_l2_embedding import L2Tagger
-from .tagger_l3_llm import L3Tagger
+from ..config import Config
+from ..ontology.store import OntologyStore
+from .cfda_crosswalk import apply_cfda_crosswalk
+from .evidence import TagEvidence
+from .layer1_spacy import L1Tagger
+from .layer2_embedding import L2Tagger
+from .layer3_llm import L3Tagger
 
 logger = logging.getLogger(__name__)
 

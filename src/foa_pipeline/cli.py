@@ -3,9 +3,9 @@ import json
 import logging
 
 from .config import get_config
-from .grants_gov import poll_grants
+from .ingestion.grants_gov import poll_grants
+from .ingestion.nsf_rss import poll_nsf_rss
 from .logging_setup import setup_logging
-from .nsf_rss import poll_nsf_rss
 
 # Boilerplate PDFs that are generic and don't describe a specific FOA
 SKIP_URLS = {
@@ -116,7 +116,7 @@ def main() -> None:
         logging.info("NSF RSS poll complete: %s", stats)
 
     elif args.command == "nsf-scrape":
-        from .nsf_scraper import drain_nsf_queue
+        from .ingestion.nsf_scraper import drain_nsf_queue
 
         stats = drain_nsf_queue(
             config, max_pages=args.max_pages, dry_run=args.dry_run
@@ -168,17 +168,17 @@ def main() -> None:
 
 def _run_download_pdfs(config, args) -> None:
     """Run the async PDF downloader."""
-    from .pdf_downloader import run_downloader
+    from .ingestion.pdf_downloader import run_downloader
     stats = run_downloader(config)
     logging.info("PDF Downloader finished. Stats: %s", stats)
 
 
 def _run_normalise(config, args) -> None:
     """Normalise all raw records from data/raw/ into data/normalised/."""
-    from .database import Database
-    from .normaliser import normalise_record
-    from .storage import ensure_dir
-    from .validator import validate_record
+    from .normalisation.normaliser import normalise_record
+    from .normalisation.validator import validate_record
+    from .storage.database import Database
+    from .storage.jsonl import ensure_dir
 
     ensure_dir(config.normalised_output_dir)
     db = Database(config.app_db_path)
@@ -223,9 +223,9 @@ def _run_enrich_foas(config) -> None:
     import urllib.request
     from pathlib import Path
 
-    from .database import Database
-    from .grants_gov import GrantsGovClient
-    from .pdf_parser import extract_structured_fields, parse_foa_pdf
+    from .ingestion.grants_gov import GrantsGovClient
+    from .parsing.pdf_parser import extract_structured_fields, parse_foa_pdf
+    from .storage.database import Database
 
     db = Database(config.app_db_path)
     client = GrantsGovClient(config)
@@ -364,8 +364,8 @@ def _run_enrich_foas(config) -> None:
 
 
 def _run_extract_budget(config) -> None:
-    from .database import Database
-    from .llm_extractor import BudgetTierExtractor
+    from .parsing.budget_extractor import BudgetTierExtractor
+    from .storage.database import Database
 
     db = Database(config.app_db_path)
     extractor = BudgetTierExtractor(base_url=config.ollama_base_url, model=config.ollama_model)
@@ -400,8 +400,8 @@ def _run_extract_budget(config) -> None:
 
 def _run_setup_ontology(config) -> None:
     """Load all ontology CSVs and run synonym expansion."""
-    from .ontology_store import OntologyStore
-    from .synonym_expander import expand_synonyms_for_store
+    from .ontology.store import OntologyStore
+    from .ontology.synonyms import expand_synonyms_for_store
 
     store = OntologyStore(config.app_db_path)
     stats = store.load_all_ontologies(config.ontology_dir)
@@ -433,10 +433,10 @@ def _run_setup_ontology(config) -> None:
 
 def _run_tag_all(config, args) -> None:
     """Run the 3-layer semantic tagging pipeline and build the vector index."""
-    from .database import Database
-    from .ontology_store import OntologyStore
-    from .tagger_pipeline import TaggerPipeline
-    from .vector_index import VectorIndex
+    from .matching.vector_index import VectorIndex
+    from .ontology.store import OntologyStore
+    from .storage.database import Database
+    from .tagging.pipeline import TaggerPipeline
 
     db = Database(config.app_db_path)
     store = OntologyStore(config.app_db_path)
@@ -489,8 +489,8 @@ def _run_tag_all(config, args) -> None:
 
 def _run_precompute_embeddings(config) -> None:
     """Precompute embeddings for all ontology concepts."""
-    from .ontology_store import OntologyStore
-    from .tagger_l2_embedding import L2Tagger
+    from .ontology.store import OntologyStore
+    from .tagging.layer2_embedding import L2Tagger
 
     store = OntologyStore(config.app_db_path)
     tagger = L2Tagger(
@@ -506,8 +506,8 @@ def _run_precompute_embeddings(config) -> None:
 
 def _run_export_csv(config, args) -> None:
     """Export all FOAs from the database to CSV."""
-    from .csv_exporter import export_foas_to_csv
-    from .database import Database
+    from .export.csv_exporter import export_foas_to_csv
+    from .storage.database import Database
 
     db = Database(config.app_db_path)
     records, total = db.list_foas(page=1, size=100000)
@@ -520,11 +520,11 @@ def _run_export_csv(config, args) -> None:
 
 def _run_search(config, args) -> None:
     """Match a researcher profile against the indexed FOAs."""
-    from .database import Database
-    from .grant_matcher import match_profile_to_foas
-    from .ontology_store import OntologyStore
-    from .tagger_pipeline import TaggerPipeline
-    from .vector_index import VectorIndex
+    from .matching.matcher import match_profile_to_foas
+    from .matching.vector_index import VectorIndex
+    from .ontology.store import OntologyStore
+    from .storage.database import Database
+    from .tagging.pipeline import TaggerPipeline
 
     db = Database(config.app_db_path)
     index = VectorIndex(db, config.embedding_model, config.embeddings_cache_dir)
@@ -568,7 +568,7 @@ def _run_search(config, args) -> None:
 
 def _run_evaluate(args) -> None:
     """Run the tagging evaluation against the gold or silver eval set."""
-    from .evaluate import run_evaluation
+    from .evaluation.runner import run_evaluation
 
     run_evaluation(use_gold=args.gold, use_db_tags=args.gold)
 
@@ -589,7 +589,7 @@ def _run_pdf_parse(args) -> None:
     """Parse a single PDF file and print results."""
     from pathlib import Path
 
-    from .pdf_parser import extract_structured_fields, parse_foa_pdf
+    from .parsing.pdf_parser import extract_structured_fields, parse_foa_pdf
 
     result = parse_foa_pdf(Path(args.pdf_path))
     logging.info("Parsed %s (%s)", args.pdf_path, result.parse_method)
@@ -611,7 +611,7 @@ def _run_pdf_parse(args) -> None:
 def _run_mine_synonyms(config, args) -> None:
     import csv
 
-    from .database import Database
+    from .storage.database import Database
 
     db = Database(config.app_db_path)
 
@@ -646,7 +646,7 @@ def _run_curate_eval_set(config, args) -> None:
     import json
     import random
 
-    from .database import Database
+    from .storage.database import Database
 
     db = Database(config.app_db_path)
 

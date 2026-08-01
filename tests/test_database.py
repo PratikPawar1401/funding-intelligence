@@ -1,6 +1,6 @@
 """Tests for the database module."""
 
-from foa_pipeline.database import Database
+from foa_pipeline.storage.database import Database
 
 
 def test_upsert_and_get(tmp_path, sample_foa):

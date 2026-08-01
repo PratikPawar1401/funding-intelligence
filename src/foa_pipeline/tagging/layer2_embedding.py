@@ -15,8 +15,8 @@ from typing import Dict, List, Optional
 
 import numpy as np
 
-from .evidence_logger import TagEvidence
-from .ontology_store import OntologyConcept, OntologyStore
+from ..ontology.store import OntologyConcept, OntologyStore
+from .evidence import TagEvidence
 
 logger = logging.getLogger(__name__)
 

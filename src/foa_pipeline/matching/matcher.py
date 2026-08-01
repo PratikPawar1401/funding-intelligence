@@ -17,7 +17,7 @@ CLI: python -m foa_pipeline.cli search --profile "computational social science" 
 import logging
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from .database import Database
+from ..storage.database import Database
 from .vector_index import VectorIndex
 
 logger = logging.getLogger(__name__)

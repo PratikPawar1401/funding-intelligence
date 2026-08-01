@@ -1,0 +1,16 @@
+"""Tagging evaluation: metrics, gold/silver comparison, and label generation.
+
+`runner` drives an end-to-end evaluation against an eval set and writes the
+error-analysis artefacts; `metrics` holds the reusable scoring helpers.
+"""
+
+from .metrics import compute_metrics, format_eval_report, load_evaluation_set
+from .runner import calculate_metrics, run_evaluation
+
+__all__ = [
+    "run_evaluation",
+    "calculate_metrics",
+    "compute_metrics",
+    "load_evaluation_set",
+    "format_eval_report",
+]

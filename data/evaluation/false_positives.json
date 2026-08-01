@@ -22,22 +22,22 @@
   {
     "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
     "title": "SBIR/STTR: Developing Deep Technologies",
-    "concept": "sdg_17",
-    "label": "Partnerships for the Goals",
-    "category": "research_domain",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3512,
-    "context": "- Deadline date First Wednesday in November, Annually Thereafter 2027 March 4 2027 - Deadline date First Thursday in March, Annually Thereafter Due by 5pm submitting organization's local time Program "
-  },
-  {
-    "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
-    "title": "SBIR/STTR: Developing Deep Technologies",
     "concept": "nsf_eng",
     "label": "Engineering",
     "category": "research_discipline",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": "Small Business Innovation Research / Small Business Technology Transfer Phase I, Phase II, Fast-Track"
+  },
+  {
+    "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
+    "title": "SBIR/STTR: Developing Deep Technologies",
+    "concept": "sdg_17",
+    "label": "Partnerships for the Goals",
+    "category": "research_domain",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3512,
+    "context": "- Deadline date First Wednesday in November, Annually Thereafter 2027 March 4 2027 - Deadline date First Thursday in March, Annually Thereafter Due by 5pm submitting organization's local time Program "
   },
   {
     "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
@@ -62,22 +62,22 @@
   {
     "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
     "title": "Catalysis",
-    "concept": "nsf_eng",
-    "label": "Engineering",
-    "category": "research_discipline",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": ") the Electrochemical Systems program; 2) the Interfacial Engineering program; and 3) the Process Systems, Reaction"
-  },
-  {
-    "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
-    "title": "Catalysis",
     "concept": "nsf_tip",
     "label": "Technology Innovation and Partnerships",
     "category": "research_discipline",
     "layer": "layer_2_embedding",
     "confidence": 0.3563,
     "context": "Proposers can view budget amounts and other information from recent awards made by this program via the ?What Has Been Funded (Recent Awards Made Through This Program, with Abstracts)? link towards th"
+  },
+  {
+    "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
+    "title": "Catalysis",
+    "concept": "nsf_eng",
+    "label": "Engineering",
+    "category": "research_discipline",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": ") the Electrochemical Systems program; 2) the Interfacial Engineering program; and 3) the Process Systems, Reaction"
   },
   {
     "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
@@ -112,6 +112,36 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
+    "concept": "pop_16",
+    "label": "Agricultural Workers",
+    "category": "population",
+    "layer": "layer_3_llm",
+    "confidence": 0.95,
+    "context": "[Resolved against Women and Girls] Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of"
+  },
+  {
+    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
+    "title": "Sociology",
+    "concept": "nsf_eng",
+    "label": "Engineering",
+    "category": "research_discipline",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "networks, socialization, and the sociology of science and technology. The program supports both original data collection and secondary"
+  },
+  {
+    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
+    "title": "Sociology",
+    "concept": "pop_08",
+    "label": "Racial and Ethnic Minorities",
+    "category": "population",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "participation of groups, institutions and geographic regions that are underrepresented in STEM disciplines, which is essential to the health"
+  },
+  {
+    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
+    "title": "Sociology",
     "concept": "method_07",
     "label": "Qualitative Research",
     "category": "method",
@@ -122,12 +152,12 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
-    "concept": "pop_16",
-    "label": "Agricultural Workers",
+    "concept": "pop_19",
+    "label": "Small Business Owners",
     "category": "population",
-    "layer": "layer_3_llm",
-    "confidence": 0.95,
-    "context": "[Resolved against Women and Girls] Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of"
+    "layer": "layer_2_embedding",
+    "confidence": 0.3719,
+    "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
   },
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
@@ -152,16 +182,6 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
-    "concept": "pop_08",
-    "label": "Racial and Ethnic Minorities",
-    "category": "population",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "participation of groups, institutions and geographic regions that are underrepresented in STEM disciplines, which is essential to the health"
-  },
-  {
-    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
-    "title": "Sociology",
     "concept": "great_13",
     "label": "Community and Regional Development",
     "category": "sponsor_theme",
@@ -170,24 +190,24 @@
     "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
   },
   {
-    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
-    "title": "Sociology",
+    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
+    "title": "Centers of Research Excellence in Science and Technology (CREST)",
+    "concept": "great_04",
+    "label": "Energy",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3309,
+    "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology (CREST) program provides sup"
+  },
+  {
+    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
+    "title": "Centers of Research Excellence in Science and Technology (CREST)",
     "concept": "nsf_eng",
     "label": "Engineering",
     "category": "research_discipline",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "networks, socialization, and the sociology of science and technology. The program supports both original data collection and secondary"
-  },
-  {
-    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
-    "title": "Sociology",
-    "concept": "pop_19",
-    "label": "Small Business Owners",
-    "category": "population",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3719,
-    "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
+    "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of"
   },
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
@@ -212,16 +232,6 @@
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
-    "concept": "great_04",
-    "label": "Energy",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3309,
-    "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology (CREST) program provides sup"
-  },
-  {
-    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
-    "title": "Centers of Research Excellence in Science and Technology (CREST)",
     "concept": "method_17",
     "label": "Data Science",
     "category": "method",
@@ -230,14 +240,14 @@
     "context": "areas of national interest, such as artificial intelligence, data science and analytics; advanced materials, manufacturing, robotics;"
   },
   {
-    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
-    "title": "Centers of Research Excellence in Science and Technology (CREST)",
-    "concept": "nsf_eng",
-    "label": "Engineering",
-    "category": "research_discipline",
+    "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
+    "title": "NSF INCLUDES Initiative",
+    "concept": "pop_07",
+    "label": "Indigenous Peoples",
+    "category": "population",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of"
+    "context": "US campus. -Tribal Nations: An American Indian or Alaska Native tribe, band, nation, pueblo, village,"
   },
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
@@ -252,12 +262,12 @@
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
-    "concept": "great_08",
-    "label": "Transportation",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3005,
-    "context": "design elements of collaborative infrastructure - (1) shared vision, (2) partnerships, (3) goals and metrics, (4) leadership and communication, and (5) expansion, sustainability, and scale - to create"
+    "concept": "nsf_eng",
+    "label": "Engineering",
+    "category": "research_discipline",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "the Nation of Communities of Learners of Underrepresented Discoverers in Engineering and Science (INCLUDES) Initiative In 2016, the"
   },
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
@@ -282,22 +292,12 @@
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
-    "concept": "pop_10",
-    "label": "People with Disabilities",
-    "category": "population",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "innovation, focused on NSF \u2019 s commitment to ensuring accessibility and inclusivity in STEM fields, as communicated in the"
-  },
-  {
-    "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
-    "title": "NSF INCLUDES Initiative",
-    "concept": "pop_07",
-    "label": "Indigenous Peoples",
-    "category": "population",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "US campus. -Tribal Nations: An American Indian or Alaska Native tribe, band, nation, pueblo, village,"
+    "concept": "great_08",
+    "label": "Transportation",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3005,
+    "context": "design elements of collaborative infrastructure - (1) shared vision, (2) partnerships, (3) goals and metrics, (4) leadership and communication, and (5) expansion, sustainability, and scale - to create"
   },
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
@@ -312,22 +312,12 @@
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
-    "concept": "nsf_eng",
-    "label": "Engineering",
-    "category": "research_discipline",
+    "concept": "pop_10",
+    "label": "People with Disabilities",
+    "category": "population",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "the Nation of Communities of Learners of Underrepresented Discoverers in Engineering and Science (INCLUDES) Initiative In 2016, the"
-  },
-  {
-    "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
-    "title": "Robert Noyce Teacher Scholarship Program",
-    "concept": "nsf_mps",
-    "label": "Mathematical and Physical Sciences",
-    "category": "research_discipline",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3697,
-    "context": "Robert Noyce Teacher Scholarship Program The National Science FoundationRobert Noyce Teacher Scholarship Program (Noyce)invites innovative proposals that address the critical need for recruiting, prep"
+    "context": "innovation, focused on NSF \u2019 s commitment to ensuring accessibility and inclusivity in STEM fields, as communicated in the"
   },
   {
     "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
@@ -338,6 +328,16 @@
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": "To achieve this goal, Noyce supports talented science, technology, engineering, and mathematics (STEM) undergraduate majors"
+  },
+  {
+    "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
+    "title": "Robert Noyce Teacher Scholarship Program",
+    "concept": "nsf_mps",
+    "label": "Mathematical and Physical Sciences",
+    "category": "research_discipline",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3697,
+    "context": "Robert Noyce Teacher Scholarship Program The National Science FoundationRobert Noyce Teacher Scholarship Program (Noyce)invites innovative proposals that address the critical need for recruiting, prep"
   },
   {
     "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
@@ -362,32 +362,12 @@
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
     "title": "Engineering for Civil Infrastructure",
-    "concept": "sdg_13",
-    "label": "Climate Action",
+    "concept": "sdg_12",
+    "label": "Responsible Consumption and Production",
     "category": "research_domain",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "nation\u2019s physical civil infrastructure and that can contribute to climate change adaptation and mitigation, and hazards and disaster resilience."
-  },
-  {
-    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
-    "title": "Engineering for Civil Infrastructure",
-    "concept": "great_08",
-    "label": "Transportation",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3502,
-    "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI) program supports fundamental research in geotechnical, structural, materials, architectural, and coastal engineering"
-  },
-  {
-    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
-    "title": "Engineering for Civil Infrastructure",
-    "concept": "nsf_geo",
-    "label": "Geosciences",
-    "category": "research_discipline",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "characterization is supported through programs in the NSF Directorate for Geosciences. Proposers are actively encouraged to email a one-"
+    "context": "an equitable and prosperous nation and promoting environmentally friendly, circular economy policies. The ECI program supports research that advances knowledge"
   },
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
@@ -402,12 +382,32 @@
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
     "title": "Engineering for Civil Infrastructure",
-    "concept": "sdg_12",
-    "label": "Responsible Consumption and Production",
+    "concept": "sdg_13",
+    "label": "Climate Action",
     "category": "research_domain",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "an equitable and prosperous nation and promoting environmentally friendly, circular economy policies. The ECI program supports research that advances knowledge"
+    "context": "nation\u2019s physical civil infrastructure and that can contribute to climate change adaptation and mitigation, and hazards and disaster resilience."
+  },
+  {
+    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
+    "title": "Engineering for Civil Infrastructure",
+    "concept": "nsf_geo",
+    "label": "Geosciences",
+    "category": "research_discipline",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "characterization is supported through programs in the NSF Directorate for Geosciences. Proposers are actively encouraged to email a one-"
+  },
+  {
+    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
+    "title": "Engineering for Civil Infrastructure",
+    "concept": "great_08",
+    "label": "Transportation",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3502,
+    "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI) program supports fundamental research in geotechnical, structural, materials, architectural, and coastal engineering"
   },
   {
     "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
@@ -442,16 +442,6 @@
   {
     "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
     "title": "Documenting Endangered Languages",
-    "concept": "sdg_17",
-    "label": "Partnerships for the Goals",
-    "category": "research_domain",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3746,
-    "context": "conference proposals, please refer to PAPPG Chapter II. E.9. *Who May Submit Proposals: Proposals may only be submitted by the following: -Non-profit, non-academic organizations: Independent museums, "
-  },
-  {
-    "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
-    "title": "Documenting Endangered Languages",
     "concept": "nsf_eng",
     "label": "Engineering",
     "category": "research_discipline",
@@ -480,44 +470,14 @@
     "context": "conference proposals, please refer to PAPPG Chapter II. E.9. *Who May Submit Proposals: Proposals may only be submitted by the following: -Non-profit, non-academic organizations: Independent museums, "
   },
   {
-    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
-    "title": "EPSCoR FEC",
-    "concept": "nsf_edu",
-    "label": "STEM Education",
-    "category": "research_discipline",
-    "layer": "layer_2_embedding",
-    "confidence": 0.5063,
-    "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
-  },
-  {
-    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
-    "title": "EPSCoR FEC",
-    "concept": "nsf_tip",
-    "label": "Technology Innovation and Partnerships",
-    "category": "research_discipline",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4549,
-    "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
-  },
-  {
-    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
-    "title": "EPSCoR FEC",
+    "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
+    "title": "Documenting Endangered Languages",
     "concept": "sdg_17",
     "label": "Partnerships for the Goals",
     "category": "research_domain",
     "layer": "layer_2_embedding",
-    "confidence": 0.3614,
-    "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
-  },
-  {
-    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
-    "title": "EPSCoR FEC",
-    "concept": "great_04",
-    "label": "Energy",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3124,
-    "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
+    "confidence": 0.3746,
+    "context": "conference proposals, please refer to PAPPG Chapter II. E.9. *Who May Submit Proposals: Proposals may only be submitted by the following: -Non-profit, non-academic organizations: Independent museums, "
   },
   {
     "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
@@ -532,11 +492,11 @@
   {
     "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
     "title": "EPSCoR FEC",
-    "concept": "method_09",
-    "label": "Community-Based Participatory Research",
-    "category": "method",
+    "concept": "nsf_edu",
+    "label": "STEM Education",
+    "category": "research_discipline",
     "layer": "layer_2_embedding",
-    "confidence": 0.4033,
+    "confidence": 0.5063,
     "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
   },
   {
@@ -548,6 +508,16 @@
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": "and have 501(c)(3) tax status.</span></li> <li><span>Tribal Governments with the governing body of any Indian or Alaska"
+  },
+  {
+    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
+    "title": "EPSCoR FEC",
+    "concept": "nsf_tip",
+    "label": "Technology Innovation and Partnerships",
+    "category": "research_discipline",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4549,
+    "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
   },
   {
     "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
@@ -568,6 +538,36 @@
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": "builds interjurisdictional collaborative teams of EPSCoR investigators in Science, Technology, Engineering, and Mathematics (STEM) focus areas"
+  },
+  {
+    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
+    "title": "EPSCoR FEC",
+    "concept": "great_04",
+    "label": "Energy",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3124,
+    "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
+  },
+  {
+    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
+    "title": "EPSCoR FEC",
+    "concept": "method_09",
+    "label": "Community-Based Participatory Research",
+    "category": "method",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4033,
+    "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
+  },
+  {
+    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
+    "title": "EPSCoR FEC",
+    "concept": "sdg_17",
+    "label": "Partnerships for the Goals",
+    "category": "research_domain",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3614,
+    "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
   },
   {
     "foa_id": "b24f1220-a15b-4056-bf94-28aeed4eea65",
@@ -662,6 +662,36 @@
   {
     "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
     "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
+    "concept": "pop_20",
+    "label": "Tribal Communities",
+    "category": "population",
+    "layer": "layer_2_embedding",
+    "confidence": 0.5165,
+    "context": "proposal includes funding to be provided to an international branch campus of a US institution of higher education (including through use of sub-awards and consultant arrangements), the proposer must "
+  },
+  {
+    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
+    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
+    "concept": "great_06",
+    "label": "Natural Resources and Environment",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3398,
+    "context": "proposal includes funding to be provided to an international branch campus of a US institution of higher education (including through use of sub-awards and consultant arrangements), the proposer must "
+  },
+  {
+    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
+    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
+    "concept": "pop_07",
+    "label": "Indigenous Peoples",
+    "category": "population",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "US campus. -Tribal Nations: An American Indian or Alaska Native tribe, band, nation, pueblo, village,"
+  },
+  {
+    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
+    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
     "concept": "nsf_tip",
     "label": "Technology Innovation and Partnerships",
     "category": "research_discipline",
@@ -672,11 +702,11 @@
   {
     "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
     "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
-    "concept": "great_06",
-    "label": "Natural Resources and Environment",
+    "concept": "great_10",
+    "label": "International Affairs",
     "category": "sponsor_theme",
     "layer": "layer_2_embedding",
-    "confidence": 0.3398,
+    "confidence": 0.3295,
     "context": "proposal includes funding to be provided to an international branch campus of a US institution of higher education (including through use of sub-awards and consultant arrangements), the proposer must "
   },
   {
@@ -692,52 +722,12 @@
   {
     "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
     "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
-    "concept": "pop_20",
-    "label": "Tribal Communities",
-    "category": "population",
-    "layer": "layer_2_embedding",
-    "confidence": 0.5165,
-    "context": "proposal includes funding to be provided to an international branch campus of a US institution of higher education (including through use of sub-awards and consultant arrangements), the proposer must "
-  },
-  {
-    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
-    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
     "concept": "pop_10",
     "label": "People with Disabilities",
     "category": "population",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": "models of scientific communication and publication that improve efficiency and accessibility, iii.) Developing FAIROS data portals, research"
-  },
-  {
-    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
-    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
-    "concept": "pop_07",
-    "label": "Indigenous Peoples",
-    "category": "population",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "US campus. -Tribal Nations: An American Indian or Alaska Native tribe, band, nation, pueblo, village,"
-  },
-  {
-    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
-    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
-    "concept": "great_10",
-    "label": "International Affairs",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3295,
-    "context": "proposal includes funding to be provided to an international branch campus of a US institution of higher education (including through use of sub-awards and consultant arrangements), the proposer must "
-  },
-  {
-    "foa_id": "160c5a72-dfcd-4061-995e-a05e1d239145",
-    "title": "Division of Chemistry: Disciplinary Research Programs",
-    "concept": "nsf_geo",
-    "label": "Geosciences",
-    "category": "research_discipline",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3995,
-    "context": "proposals should follow the guidance in this solicitation. Proposals submitted through the RUI/ROA solicitation to the CLP, CSD, and CTMC programs can be submitted at any time starting September 1, 20"
   },
   {
     "foa_id": "160c5a72-dfcd-4061-995e-a05e1d239145",
@@ -748,5 +738,15 @@
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": "(RAPID), Research Advanced by Interdisciplinary Science and Engineering (RAISE), and conferences can be submitted anytime"
+  },
+  {
+    "foa_id": "160c5a72-dfcd-4061-995e-a05e1d239145",
+    "title": "Division of Chemistry: Disciplinary Research Programs",
+    "concept": "nsf_geo",
+    "label": "Geosciences",
+    "category": "research_discipline",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3995,
+    "context": "proposals should follow the guidance in this solicitation. Proposals submitted through the RUI/ROA solicitation to the CLP, CSD, and CTMC programs can be submitted at any time starting September 1, 20"
   }
 ]

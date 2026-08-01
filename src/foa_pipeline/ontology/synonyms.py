@@ -10,7 +10,7 @@ For each ontology concept label, generates synonyms using:
 import logging
 from typing import Dict, List, Set
 
-from .ontology_store import OntologyStore
+from .store import OntologyStore
 
 logger = logging.getLogger(__name__)
 

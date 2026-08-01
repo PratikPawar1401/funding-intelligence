@@ -1,5 +1,17 @@
 """
-Docker entry point for the API and frontend.
+ISSR Funding Intelligence — FOA ingestion, semantic tagging, and grant matching.
+
+Subpackages:
+    ingestion      Source connectors (Grants.gov API, NSF RSS/scraping, PDFs)
+    parsing        Layout-aware PDF and LLM field extraction
+    normalisation  Canonical schema, normalisation, and validation
+    ontology       Controlled vocabulary and synonym expansion
+    tagging        Three-layer semantic tagging engine
+    matching       Vector search and hybrid researcher-profile matching
+    storage        SQLite database and JSONL helpers
+    evaluation     Metrics, gold/silver evaluation, label generation
+    export         CSV/JSON export for downstream consumers
+    api            FastAPI application serving the web frontend
 """
 
 import os
@@ -13,26 +25,17 @@ import os
 # deployment can still override it.
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 
-# Re-exported for convenience; not "unused" despite appearances.
-# E402: must follow the OMP_NUM_THREADS setting above to be effective.
-from .vector_index import VectorIndex  # noqa: E402,F401
-
 __all__ = [
+    "api",
     "config",
-    "grants_gov",
-    "nsf_rss",
-    "nsf_scraper",
-    "schema",
-    "storage",
-    "normaliser",
-    "validator",
-    "ontology_store",
-    "synonym_expander",
-    "evidence_logger",
-    "pdf_parser",
-    "database",
-    "csv_exporter",
     "evaluation",
-    "vector_index",
+    "export",
+    "ingestion",
+    "matching",
+    "normalisation",
+    "ontology",
+    "parsing",
+    "storage",
+    "tagging",
 ]
 __version__ = "1.0.0"

@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from foa_pipeline.pdf_parser import (
+from foa_pipeline.parsing.pdf_parser import (
     ParsedPDF,
     _extract_sections,
     extract_structured_fields,

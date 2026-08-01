@@ -2,7 +2,7 @@
 
 import pytest
 
-from foa_pipeline.normaliser import (
+from foa_pipeline.normalisation.normaliser import (
     _extract_cfda,
     _extract_eligibility_types,
     _map_funding_instrument,

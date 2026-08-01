@@ -1,6 +1,6 @@
 """Tests for the hybrid grant matcher (researcher profile → ranked FOAs)."""
 
-from foa_pipeline.grant_matcher import (
+from foa_pipeline.matching.matcher import (
     COSINE_WEIGHT,
     TAG_WEIGHT,
     compute_tag_overlap,

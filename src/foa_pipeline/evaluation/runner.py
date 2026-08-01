@@ -12,9 +12,9 @@ import logging
 from collections import defaultdict
 
 from foa_pipeline.config import get_config
-from foa_pipeline.database import Database
-from foa_pipeline.ontology_store import OntologyStore
-from foa_pipeline.tagger_pipeline import TaggerPipeline
+from foa_pipeline.ontology.store import OntologyStore
+from foa_pipeline.storage.database import Database
+from foa_pipeline.tagging.pipeline import TaggerPipeline
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 

@@ -76,7 +76,7 @@ sqlite3 data/db/funding_intelligence.db "SELECT category, COUNT(*) FROM foa_tags
 **What to say:** *"Finally, we need to prove it works. We built a 20-FOA hand-labeled gold standard dataset. Let's run our evaluation engine to see our Precision, Recall, and F1 scores."*
 ```bash
 # Run P/R/F1 evaluation
-PYTHONPATH=src .venv/bin/python src/foa_pipeline/evaluate.py --gold
+PYTHONPATH=src .venv/bin/python -m foa_pipeline.cli evaluate --gold
 ```
 *(Point out the `RESEARCH_DISCIPLINE` score here, showing how your custom NSF Directorates outperformed the UN SDGs).*
 

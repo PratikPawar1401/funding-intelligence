@@ -7,7 +7,7 @@ from fastapi.testclient import TestClient
 
 from foa_pipeline.api import deps
 from foa_pipeline.api.app import create_app
-from foa_pipeline.database import Database
+from foa_pipeline.storage.database import Database
 
 
 @pytest.fixture
@@ -172,7 +172,7 @@ class TestSemanticSearch:
     def test_reports_missing_index_gracefully(self, client, tmp_path, monkeypatch):
         """With no FAISS index built, the endpoint explains rather than erroring."""
         from foa_pipeline.api.routes import search as search_route
-        from foa_pipeline.vector_index import VectorIndex
+        from foa_pipeline.matching.vector_index import VectorIndex
 
         empty_index = VectorIndex(
             db=None, model_name="unused", cache_dir=tmp_path / "no-index"

@@ -15,7 +15,7 @@ import logging
 import requests
 
 from foa_pipeline.config import get_config
-from foa_pipeline.database import Database
+from foa_pipeline.storage.database import Database
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s | %(levelname)s | %(message)s")
 

@@ -1,6 +1,6 @@
 import dataclasses
 
-from foa_pipeline.grants_gov import GrantsGovClient, poll_grants
+from foa_pipeline.ingestion.grants_gov import GrantsGovClient, poll_grants
 
 
 class DummyClient(GrantsGovClient):
@@ -24,7 +24,7 @@ class DummyClient(GrantsGovClient):
 
 
 def test_poll_grants_pagination(test_config, monkeypatch):
-    monkeypatch.setattr("foa_pipeline.grants_gov.GrantsGovClient", DummyClient)
+    monkeypatch.setattr("foa_pipeline.ingestion.grants_gov.GrantsGovClient", DummyClient)
 
     # Set page size to match the test mock using replace since it's frozen
     test_config = dataclasses.replace(test_config, grants_gov_page_size=2)

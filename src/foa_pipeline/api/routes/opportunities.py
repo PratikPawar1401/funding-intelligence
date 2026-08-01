@@ -5,7 +5,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 
-from ...database import Database
+from ...storage.database import Database
 from ..deps import get_db
 
 router = APIRouter()

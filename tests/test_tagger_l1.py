@@ -3,10 +3,10 @@
 
 import pytest
 
-from foa_pipeline.evidence_logger import TagEvidence
-from foa_pipeline.ontology_store import OntologyStore
-from foa_pipeline.synonym_expander import expand_synonyms_for_store
-from foa_pipeline.tagger_l1_spacy import L1Tagger
+from foa_pipeline.ontology.store import OntologyStore
+from foa_pipeline.ontology.synonyms import expand_synonyms_for_store
+from foa_pipeline.tagging.evidence import TagEvidence
+from foa_pipeline.tagging.layer1_spacy import L1Tagger
 
 
 @pytest.fixture(scope="module")

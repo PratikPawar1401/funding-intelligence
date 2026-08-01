@@ -2,7 +2,7 @@
 
 This document describes how the semantic tagging outputs and the FAISS vector index are combined to match researcher abstracts to Funding Opportunity Announcements (FOAs).
 
-> **Implemented in `src/foa_pipeline/grant_matcher.py`.** Run it with:
+> **Implemented in `src/foa_pipeline/matching/matcher.py`.** Run it with:
 >
 > ```bash
 > PYTHONPATH=src python -m foa_pipeline.cli search --profile "computational social science, housing policy" --k 10

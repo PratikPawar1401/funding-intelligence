@@ -5,8 +5,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import Response
 
-from ...csv_exporter import export_foas_to_csv
-from ...database import Database
+from ...export.csv_exporter import export_foas_to_csv
+from ...storage.database import Database
 from ..deps import get_app_config, get_db
 
 router = APIRouter()

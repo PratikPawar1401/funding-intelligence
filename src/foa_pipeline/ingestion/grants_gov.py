@@ -6,9 +6,9 @@ from typing import Any, Dict, Iterable, Optional
 
 import requests
 
-from .config import Config
-from .schema import build_raw_record
-from .storage import ensure_dir, load_existing_ids, write_jsonl
+from ..config import Config
+from ..normalisation.schema import build_raw_record
+from ..storage.jsonl import ensure_dir, load_existing_ids, write_jsonl
 
 logger = logging.getLogger(__name__)
 

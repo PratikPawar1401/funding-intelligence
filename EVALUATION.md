@@ -12,12 +12,12 @@ The pipeline is evaluated using a **gold standard comparison** approach:
 2. The pipeline independently tags the same FOAs
 3. Predicted tags are compared against the gold standard to compute Precision, Recall, and F1
 
-All evaluation logic is implemented in `src/foa_pipeline/evaluate.py` and can be run reproducibly via:
+All evaluation logic is implemented in `src/foa_pipeline/evaluation/runner.py` and can be run reproducibly via:
 
 ```bash
 # Re-tag all FOAs, then evaluate against gold standard
 PYTHONPATH=src python -m foa_pipeline.cli tag-all
-PYTHONPATH=src python src/foa_pipeline/evaluate.py --gold
+PYTHONPATH=src python -m foa_pipeline.cli evaluate --gold
 ```
 
 ---
@@ -210,7 +210,7 @@ PYTHONPATH=src python -m foa_pipeline.cli precompute-embeddings
 PYTHONPATH=src python -m foa_pipeline.cli tag-all
 
 # 3. Run evaluation against gold standard
-PYTHONPATH=src python src/foa_pipeline/evaluate.py --gold
+PYTHONPATH=src python -m foa_pipeline.cli evaluate --gold
 
 # 4. View results
 cat data/evaluation/evaluation_summary.json

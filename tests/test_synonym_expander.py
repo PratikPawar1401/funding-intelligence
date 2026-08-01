@@ -3,8 +3,8 @@
 
 import pytest
 
-from foa_pipeline.ontology_store import OntologyStore
-from foa_pipeline.synonym_expander import (
+from foa_pipeline.ontology.store import OntologyStore
+from foa_pipeline.ontology.synonyms import (
     ABBREVIATIONS,
     expand_synonyms_for_store,
 )

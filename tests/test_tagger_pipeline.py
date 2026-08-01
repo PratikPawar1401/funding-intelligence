@@ -9,10 +9,10 @@ from unittest.mock import MagicMock
 import pytest
 
 from foa_pipeline.config import Config
-from foa_pipeline.evidence_logger import TagEvidence
-from foa_pipeline.ontology_store import OntologyStore
-from foa_pipeline.synonym_expander import expand_synonyms_for_store
-from foa_pipeline.tagger_pipeline import TaggerPipeline
+from foa_pipeline.ontology.store import OntologyStore
+from foa_pipeline.ontology.synonyms import expand_synonyms_for_store
+from foa_pipeline.tagging.evidence import TagEvidence
+from foa_pipeline.tagging.pipeline import TaggerPipeline
 
 
 @pytest.fixture(scope="module")

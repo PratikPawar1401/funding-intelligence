@@ -14,8 +14,8 @@ import spacy
 from spacy.matcher import PhraseMatcher
 from spacy.tokens import Doc
 
-from .evidence_logger import TagEvidence
-from .ontology_store import OntologyConcept, OntologyStore
+from ..ontology.store import OntologyConcept, OntologyStore
+from .evidence import TagEvidence
 
 logger = logging.getLogger(__name__)
 

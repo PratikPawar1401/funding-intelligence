@@ -12,7 +12,7 @@ from typing import Optional
 
 import requests
 
-from .evidence_logger import TagEvidence
+from .evidence import TagEvidence
 
 logger = logging.getLogger(__name__)
 

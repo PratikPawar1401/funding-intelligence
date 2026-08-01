@@ -15,7 +15,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from bs4 import BeautifulSoup
 
-from foa_pipeline.nsf_scraper import (
+from foa_pipeline.ingestion.nsf_scraper import (
     _extract_dates_from_html,
     _extract_nsf_id,
     _parse_html_content,
@@ -148,7 +148,7 @@ class TestParseHtmlContent:
 
 class TestPlaywrightScraper:
     @pytest.mark.asyncio
-    @patch("foa_pipeline.nsf_scraper.async_playwright")
+    @patch("foa_pipeline.ingestion.nsf_scraper.async_playwright")
     async def test_run_playwright_scraper_success(self, mock_async_playwright):
         # Mock setup
         mock_page = AsyncMock()
@@ -196,7 +196,7 @@ class TestDrainNsfQueue:
         conn.close()
         return test_config
 
-    @patch("foa_pipeline.nsf_scraper._run_playwright_scraper", new_callable=AsyncMock)
+    @patch("foa_pipeline.ingestion.nsf_scraper._run_playwright_scraper", new_callable=AsyncMock)
     def test_drain_nsf_queue_success(self, mock_run, setup_queue_db):
         config = setup_queue_db
 
@@ -236,7 +236,7 @@ class TestDrainNsfQueue:
 
         assert row[0] == "pending"
 
-    @patch("foa_pipeline.nsf_scraper._run_playwright_scraper", new_callable=AsyncMock)
+    @patch("foa_pipeline.ingestion.nsf_scraper._run_playwright_scraper", new_callable=AsyncMock)
     def test_drain_nsf_queue_failed(self, mock_run, setup_queue_db):
         config = setup_queue_db
 
