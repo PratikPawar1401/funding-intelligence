@@ -19,7 +19,7 @@ Data Sources          Ingestion             Processing              Storage     
 │  Website │    │   Scraper       │    ├──────────────────┤    └─────────────┘    └──────────┘
 └──────────┘    ├─────────────────┤    │ L1: spaCy        │
 ┌──────────┐    │ Layout-Aware    │    │ L2: Embeddings   │
-│ FOA PDFs │───>│ PDF Parser      │    │ L3: LLM (stretch)│
+│ FOA PDFs │───>│ PDF Parser      │    │ L3: LLM (Mistral)│
 └──────────┘    └─────────────────┘    └──────────────────┘
 ```
 
@@ -68,8 +68,9 @@ Data Sources          Ingestion             Processing              Storage     
 
 ### Prerequisites
 
-- Python 3.11+
+- Python 3.9+
 - [Playwright browsers](https://playwright.dev/python/docs/intro) (for NSF scraping)
+- [Ollama](https://ollama.com) with `mistral:7b-instruct` — **optional**; Layer 3 disambiguation degrades gracefully to Layer 1 + Layer 2 without it
 
 ### Installation
 
@@ -170,75 +171,82 @@ make docker-down   # Stop services
 ```
 funding-intelligence/
 ├── src/foa_pipeline/
-│   ├── cli.py                  # CLI entry point (12 subcommands)
-│   ├── config.py               # Environment-based configuration
+│   ├── cli.py                    # CLI entry point (17 subcommands)
+│   ├── config.py                 # Environment-based configuration
+│   ├── logging_setup.py
 │   │
-│   ├── # ── Ingestion ──
-│   ├── grants_gov.py           # Grants.gov REST API client
-│   ├── nsf_rss.py              # NSF RSS feed change detector
-│   ├── nsf_scraper.py          # Playwright headless scraper
+│   ├── ingestion/                # Source connectors
+│   │   ├── grants_gov.py         #   Grants.gov REST API client
+│   │   ├── nsf_rss.py            #   NSF RSS feed change detector
+│   │   ├── nsf_scraper.py        #   Playwright headless scraper
+│   │   └── pdf_downloader.py     #   Async PDF retrieval
 │   │
-│   ├── # ── Parsing ──
-│   ├── pdf_parser.py           # Layout-aware PDF extraction
+│   ├── parsing/                  # Document extraction
+│   │   ├── pdf_parser.py         #   Layout-aware PDF extraction
+│   │   └── budget_extractor.py   #   LLM budget-tier extraction
 │   │
-│   ├── # ── Normalisation ──
-│   ├── normaliser.py           # Multi-source data normalisation
-│   ├── validator.py            # JSON Schema validation
-│   ├── schema.py               # Record builder
+│   ├── normalisation/            # Canonical schema
+│   │   ├── normaliser.py         #   Multi-source normalisation
+│   │   ├── validator.py          #   JSON Schema validation
+│   │   └── schema.py             #   Record builder
 │   │
-│   ├── # ── Ontology ──
-│   ├── ontology_store.py       # SQLite taxonomy management
-│   ├── synonym_expander.py     # WordNet synonym expansion
+│   ├── ontology/                 # Controlled vocabulary
+│   │   ├── store.py              #   SQLite taxonomy management
+│   │   └── synonyms.py           #   WordNet synonym expansion
 │   │
-│   ├── # ── Tagging ──
-│   ├── tagger_l1_spacy.py      # Layer 1: spaCy PhraseMatcher
-│   ├── tagger_l2_embedding.py  # Layer 2: Sentence embeddings
-│   ├── tagger_l3_llm.py        # Layer 3: LLM disambiguation
-│   ├── tagger_pipeline.py      # L1 → L2 → L3 orchestrator
-│   ├── evidence_logger.py      # Tag provenance tracking
+│   ├── tagging/                  # Semantic tagging engine
+│   │   ├── pipeline.py           #   L1 → L2 → L3 orchestrator
+│   │   ├── layer1_spacy.py       #   Layer 1: spaCy PhraseMatcher
+│   │   ├── layer2_embedding.py   #   Layer 2: sentence embeddings
+│   │   ├── layer3_llm.py         #   Layer 3: LLM disambiguation
+│   │   ├── cfda_crosswalk.py     #   CFDA recall backstop
+│   │   └── evidence.py           #   Tag provenance
 │   │
-│   ├── # ── Search & Matching ──
-│   ├── vector_index.py         # FAISS vector index
-│   ├── grant_matcher.py        # Hybrid profile → FOA relevance ranking
+│   ├── matching/                 # Researcher profile → FOA
+│   │   ├── matcher.py            #   Hybrid relevance ranking
+│   │   └── vector_index.py       #   FAISS vector index
 │   │
-│   ├── # ── Storage & Export ──
-│   ├── database.py             # SQLite DB with FTS5
-│   ├── storage.py              # JSONL utilities
-│   ├── csv_exporter.py         # CSV export with evidence
-│   ├── evaluation.py           # P/R/F1 metrics
+│   ├── storage/                  # Persistence
+│   │   ├── database.py           #   SQLite DB with FTS5
+│   │   └── jsonl.py              #   JSONL utilities
 │   │
-│   └── api/                    # FastAPI backend
-│       ├── app.py              # Application factory
-│       ├── deps.py             # Dependency injection
-│       └── routes/             # REST endpoints
-│           ├── opportunities.py
-│           ├── search.py
-│           ├── tags.py
-│           ├── export.py
-│           └── health.py
+│   ├── evaluation/               # Accuracy measurement
+│   │   ├── runner.py             #   Evaluation driver
+│   │   ├── metrics.py            #   P/R/F1 scoring helpers
+│   │   └── synthetic_annotator.py#   LLM silver-label generation
+│   │
+│   ├── export/
+│   │   └── csv_exporter.py       #   CSV export with tag evidence
+│   │
+│   └── api/                      # FastAPI backend
+│       ├── app.py                #   Application factory
+│       ├── deps.py               #   Dependency injection
+│       ├── middleware.py         #   Rate limiting
+│       └── routes/               #   REST endpoints
 │
-├── frontend/                   # Web UI ("Simpler Grants.gov")
-│   ├── index.html
-│   ├── css/
-│   └── js/
+├── frontend/                     # Web UI ("Simpler Grants.gov")
 │
 ├── data/
-│   ├── ontology/               # Taxonomy source CSVs
-│   ├── raw/                    # Ingested JSONL (gitignored)
-│   ├── normalised/             # Processed output
-│   ├── db/                     # SQLite database
-│   ├── embeddings/             # Cached vectors
-│   └── evaluation/             # Hand-labelled test set
+│   ├── ontology/                 # Taxonomy source CSVs
+│   ├── raw/                      # Ingested JSONL (gitignored)
+│   ├── normalised/               # Processed output
+│   ├── db/                       # SQLite database
+│   ├── embeddings/               # Cached vectors
+│   ├── evaluation/               # Gold/silver eval sets + error analysis
+│   └── prompts/                  # LLM prompt templates
 │
-├── tests/                      # 185 tests
-├── Documentation/              # Blueprint, proposal, reports
-├── scraper_config/             # Per-domain scraping rules (YAML)
-├── prompts/                    # LLM prompt templates
-├── phase-test-scripts/         # End-to-end test scripts
+├── tests/                        # 195 tests
+├── Documentation/                # Blueprint, proposal, reports
+├── scraper_config/               # Per-domain scraping rules (YAML)
+├── phase-test-scripts/           # End-to-end smoke scripts
 │
+├── .github/                      # Issue/PR templates
+├── CONTRIBUTING.md
+├── CODE_OF_CONDUCT.md
+├── SECURITY.md
 ├── Dockerfile
 ├── docker-compose.yml
-├── Makefile                    # 15 convenience targets
+├── Makefile
 ├── requirements.txt
 └── pyproject.toml
 ```
@@ -325,8 +333,30 @@ that gap. For full methodology, per-change results, and error analysis, see
 
 ## Contributing
 
-This project is developed as part of GSoC 2026 under the HumanAI Foundation. Contributions and feedback are welcome.
+Contributions are welcome — this project is built to be maintained by people who
+weren't here when it was written.
 
+Start with **[CONTRIBUTING.md](CONTRIBUTING.md)**. It covers environment setup,
+the repository layout, and the rules for changing the tagging engine — most
+importantly, that any change to synonyms, thresholds, or a tagging layer needs
+before/after gold-standard evaluation numbers. Accuracy regressions are easy to
+introduce and invisible without measuring.
+
+Good first contributions:
+
+- **Tagging quality reports.** Found a tag that's plainly wrong? File a
+  [tagging quality issue](.github/ISSUE_TEMPLATE/tagging_quality.yml) with the
+  triggering text. These become evaluation cases and are genuinely useful.
+- **A second annotator pass.** Inter-annotator agreement is the project's
+  biggest documented methodological gap — see
+  [ANNOTATION_CODEBOOK.md](ANNOTATION_CODEBOOK.md).
+- **New data sources.** `ingestion/` is designed so a new connector only has to
+  emit records that `normalisation/` can canonicalise.
+
+Please also read the [Code of Conduct](CODE_OF_CONDUCT.md). For security issues,
+follow [SECURITY.md](SECURITY.md) rather than opening a public issue.
+
+**Origin**: Google Summer of Code 2026, HumanAI Foundation / University of Alabama ISSR.
 **Mentor**: Dr. Christopher Cotropia (University of Alabama)
 
 ## License
