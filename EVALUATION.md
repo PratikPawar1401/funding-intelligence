@@ -178,6 +178,97 @@ V3's numbers above were reproducible in isolation, but two measurement-infrastru
 
 ---
 
+## 4b. Boilerplate Filtering — A Mostly Negative Result
+
+FOA text is part programme description, part agency administrative template
+(submission rules, deadline tables, eligibility legalese, policy
+cross-references). Error analysis showed the tagger scanning both as one blob:
+
+```
+"Deadline date First Wednesday in November, Annually Thereafter 2027..."
+    -> tagged "Partnerships for the Goals" (cosine 0.35)
+"please refer to PAPPG Chapter II.E.9. *Who May Submit Proposals..."
+    -> tagged "International Affairs" (cosine 0.34)
+```
+
+`normalisation/boilerplate.py` was built to strip these, with patterns grouped
+so each could be measured on its own. The hypothesis was that removing
+non-content text would substantially raise precision. **It largely did not.**
+
+| Group applied alone | Gold F1 | Δ |
+|---|---|---|
+| Baseline (no stripping) | 0.500 | — |
+| `markup` (HTML tags, entities, attribute values) | 0.507 | **+0.007** |
+| `deadlines` (due-date tables, cutoff times) | 0.502 | +0.002 |
+| `eligibility` ("Who May Submit" block) | 0.495 | −0.005 |
+| `procedural` (PAPPG refs, cognizant officer) | 0.495 | −0.005 |
+| All groups together | 0.500 | +0.000 |
+
+### Why it failed, and what that revealed
+
+The patterns are *correct* about what constitutes boilerplate — the eligibility
+block genuinely appears in 46 of 131 FOAs and genuinely contains no research
+content. The problem is structural:
+
+**The tagger emits up to N tags per category regardless of input.** Deleting
+the text that triggered a false positive doesn't reduce the tag count; it
+promotes the next candidate into the freed slot, which is frequently also
+wrong. Applying every group moved false positives only 75 → 69 while costing
+two true positives.
+
+This reframed the problem. Over-tagging (6.3 tags/FOA emitted vs 4.0 in the
+gold standard) is a property of the **emission policy**, not the input text.
+Measuring the controls directly:
+
+| Confidence floor (L2) | Cap 3 | Cap 2 | Cap 1 |
+|---|---|---|---|
+| none | 0.500 | **0.511** | 0.467 |
+| ≥ 0.40 | 0.497 | 0.506 | 0.437 |
+| ≥ 0.45 | 0.450 | 0.458 | 0.379 |
+| ≥ 0.50 | 0.408 | 0.416 | 0.328 |
+
+Two things worth recording:
+
+1. **Every confidence floor hurts.** Layer 2 cosine values are compressed —
+   genuine matches sit at 0.35–0.50, the same band as the noise — so any floor
+   removes signal as fast as it removes errors. That is a diagnostic about the
+   embedding model, not the threshold: a general-purpose encoder does not
+   separate this domain's concepts sharply enough for absolute-score filtering.
+   Fine-tuning on FOA text is the real fix, not more tuning.
+2. **Tightening the cap 3 → 2 gives +0.011**, the largest single lever found.
+   It is a genuine precision/recall trade (fewer tags surfaced per FOA), tuned
+   on 20 FOAs, and is **not currently applied** — see below.
+
+### What was kept
+
+Only `markup` stripping is enabled in the pipeline (`DEFAULT_GROUPS`). It is
+justified on principle as well as measurement: descriptions are stored with raw
+HTML, so `<ul type="disc">` and `href` URLs were being fed to the taggers as
+content. Unusually for these changes, it improved precision *and* recall
+(0.409 → 0.414, 0.642 → 0.654) rather than trading one for the other.
+
+The text-level pattern groups are retained but disabled, with their measurements
+recorded in the module docstring — the negative result is worth preserving so
+the next person doesn't repeat the experiment.
+
+### Global Metrics (V5)
+
+| Metric | V4 | V5 (markup stripping) |
+|---|---|---|
+| **Precision** | 0.409 | **0.414** |
+| **Recall** | 0.642 | **0.654** |
+| **F1** | 0.500 | **0.507** |
+
+`sponsor_theme` F1 0.635 → 0.656; other categories unchanged.
+
+> **Caveat.** A +0.007 movement on a 20-FOA / 81-tag gold set is roughly one
+> tag decision. The markup change is defensible on its own merits regardless of
+> the number. The cap change is not shipped precisely because +0.011 on this
+> set is within the noise the set can resolve — it needs a larger gold standard
+> before it can be justified as an improvement rather than a preference.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:

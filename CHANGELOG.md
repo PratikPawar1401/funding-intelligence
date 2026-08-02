@@ -12,6 +12,12 @@ Research (ISSR).
 ## [Unreleased]
 
 ### Added
+- `normalisation/boilerplate.py` — administrative boilerplate removal before
+  tagging. Only HTML markup stripping is enabled by default; the text-level
+  pattern groups (eligibility blocks, deadline tables, PAPPG references) are
+  retained but disabled because measurement showed they don't improve tagging.
+  See `EVALUATION.md` §4b for why, and the module docstring for per-group
+  numbers.
 - `grant_matcher.py` — researcher profile → ranked FOA matching using the hybrid
   relevance score (`0.7 × cosine + 0.3 × tag_overlap`) documented in
   `MATCHING.md`. Retrieves a wider FAISS candidate pool than requested before
@@ -82,9 +88,9 @@ Gold-standard metrics (20-FOA hand-labelled set) across this work:
 
 | Metric | Before | After |
 |---|---|---|
-| Precision | 0.371 | 0.409 |
-| Recall | 0.642 | 0.642 |
-| F1 | 0.471 | **0.500** |
+| Precision | 0.371 | 0.414 |
+| Recall | 0.642 | 0.654 |
+| F1 | 0.471 | **0.507** |
 
 Largest per-category gain: `method` F1 0.250 → 0.370. See `EVALUATION.md` §4a
 for the per-change breakdown, including one candidate threshold change that was

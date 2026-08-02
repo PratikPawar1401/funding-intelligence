@@ -2,12 +2,12 @@
   "eval_set": "eval_set_gold.json",
   "total_foas_evaluated": 20,
   "global": {
-    "precision": 0.409,
-    "recall": 0.642,
-    "f1": 0.5,
-    "tp": 52,
+    "precision": 0.414,
+    "recall": 0.654,
+    "f1": 0.507,
+    "tp": 53,
     "fp": 75,
-    "fn": 29
+    "fn": 28
   },
   "per_category": {
     "method": {
@@ -43,12 +43,12 @@
       "fn": 7
     },
     "sponsor_theme": {
-      "precision": 0.588,
-      "recall": 0.69,
-      "f1": 0.635,
-      "tp": 20,
+      "precision": 0.6,
+      "recall": 0.724,
+      "f1": 0.656,
+      "tp": 21,
       "fp": 14,
-      "fn": 9
+      "fn": 8
     }
   }
 }

@@ -10,6 +10,7 @@ import logging
 from typing import Any, Dict, List, Set
 
 from ..config import Config
+from ..normalisation.boilerplate import strip_boilerplate
 from ..ontology.store import OntologyStore
 from .cfda_crosswalk import apply_cfda_crosswalk
 from .evidence import TagEvidence
@@ -86,6 +87,11 @@ class TaggerPipeline:
             record.get("additional_info", ""),
         ]
         full_text = " ".join(p for p in text_parts if p)
+
+        # Descriptions are stored with raw HTML. Tag names and attribute values
+        # ("disc", "circle", href URLs) are tokens both taggers would otherwise
+        # treat as content.
+        full_text = strip_boilerplate(full_text)
 
         if not full_text.strip():
             return []
