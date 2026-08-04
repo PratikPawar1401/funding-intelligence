@@ -8,11 +8,12 @@ Confidence is always 1.0 for matches at this layer.
 """
 
 import logging
-from typing import Dict, List, Set
+from typing import Dict, FrozenSet, List, Optional, Set, Tuple
 
 import spacy
 from spacy.matcher import PhraseMatcher
-from spacy.tokens import Doc
+from spacy.tokens import Doc, Span
+from spacy.util import filter_spans
 
 from ..ontology.store import OntologyConcept, OntologyStore
 from .evidence import TagEvidence
@@ -78,30 +79,64 @@ class L1Tagger:
             len(concepts),
         )
 
-    def tag_text(self, text: str) -> List[TagEvidence]:
+    def tag_text(
+        self,
+        text: str,
+        excluded_spans: Optional[List[Tuple[int, int, FrozenSet[str]]]] = None,
+    ) -> List[TagEvidence]:
         """
         Scan text and return evidence for all matched concepts.
+
+        `excluded_spans` suppresses categories over character ranges, given as
+        `(start_char, end_char, categories)`, so a section can be disqualified
+        from producing certain tags without being removed from the text —
+        removing it would shift Layer 2's chunk boundaries.
         """
         if not text or not self.matcher or not self.nlp:
             return []
 
         doc: Doc = self.nlp(text)
-        matches = self.matcher(doc)
+
+        # Keep only the longest match where several overlap at one position.
+        # The matcher reports both a concept's label and its synonyms, so
+        # "rural communities" also produces a bare "rural" hit at the same
+        # place. The bare hit is reported first, is correctly rejected by the
+        # modifier check below as an adjective, and used to consume the
+        # concept's one slot — silently hiding the full-label match that would
+        # have been accepted. filter_spans prefers the longest span, so the
+        # label wins over its own synonym.
+        spans = [
+            Span(doc, start, end, label=match_id)
+            for match_id, start, end in self.matcher(doc)
+        ]
 
         evidence_list: List[TagEvidence] = []
         seen_concepts: Set[str] = set()
 
-        for match_id, start, end in matches:
-            concept_id = self.nlp.vocab.strings[match_id]
+        for span in filter_spans(spans):
+            start, end = span.start, span.end
+            concept_id = self.nlp.vocab.strings[span.label]
 
             # Only record the first occurrence per concept to avoid duplicate spam
             if concept_id in seen_concepts:
                 continue
 
-            seen_concepts.add(concept_id)
             concept = self.concept_lookup.get(concept_id)
             if not concept:
                 continue
+
+            # Checked before the concept is marked as seen, so a match falling
+            # in an excluded region doesn't block a legitimate one later in the
+            # document.
+            if excluded_spans:
+                match_start = doc[start].idx
+                if any(
+                    lo <= match_start < hi and concept.category in categories
+                    for lo, hi, categories in excluded_spans
+                ):
+                    continue
+
+            seen_concepts.add(concept_id)
 
             # Contextual Dependency Checks
             is_valid = True
@@ -123,6 +158,15 @@ class L1Tagger:
             # Single-word terms that frequently appear as modifiers in compound nouns
             # where the concept doesn't actually apply. E.g. "food security" ≠ National Defense,
             # "machine learning" ≠ Quality Education, "housing insecure" ≠ Housing policy.
+            #
+            # Restricted to single-token matches, which is what the heuristic was
+            # always described as covering. Without that guard it also rejected
+            # multi-word exact label matches whenever the phrase's head noun
+            # happened to be an ambiguous word: "machine learning" was discarded
+            # because "learning" heads a compound, and the six-token match on
+            # "good health and well-being" because "health" sits in a
+            # prepositional phrase. A multi-word match is specific enough that
+            # the surrounding syntax is not evidence against it.
             ambiguous_terms = {
                 "ecosystem", "travel", "environment", "system", "space", "model",
                 "security", "learning", "education", "equity", "housing",
@@ -130,7 +174,7 @@ class L1Tagger:
                 "rural", "urban", "student", "veteran",
                 "statistics", "transportation", "transport",
             }
-            if is_valid and root_token.text.lower() in ambiguous_terms:
+            if is_valid and len(match_span) == 1 and root_token.text.lower() in ambiguous_terms:
                 # If the match is a single token used as a modifier/compound, reject it.
                 # "npadvmod" catches hyphenated compound-adjective patterns like
                 # "energy-efficient system components", where "energy" modifies

@@ -10,8 +10,9 @@ Includes precomputation utilities to cache ontology embeddings.
 
 import json
 import logging
+import re
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, FrozenSet, List, Optional, Tuple
 
 import numpy as np
 
@@ -128,28 +129,81 @@ class L2Tagger:
 
     def chunk_text(self, text: str, chunk_size: int = 250, overlap: int = 50) -> List[str]:
         """Split text into overlapping chunks (words)."""
-        words = text.split()
+        return [c for c, _start, _end in self.chunk_text_with_spans(text, chunk_size, overlap)]
+
+    def chunk_text_with_spans(
+        self, text: str, chunk_size: int = 250, overlap: int = 50
+    ) -> List[Tuple[str, int, int]]:
+        """
+        Chunk text, also returning each chunk's character span in the original.
+
+        The spans let a caller suppress specific categories for the part of a
+        document they don't apply to (for example, not inferring target
+        populations from an eligibility section) without deleting that text.
+        Deleting it would shift every downstream chunk boundary and perturb
+        categories that had nothing to do with the exclusion.
+
+        Chunk strings are whitespace-normalised, matching the original
+        behaviour, so they will not be byte-identical to `text[start:end]`.
+        """
+        words = [(m.group(), m.start(), m.end()) for m in re.finditer(r"\S+", text)]
         if not words:
             return []
 
-        chunks = []
+        chunks: List[Tuple[str, int, int]] = []
         for i in range(0, len(words), chunk_size - overlap):
-            chunk = " ".join(words[i:i + chunk_size])
-            chunks.append(chunk)
+            window = words[i:i + chunk_size]
+            if not window:
+                break
+            chunks.append((" ".join(w[0] for w in window), window[0][1], window[-1][2]))
             if i + chunk_size >= len(words):
                 break
         return chunks
 
-    def tag_text(self, text: str) -> List[TagEvidence]:
+    @staticmethod
+    def _suppressed_categories(
+        chunk_start: int,
+        chunk_end: int,
+        excluded_spans: Optional[List[Tuple[int, int, FrozenSet[str]]]],
+    ) -> FrozenSet[str]:
+        """Categories to suppress for a chunk, by majority character overlap."""
+        if not excluded_spans:
+            return frozenset()
+
+        chunk_len = max(chunk_end - chunk_start, 1)
+        suppressed: set = set()
+        for lo, hi, categories in excluded_spans:
+            overlap = min(chunk_end, hi) - max(chunk_start, lo)
+            if overlap > 0 and overlap / chunk_len > 0.5:
+                suppressed |= set(categories)
+        return frozenset(suppressed)
+
+    def tag_text(
+        self,
+        text: str,
+        excluded_spans: Optional[List[Tuple[int, int, FrozenSet[str]]]] = None,
+    ) -> List[TagEvidence]:
         """
         Embed text chunks and find ontology concepts above threshold.
+
+        `excluded_spans` suppresses categories over character ranges, given as
+        `(start_char, end_char, categories)`. A chunk is treated as belonging to
+        an excluded region when the majority of its characters fall inside it —
+        chunks overlap by design, so requiring only partial overlap would
+        suppress chunks that are mostly ordinary programme text.
         """
         if not text or not self.model or not self.concept_embeddings:
             return []
 
-        chunks = self.chunk_text(text)
-        if not chunks:
+        spans = self.chunk_text_with_spans(text)
+        if not spans:
             return []
+
+        chunks = [c for c, _s, _e in spans]
+        suppressed_per_chunk = [
+            self._suppressed_categories(start, end, excluded_spans)
+            for _c, start, end in spans
+        ]
 
         # Embed all chunks at once
         chunk_embs = self.model.encode(chunks, convert_to_numpy=True)
@@ -158,10 +212,14 @@ class L2Tagger:
 
         # Compare each chunk against all concepts
         for i, chunk_emb in enumerate(chunk_embs):
+            suppressed = suppressed_per_chunk[i]
             for concept_id, concept_emb in self.concept_embeddings.items():
-                sim = cosine_similarity(chunk_emb, concept_emb)
-
                 concept = self.concept_lookup[concept_id]
+
+                if concept.category in suppressed:
+                    continue
+
+                sim = cosine_similarity(chunk_emb, concept_emb)
 
                 # Determine threshold: per-concept override takes priority
                 # over the category default (e.g. a concept that is

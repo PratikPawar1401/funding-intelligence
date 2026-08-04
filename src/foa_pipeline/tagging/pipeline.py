@@ -20,6 +20,10 @@ from .layer3_llm import L3Tagger
 
 logger = logging.getLogger(__name__)
 
+# Categories that must not be inferred from an FOA's eligibility section.
+# Eligibility says who may apply; population says who the research serves.
+ELIGIBILITY_EXCLUDED_CATEGORIES = frozenset({"population"})
+
 
 class TaggerPipeline:
     """Coordinates the full semantic tagging pipeline."""
@@ -79,28 +83,47 @@ class TaggerPipeline:
         if not self.is_initialized:
             self.initialize()
 
-        # Combine fields to scan
-        text_parts = [
-            record.get("title", ""),
-            record.get("program_description", ""),
-            record.get("eligibility_description", ""),
-            record.get("additional_info", ""),
-        ]
-        full_text = " ".join(p for p in text_parts if p)
+        # Fields are stripped individually and then joined, so the eligibility
+        # section's offsets in the joined string are known. Field order is
+        # unchanged, so both layers see exactly the text — and Layer 2 the same
+        # chunk boundaries — that they saw before.
+        #
+        # Descriptions are stored with raw HTML; tag names and attribute values
+        # ("disc", "circle", href URLs) would otherwise be treated as content.
+        head = strip_boilerplate(
+            " ".join(
+                p
+                for p in (record.get("title", ""), record.get("program_description", ""))
+                if p
+            )
+        )
+        eligibility_text = strip_boilerplate(record.get("eligibility_description", ""))
+        tail = strip_boilerplate(record.get("additional_info", ""))
 
-        # Descriptions are stored with raw HTML. Tag names and attribute values
-        # ("disc", "circle", href URLs) are tokens both taggers would otherwise
-        # treat as content.
-        full_text = strip_boilerplate(full_text)
+        full_text = " ".join(s for s in (head, eligibility_text, tail) if s)
 
         if not full_text.strip():
             return []
 
+        # ONTOLOGY.md 2.3 defines a population as who the research is about or
+        # serves; eligibility text says who may *apply*. Inferring populations
+        # from it is wrong by definition, and was the largest single source of
+        # population false positives on the gold set — applicant lists such as
+        # "Tribal Nations: An American Indian or Alaska Native tribe, band..."
+        # and "Minority-serving institutions, as defined in 42 USC...".
+        excluded_spans = []
+        if eligibility_text:
+            start = (len(head) + 1) if head else 0
+            excluded_spans.append(
+                (start, start + len(eligibility_text), ELIGIBILITY_EXCLUDED_CATEGORIES)
+            )
+        spans = excluded_spans or None
+
         # 1. Run L1 (Exact/Synonyms)
-        l1_evidence = self.l1.tag_text(full_text)
+        l1_evidence = self.l1.tag_text(full_text, excluded_spans=spans)
 
         # 2. Run L2 (Semantic Embedding)
-        l2_evidence = self.l2.tag_text(full_text)
+        l2_evidence = self.l2.tag_text(full_text, excluded_spans=spans)
 
         # 3. Merge and Disambiguate
         merged = self._merge_and_disambiguate(l1_evidence, l2_evidence, full_text)

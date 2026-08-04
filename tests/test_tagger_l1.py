@@ -176,6 +176,63 @@ class TestL1TaggerDeduplication:
         assert len(concept_ids) == len(set(concept_ids))
 
 
+class TestL1TaggerExcludedSpans:
+    """Category suppression over character ranges.
+
+    Populations must not be inferred from eligibility text, which states who
+    may apply rather than who the research serves (ONTOLOGY.md 2.3).
+    """
+
+    POPULATION = frozenset({"population"})
+
+    def test_match_inside_excluded_span_is_suppressed(self, l1_tagger):
+        text = "Eligible applicants include rural communities and tribal colleges."
+        span = [(0, len(text), self.POPULATION)]
+
+        without = {ev.concept_id for ev in l1_tagger.tag_text(text)}
+        with_exclusion = {ev.concept_id for ev in l1_tagger.tag_text(text, excluded_spans=span)}
+
+        assert "pop_rural" in without
+        assert "pop_rural" not in with_exclusion
+
+    def test_match_outside_excluded_span_survives(self, l1_tagger):
+        prefix = "This program studies rural communities in depth. "
+        text = prefix + "Eligible applicants include universities."
+        span = [(len(prefix), len(text), self.POPULATION)]
+
+        concept_ids = {ev.concept_id for ev in l1_tagger.tag_text(text, excluded_spans=span)}
+        assert "pop_rural" in concept_ids
+
+    def test_suppressed_match_does_not_block_a_later_valid_one(self, l1_tagger):
+        """
+        The exclusion check runs before the concept is marked as seen. Without
+        that ordering, an eligibility mention would consume the concept's one
+        slot and hide a genuine mention later in the document.
+        """
+        eligibility = "Eligible applicants include rural communities. "
+        body = "The funded research examines rural communities and their health."
+        text = eligibility + body
+        span = [(0, len(eligibility), self.POPULATION)]
+
+        concept_ids = {ev.concept_id for ev in l1_tagger.tag_text(text, excluded_spans=span)}
+        assert "pop_rural" in concept_ids
+
+    def test_other_categories_are_unaffected(self, l1_tagger):
+        text = "Eligible applicants must apply machine learning to climate action."
+        span = [(0, len(text), self.POPULATION)]
+
+        concept_ids = {ev.concept_id for ev in l1_tagger.tag_text(text, excluded_spans=span)}
+        assert "meth_ml" in concept_ids
+        assert "sdg_13" in concept_ids
+
+    def test_no_spans_behaves_as_before(self, l1_tagger):
+        text = "This program supports rural communities and climate action."
+        assert (
+            {ev.concept_id for ev in l1_tagger.tag_text(text)}
+            == {ev.concept_id for ev in l1_tagger.tag_text(text, excluded_spans=None)}
+        )
+
+
 class TestL1TaggerToTagRecord:
     """Test conversion to the FOA JSON schema tag format."""
 

@@ -2,36 +2,36 @@
   "eval_set": "eval_set_gold.json",
   "total_foas_evaluated": 20,
   "global": {
-    "precision": 0.414,
+    "precision": 0.427,
     "recall": 0.654,
-    "f1": 0.507,
+    "f1": 0.517,
     "tp": 53,
-    "fp": 75,
+    "fp": 71,
     "fn": 28
   },
   "per_category": {
     "method": {
-      "precision": 0.357,
-      "recall": 0.455,
-      "f1": 0.4,
-      "tp": 5,
+      "precision": 0.4,
+      "recall": 0.545,
+      "f1": 0.462,
+      "tp": 6,
       "fp": 9,
-      "fn": 6
+      "fn": 5
     },
     "population": {
-      "precision": 0.304,
-      "recall": 0.875,
-      "f1": 0.452,
-      "tp": 7,
-      "fp": 16,
-      "fn": 1
+      "precision": 0.375,
+      "recall": 0.75,
+      "f1": 0.5,
+      "tp": 6,
+      "fp": 10,
+      "fn": 2
     },
     "research_discipline": {
-      "precision": 0.395,
+      "precision": 0.386,
       "recall": 0.739,
-      "f1": 0.515,
+      "f1": 0.507,
       "tp": 17,
-      "fp": 26,
+      "fp": 27,
       "fn": 6
     },
     "research_domain": {
@@ -43,11 +43,11 @@
       "fn": 7
     },
     "sponsor_theme": {
-      "precision": 0.6,
+      "precision": 0.583,
       "recall": 0.724,
-      "f1": 0.656,
+      "f1": 0.646,
       "tp": 21,
-      "fp": 14,
+      "fp": 15,
       "fn": 8
     }
   }
