@@ -88,13 +88,16 @@ Gold-standard metrics (20-FOA hand-labelled set) across this work:
 
 | Metric | Before | After |
 |---|---|---|
-| Precision | 0.371 | 0.414 |
+| Precision | 0.371 | 0.427 |
 | Recall | 0.642 | 0.654 |
-| F1 | 0.471 | **0.507** |
+| F1 | 0.471 | **0.517** |
 
-Largest per-category gain: `method` F1 0.250 → 0.370. See `EVALUATION.md` §4a
-for the per-change breakdown, including one candidate threshold change that was
-tested and rejected for making held-out F1 worse.
+Layer 2 separation AUC 0.633 → 0.666 (added as a second metric because F1 on an
+81-tag set cannot resolve changes this small — see `EVALUATION.md` §4c).
+
+Largest per-category gain: `method` F1 0.250 → 0.462. See `EVALUATION.md` §4a,
+§4b, and §4c for the per-change breakdown, including several candidate changes
+that were tested and rejected for making held-out F1 worse.
 
 ---
 

@@ -269,6 +269,129 @@ the next person doesn't repeat the experiment.
 
 ---
 
+## 4c. V6 — Measuring Separation Instead of Only F1
+
+### Why a second metric was needed
+
+At 20 FOAs and 81 tags, a global F1 movement of ±0.02 is roughly one tag
+decision. That is not enough resolution to tell an improvement from noise, and
+it had already caused wasted effort: the boilerplate work in §4b was predicted
+at +0.05 and delivered +0.007.
+
+`cli diagnose-separation` (`evaluation/diagnostics.py`) measures something F1
+cannot: whether Layer 2 assigns systematically higher cosine scores to correct
+concepts than to incorrect ones, across *every* scored tag rather than only
+those that crossed a threshold. It reports AUC (the probability a random
+correct tag outscores a random incorrect one; 0.5 means the score carries no
+information). Only Layer 2 evidence is considered — Layer 1 always reports 1.0
+and Layer 3 always 0.95.
+
+This required a change to `evaluation/runner.py`, which had been recording
+layer and confidence for false positives but not true positives, making the
+comparison impossible.
+
+### What the baseline revealed
+
+| Category | AUC | Reading |
+|---|---|---|
+| research_discipline | 0.940 | Layer 2 separates these well |
+| sponsor_theme | 0.667 | moderate |
+| **method** | **0.476** | **worse than chance** |
+| **population** | **0.400** | **worse than chance** |
+
+Overall AUC 0.633, mean gap +0.037.
+
+For `method` and `population` the cosine score was *anti-correlated* with
+correctness — higher similarity was slightly more likely to be wrong. That is a
+stronger and more actionable statement than "these categories score badly", and
+it explained their weak F1 better than F1 did.
+
+A related observation: **intra-category concept similarity tracks category
+performance inversely.** Mean pairwise similarity between concept vectors was
+0.308 for `research_discipline` (AUC 0.940) and 0.464 for `research_domain`
+(F1 0.261). When concepts within a category sit too close together in embedding
+space, the tagger cannot discriminate between them. This is a principled way to
+prioritise future ontology work.
+
+### Changes made, and what each did
+
+**1. Concept description enrichment.** `method` and `population` descriptions
+were ~80–110 character unpunctuated fragments, so the label side of the
+dual-encoder had almost nothing to match against. All 45 were rewritten with
+paraphrase diversity, explicit inclusion criteria, and disambiguation clauses
+between overlapping concepts (Indigenous Peoples vs Tribal Communities;
+Children and Youth vs Students). Sources were official definitions and
+`ONTOLOGY.md` — never corpus or eval-set text.
+
+Result: `method` F1 0.370 → 0.400, its Layer 2 false positives 7 → 2. The
+mechanism is identifiable: Citizen Science now carries an explicit negative
+clause ("does not apply to broadening participation, outreach, or public
+engagement"), which is exactly the boilerplate that had been triggering it.
+
+`population` did **not** improve, because the change was aimed at the wrong
+layer. Its errors are Layer 1 exact matches on eligibility lists — *"Tribal
+Nations: An American Indian or Alaska Native tribe, band, nation…"*,
+*"Minority-serving institutions, as defined in 42 §USC…"* — plus one word-sense
+error where a data portal's *"accessibility"* matched People with Disabilities.
+Descriptions only affect Layer 2. Confirmed by the layer split: L1 8 → 8.
+
+A hypothesis that longer descriptions would blur concepts together was tested
+and **disproved**: intra-category similarity moved +0.003 for populations, and
++0.052 for methods, which improved regardless.
+
+**2. Eligibility exclusion.** `ONTOLOGY.md` §2.3 defines a population as who the
+research serves; eligibility text states who may *apply*. Inferring populations
+from it is wrong by definition. Two implementations were measured and reverted
+before one worked:
+
+| Attempt | Global F1 | Population F1 |
+|---|---|---|
+| Scan eligibility as separate text | 0.458 | 0.500 |
+| Suppress in Layer 1 by offset only | 0.500 | 0.414 |
+| **Character-span exclusion in both layers** | **0.515** | **0.500** |
+
+The first attempt got population right but cost 0.049 globally, because
+splitting the string changed Layer 2's chunk boundaries and lost sponsor_theme
+four true positives. The lesson is that *the rule was right and the
+implementation was destructive*: both layers now accept `excluded_spans`,
+suppressing categories over character ranges while leaving the text — and
+therefore the chunking — untouched.
+
+**3. Two Layer 1 recall bugs**, surfaced by three tests that had been failing
+for the entire project and were repeatedly dismissed as pre-existing:
+
+- A concept's short synonym shadowed its own longer label. "Rural Communities"
+  also produces a bare "rural" hit at the same position; the bare hit was
+  reported first, correctly rejected as an adjective, and in being rejected
+  consumed the concept's single slot, hiding the full-label match. Fixed with
+  spaCy's `filter_spans`, which prefers the longest span.
+- The ambiguous-term modifier check, documented as covering "single-word
+  terms", was never length-checked, so it discarded exact multi-token label
+  matches whose head noun happened to be ambiguous — "machine learning"
+  (because "learning" heads a compound) and the six-token "good health and
+  well-being" (because "health" sits in a prepositional phrase).
+
+### Global Metrics (V6)
+
+| Metric | V5 | V6 |
+|---|---|---|
+| **Precision** | 0.414 | **0.427** |
+| **Recall** | 0.654 | 0.654 |
+| **F1** | 0.507 | **0.517** |
+| Layer 2 separation AUC | 0.633 | **0.666** |
+
+Per category: `method` 0.370 → **0.462**, `population` 0.483 → **0.500**,
+`sponsor_theme` 0.656 → 0.646, `research_discipline` 0.515 → 0.507,
+`research_domain` 0.261 unchanged. The two small regressions are one tag each.
+
+> **Caveat.** +0.010 global F1 on an 81-tag set remains within what the set can
+> resolve. The stronger evidence is the separation improvement and the two
+> Layer 1 bugs, which are defects with identified mechanisms and would hold on
+> any corpus. Expanding the gold set remains the precondition for defending
+> movements of this size.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:
