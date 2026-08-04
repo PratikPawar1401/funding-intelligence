@@ -3,21 +3,21 @@
     "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
     "title": "Foundational Research in Robotics",
     "human_tags": [
-      "nsf_cise",
-      "great_05",
-      "nsf_eng",
       "method_04",
-      "method_01"
+      "great_05",
+      "nsf_cise",
+      "method_01",
+      "nsf_eng"
     ],
     "predicted_tags": [
       "method_04",
-      "great_05",
-      "nsf_eng"
+      "nsf_eng",
+      "great_05"
     ],
     "tp": [
       "method_04",
-      "great_05",
-      "nsf_eng"
+      "nsf_eng",
+      "great_05"
     ],
     "fp": [],
     "fn": [
@@ -29,28 +29,28 @@
     "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
     "title": "Circuits and Systems for Communications and Sensing (CSCS)",
     "human_tags": [
-      "nsf_cise",
-      "method_01",
       "great_05",
-      "nsf_eng"
+      "nsf_eng",
+      "method_01",
+      "nsf_cise"
     ],
     "predicted_tags": [
-      "nsf_cise",
+      "nsf_eng",
       "great_08",
       "nsf_bio",
-      "nsf_eng"
+      "nsf_cise"
     ],
     "tp": [
-      "nsf_cise",
-      "nsf_eng"
+      "nsf_eng",
+      "nsf_cise"
     ],
     "fp": [
       "great_08",
       "nsf_bio"
     ],
     "fn": [
-      "method_01",
-      "great_05"
+      "great_05",
+      "method_01"
     ]
   },
   {
@@ -58,27 +58,27 @@
     "title": "SBIR/STTR: Developing Deep Technologies",
     "human_tags": [
       "great_05",
+      "nsf_tip",
       "sdg_09",
-      "pop_19",
-      "nsf_tip"
+      "pop_19"
     ],
     "predicted_tags": [
-      "great_01",
-      "great_05",
-      "nsf_eng",
+      "pop_19",
       "sdg_17",
+      "great_05",
+      "great_01",
       "nsf_tip",
-      "pop_19"
+      "nsf_eng"
     ],
     "tp": [
       "great_05",
-      "pop_19",
-      "nsf_tip"
+      "nsf_tip",
+      "pop_19"
     ],
     "fp": [
+      "nsf_eng",
       "great_01",
-      "sdg_17",
-      "nsf_eng"
+      "sdg_17"
     ],
     "fn": [
       "sdg_09"
@@ -88,27 +88,27 @@
     "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
     "title": "Catalysis",
     "human_tags": [
-      "great_05",
       "great_04",
+      "great_05",
       "nsf_mps"
     ],
     "predicted_tags": [
       "great_05",
-      "nsf_eng",
       "sdg_07",
       "nsf_mps",
       "nsf_tip",
+      "nsf_eng",
       "method_17"
     ],
     "tp": [
-      "great_05",
-      "nsf_mps"
+      "nsf_mps",
+      "great_05"
     ],
     "fp": [
-      "method_17",
       "nsf_tip",
       "nsf_eng",
-      "sdg_07"
+      "sdg_07",
+      "method_17"
     ],
     "fn": [
       "great_04"
@@ -119,80 +119,80 @@
     "title": "Sociology",
     "human_tags": [
       "sdg_10",
-      "nsf_sbe",
-      "great_05",
       "method_14",
-      "method_06"
+      "great_05",
+      "method_06",
+      "nsf_sbe"
     ],
     "predicted_tags": [
-      "great_09",
-      "nsf_edu",
-      "method_15",
-      "method_09",
-      "nsf_sbe",
-      "pop_16",
-      "great_05",
-      "nsf_eng",
-      "method_07",
       "pop_08",
+      "great_09",
       "great_13",
-      "pop_19"
+      "pop_19",
+      "great_05",
+      "pop_16",
+      "nsf_sbe",
+      "method_09",
+      "method_07",
+      "nsf_eng",
+      "method_15",
+      "nsf_edu"
     ],
     "tp": [
       "great_05",
       "nsf_sbe"
     ],
     "fp": [
-      "great_09",
-      "nsf_edu",
-      "method_15",
-      "method_09",
-      "pop_16",
-      "nsf_eng",
-      "method_07",
       "pop_08",
+      "nsf_eng",
+      "great_09",
+      "pop_19",
+      "pop_16",
+      "method_09",
+      "method_07",
       "great_13",
-      "pop_19"
+      "method_15",
+      "nsf_edu"
     ],
     "fn": [
       "sdg_10",
-      "method_14",
-      "method_06"
+      "method_06",
+      "method_14"
     ]
   },
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
     "human_tags": [
-      "great_09",
-      "nsf_edu",
-      "sdg_04",
-      "great_05",
       "pop_08",
-      "pop_12"
+      "great_09",
+      "great_05",
+      "pop_12",
+      "sdg_04",
+      "nsf_edu"
     ],
     "predicted_tags": [
+      "pop_08",
       "great_09",
-      "nsf_edu",
-      "great_04",
-      "great_05",
       "nsf_geo",
+      "great_05",
+      "pop_12",
+      "great_04",
       "sdg_13",
       "nsf_eng",
       "method_17",
-      "pop_08",
-      "pop_12"
+      "nsf_edu"
     ],
     "tp": [
-      "great_09",
-      "nsf_edu",
-      "great_05",
       "pop_08",
-      "pop_12"
+      "great_09",
+      "great_05",
+      "pop_12",
+      "nsf_edu"
     ],
     "fp": [
-      "great_04",
       "nsf_geo",
+      "great_04",
       "sdg_13",
       "nsf_eng",
       "method_17"
@@ -205,67 +205,67 @@
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
     "human_tags": [
-      "great_09",
-      "nsf_edu",
-      "sdg_10",
-      "sdg_04",
       "pop_08",
-      "pop_12"
+      "sdg_10",
+      "great_09",
+      "pop_12",
+      "sdg_04",
+      "nsf_edu"
     ],
     "predicted_tags": [
-      "great_09",
-      "nsf_edu",
-      "method_09",
-      "great_08",
-      "nsf_eng",
-      "sdg_17",
-      "nsf_tip",
-      "pop_07",
       "pop_08",
+      "great_09",
       "great_13",
-      "pop_10"
+      "great_08",
+      "sdg_17",
+      "pop_07",
+      "method_09",
+      "nsf_tip",
+      "nsf_eng",
+      "pop_10",
+      "nsf_edu"
     ],
     "tp": [
+      "pop_08",
       "great_09",
-      "nsf_edu",
-      "pop_08"
+      "nsf_edu"
     ],
     "fp": [
-      "method_09",
-      "great_08",
       "nsf_eng",
+      "great_08",
       "sdg_17",
-      "nsf_tip",
       "pop_07",
+      "method_09",
+      "nsf_tip",
       "great_13",
       "pop_10"
     ],
     "fn": [
-      "pop_12",
       "sdg_10",
-      "sdg_04"
+      "sdg_04",
+      "pop_12"
     ]
   },
   {
     "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
     "title": "Robert Noyce Teacher Scholarship Program",
     "human_tags": [
+      "sdg_04",
       "great_09",
-      "nsf_edu",
       "pop_12",
-      "sdg_04"
+      "nsf_edu"
     ],
     "predicted_tags": [
       "great_09",
-      "nsf_edu",
-      "nsf_eng",
+      "pop_12",
       "nsf_mps",
-      "pop_12"
+      "nsf_eng",
+      "nsf_edu"
     ],
     "tp": [
       "great_09",
-      "nsf_edu",
-      "pop_12"
+      "pop_12",
+      "nsf_edu"
     ],
     "fp": [
       "nsf_mps",
@@ -279,25 +279,25 @@
     "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
     "title": "Unleashing Tribal Energy Development",
     "human_tags": [
-      "pop_07",
       "great_04",
+      "pop_07",
       "sdg_07"
     ],
     "predicted_tags": [
-      "great_04",
       "sdg_07",
-      "great_06",
+      "great_04",
       "pop_07",
+      "great_06",
       "pop_20"
     ],
     "tp": [
-      "pop_07",
       "great_04",
-      "sdg_07"
+      "sdg_07",
+      "pop_07"
     ],
     "fp": [
-      "pop_20",
-      "great_06"
+      "great_06",
+      "pop_20"
     ],
     "fn": []
   },
@@ -307,28 +307,28 @@
     "human_tags": [
       "sdg_09",
       "great_05",
-      "sdg_11",
-      "nsf_eng"
+      "nsf_eng",
+      "sdg_11"
     ],
     "predicted_tags": [
-      "sdg_09",
       "sdg_12",
-      "great_05",
       "nsf_geo",
       "great_08",
+      "great_05",
+      "sdg_09",
       "sdg_13",
-      "nsf_eng",
-      "great_06"
+      "great_06",
+      "nsf_eng"
     ],
     "tp": [
       "great_05",
-      "sdg_09",
-      "nsf_eng"
+      "nsf_eng",
+      "sdg_09"
     ],
     "fp": [
       "sdg_12",
-      "great_08",
       "nsf_geo",
+      "great_08",
       "sdg_13",
       "great_06"
     ],
@@ -340,16 +340,16 @@
     "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
     "title": "Cognitive Neuroscience",
     "human_tags": [
-      "nsf_sbe",
+      "great_02",
       "method_08",
       "great_05",
       "nsf_bio",
-      "great_02"
+      "nsf_sbe"
     ],
     "predicted_tags": [
+      "great_05",
       "method_09",
-      "pop_12",
-      "great_05"
+      "pop_12"
     ],
     "tp": [
       "great_05"
@@ -359,25 +359,25 @@
       "pop_12"
     ],
     "fn": [
-      "nsf_bio",
-      "nsf_sbe",
+      "method_08",
       "great_02",
-      "method_08"
+      "nsf_sbe",
+      "nsf_bio"
     ]
   },
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
     "title": "Electrochemical Systems",
     "human_tags": [
-      "great_04",
       "great_05",
-      "nsf_eng",
       "sdg_07",
-      "nsf_mps"
+      "great_04",
+      "nsf_mps",
+      "nsf_eng"
     ],
     "predicted_tags": [
-      "sdg_13",
       "nsf_mps",
+      "sdg_13",
       "nsf_eng",
       "sdg_07"
     ],
@@ -390,25 +390,25 @@
       "sdg_13"
     ],
     "fn": [
-      "great_05",
-      "great_04"
+      "great_04",
+      "great_05"
     ]
   },
   {
     "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
     "title": "Documenting Endangered Languages",
     "human_tags": [
-      "pop_07",
-      "great_05",
       "method_14",
-      "nsf_sbe"
+      "great_05",
+      "nsf_sbe",
+      "pop_07"
     ],
     "predicted_tags": [
-      "nsf_eng",
       "sdg_17",
       "pop_07",
-      "pop_20",
-      "great_10"
+      "great_10",
+      "nsf_eng",
+      "pop_20"
     ],
     "tp": [
       "pop_07"
@@ -416,48 +416,48 @@
     "fp": [
       "pop_20",
       "great_10",
-      "sdg_17",
-      "nsf_eng"
+      "nsf_eng",
+      "sdg_17"
     ],
     "fn": [
-      "nsf_sbe",
+      "method_14",
       "great_05",
-      "method_14"
+      "nsf_sbe"
     ]
   },
   {
     "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
     "title": "EPSCoR FEC",
     "human_tags": [
-      "great_09",
-      "great_05"
+      "great_05",
+      "great_09"
     ],
     "predicted_tags": [
-      "great_09",
-      "method_09",
-      "great_05",
-      "nsf_eng",
-      "nsf_mps",
-      "sdg_17",
-      "nsf_tip",
-      "great_06",
-      "pop_07",
       "pop_08",
+      "great_09",
+      "sdg_17",
+      "great_05",
+      "nsf_mps",
+      "pop_07",
+      "method_09",
+      "great_06",
+      "nsf_tip",
+      "nsf_eng",
       "pop_20"
     ],
     "tp": [
-      "great_09",
-      "great_05"
+      "great_05",
+      "great_09"
     ],
     "fp": [
-      "method_09",
-      "nsf_eng",
-      "nsf_mps",
-      "sdg_17",
-      "nsf_tip",
-      "great_06",
-      "pop_07",
       "pop_08",
+      "sdg_17",
+      "nsf_mps",
+      "pop_07",
+      "method_09",
+      "great_06",
+      "nsf_tip",
+      "nsf_eng",
       "pop_20"
     ],
     "fn": []
@@ -466,32 +466,32 @@
     "foa_id": "b24f1220-a15b-4056-bf94-28aeed4eea65",
     "title": "Electronic, Photonic, Magnetic, and Quantum Devices (EPMQD)",
     "human_tags": [
-      "great_05",
       "great_04",
-      "nsf_mps",
-      "nsf_eng"
+      "great_05",
+      "nsf_eng",
+      "nsf_mps"
     ],
     "predicted_tags": [
-      "nsf_cise",
-      "great_04",
-      "sdg_03",
-      "nsf_eng",
       "method_13",
-      "method_01"
+      "great_04",
+      "nsf_cise",
+      "method_01",
+      "nsf_eng",
+      "sdg_03"
     ],
     "tp": [
       "great_04",
       "nsf_eng"
     ],
     "fp": [
-      "nsf_cise",
-      "method_01",
       "sdg_03",
-      "method_13"
+      "method_13",
+      "method_01",
+      "nsf_cise"
     ],
     "fn": [
-      "great_05",
-      "nsf_mps"
+      "nsf_mps",
+      "great_05"
     ]
   },
   {
@@ -499,20 +499,20 @@
     "title": "Infrastructure Innovation for Biological Research",
     "human_tags": [
       "great_05",
-      "nsf_bio",
       "great_02",
-      "method_19"
+      "method_19",
+      "nsf_bio"
     ],
     "predicted_tags": [
       "great_05",
+      "method_19",
       "nsf_geo",
-      "nsf_bio",
-      "method_19"
+      "nsf_bio"
     ],
     "tp": [
       "great_05",
-      "nsf_bio",
-      "method_19"
+      "method_19",
+      "nsf_bio"
     ],
     "fp": [
       "nsf_geo"
@@ -526,29 +526,29 @@
     "title": "Science of Science: Biomedical Research Enterprise",
     "human_tags": [
       "great_05",
-      "nsf_sbe",
       "great_02",
-      "method_21"
+      "method_21",
+      "nsf_sbe"
     ],
     "predicted_tags": [
-      "method_09",
-      "nsf_sbe",
-      "great_05",
-      "nsf_eng",
-      "nsf_bio",
       "great_02",
-      "method_21"
+      "great_05",
+      "nsf_bio",
+      "nsf_sbe",
+      "method_21",
+      "method_09",
+      "nsf_eng"
     ],
     "tp": [
       "great_05",
-      "nsf_sbe",
       "great_02",
-      "method_21"
+      "method_21",
+      "nsf_sbe"
     ],
     "fp": [
+      "nsf_eng",
       "method_09",
-      "nsf_bio",
-      "nsf_eng"
+      "nsf_bio"
     ],
     "fn": []
   },
@@ -556,22 +556,22 @@
     "foa_id": "facd39aa-a0de-4980-bd40-a35ab68f8811",
     "title": "Correctness for Scientific Computing Systems",
     "human_tags": [
-      "method_13",
-      "great_05",
       "great_04",
+      "great_05",
+      "method_13",
       "nsf_cise"
     ],
     "predicted_tags": [
-      "nsf_cise",
-      "great_04",
       "great_05",
       "method_13",
-      "nsf_mps"
+      "great_04",
+      "nsf_mps",
+      "nsf_cise"
     ],
     "tp": [
-      "method_13",
-      "great_05",
       "great_04",
+      "great_05",
+      "method_13",
       "nsf_cise"
     ],
     "fp": [
@@ -583,35 +583,35 @@
     "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
     "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
     "human_tags": [
-      "method_17",
       "great_05",
-      "nsf_cise"
+      "nsf_cise",
+      "method_17"
     ],
     "predicted_tags": [
-      "nsf_cise",
-      "method_17",
-      "great_05",
       "nsf_geo",
-      "nsf_tip",
-      "great_06",
+      "great_05",
+      "nsf_cise",
       "pop_07",
-      "pop_20",
       "great_10",
-      "pop_10"
+      "great_06",
+      "nsf_tip",
+      "pop_10",
+      "method_17",
+      "pop_20"
     ],
     "tp": [
-      "method_17",
       "great_05",
-      "nsf_cise"
+      "nsf_cise",
+      "method_17"
     ],
     "fp": [
-      "pop_10",
       "nsf_geo",
       "nsf_tip",
-      "great_06",
       "pop_07",
-      "pop_20",
-      "great_10"
+      "great_06",
+      "great_10",
+      "pop_10",
+      "pop_20"
     ],
     "fn": []
   },
@@ -619,20 +619,20 @@
     "foa_id": "160c5a72-dfcd-4061-995e-a05e1d239145",
     "title": "Division of Chemistry: Disciplinary Research Programs",
     "human_tags": [
-      "great_05",
-      "nsf_mps"
+      "nsf_mps",
+      "great_05"
     ],
     "predicted_tags": [
       "great_05",
-      "nsf_geo",
-      "nsf_eng"
+      "nsf_eng",
+      "nsf_geo"
     ],
     "tp": [
       "great_05"
     ],
     "fp": [
-      "nsf_geo",
-      "nsf_eng"
+      "nsf_eng",
+      "nsf_geo"
     ],
     "fn": [
       "nsf_mps"

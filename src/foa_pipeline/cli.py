@@ -85,6 +85,11 @@ def _parse_args() -> argparse.Namespace:
         help="Evaluate DB tags against the hand-labelled gold set "
         "(default: re-tag in-memory against the LLM-generated silver set)",
     )
+    subparsers.add_parser(
+        "diagnose-separation",
+        help="Report how well Layer 2 cosine scores separate correct from "
+        "incorrect tags (run an evaluation first)",
+    )
     curate_p = subparsers.add_parser(
         "curate-eval-set", help="Generate a stratified sample of FOAs for evaluation"
     )
@@ -158,6 +163,9 @@ def main() -> None:
 
     elif args.command == "evaluate":
         _run_evaluate(args)
+
+    elif args.command == "diagnose-separation":
+        _run_diagnose_separation(config)
 
     elif args.command == "pdf-parse":
         _run_pdf_parse(args)
@@ -571,6 +579,19 @@ def _run_evaluate(args) -> None:
     from .evaluation.runner import run_evaluation
 
     run_evaluation(use_gold=args.gold, use_db_tags=args.gold)
+
+
+def _run_diagnose_separation(config) -> None:
+    """Report how well Layer 2 scores separate correct from incorrect tags."""
+    from .evaluation.diagnostics import cosine_separation, format_separation_report
+
+    try:
+        report = cosine_separation(config.evaluation_dir)
+    except (FileNotFoundError, ValueError) as exc:
+        logging.error("%s", exc)
+        return
+
+    print(format_separation_report(report))
 
 
 def _run_server(config) -> None:

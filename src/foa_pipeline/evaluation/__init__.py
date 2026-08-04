@@ -4,6 +4,7 @@
 error-analysis artefacts; `metrics` holds the reusable scoring helpers.
 """
 
+from .diagnostics import cosine_separation, format_separation_report
 from .metrics import compute_metrics, format_eval_report, load_evaluation_set
 from .runner import calculate_metrics, run_evaluation
 
@@ -13,4 +14,6 @@ __all__ = [
     "compute_metrics",
     "load_evaluation_set",
     "format_eval_report",
+    "cosine_separation",
+    "format_separation_report",
 ]

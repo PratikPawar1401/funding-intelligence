@@ -117,12 +117,24 @@ def run_evaluation(use_gold=False, use_db_tags=False):
             concept = store.get_concept_by_id(t)
             if concept:
                 cat_tp[concept.category] += 1
+                # Layer and confidence are recorded for true positives as well as
+                # false positives so the two are directly comparable. Without the
+                # TP side, there is no way to measure how well Layer 2 separates
+                # correct from incorrect matches — which is the diagnostic that
+                # matters when cosine scores are compressed.
+                evidence = next(
+                    (p for p in predicted_tags_raw if p.get("ontology_concept_id") == t),
+                    None,
+                )
                 true_positives_log.append({
                     "foa_id": foa["foa_id"],
                     "title": foa.get("title", ""),
                     "concept": t,
                     "label": concept.label,
                     "category": concept.category,
+                    "layer": evidence.get("source_layer", "unknown") if evidence else "unknown",
+                    "confidence": evidence.get("confidence", 0) if evidence else 0,
+                    "context": (evidence.get("context_snippet", "") if evidence else "")[:200],
                 })
 
         for t in fp_set:
