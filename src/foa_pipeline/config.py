@@ -67,6 +67,13 @@ class Config:
     api_rate_limit_per_minute: int = 120
     api_export_max_rows: int = 10000
 
+    # ── Title weighting (defaulted) ──
+    # An FOA title averages 59 characters against ~3,100 of description, so it
+    # is diluted to near-nothing inside a 250-word chunk. These control whether
+    # Layer 2 scores it separately. 0.0 keeps the body-only behaviour.
+    title_weight: float = 0.0
+    title_combine: str = "blend"  # "blend" or "max"
+
 
 def get_config() -> Config:
     """Build Config from environment variables with sensible defaults."""
@@ -115,6 +122,9 @@ def get_config() -> Config:
         ],
         api_rate_limit_per_minute=int(_env("API_RATE_LIMIT_PER_MINUTE", "120")),
         api_export_max_rows=int(_env("API_EXPORT_MAX_ROWS", "10000")),
+        # ── Title weighting ──
+        title_weight=float(_env("TITLE_WEIGHT", "0.0")),
+        title_combine=_env("TITLE_COMBINE", "blend"),
         # ── General ──
         log_level=_env("LOG_LEVEL", "INFO"),
         user_agent=_env("USER_AGENT", "foa-pipeline/1.0"),

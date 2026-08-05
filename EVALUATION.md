@@ -392,6 +392,65 @@ Per category: `method` 0.370 → **0.462**, `population` 0.483 → **0.500**,
 
 ---
 
+## 4d. Title Weighting — Implemented, Measured, Left Disabled
+
+An FOA title averages 59 characters against ~3,100 of description, so inside a
+250-word chunk it is diluted to near-nothing — yet published work reports that
+title-only classification reaches over 90% of full-text quality on most
+datasets. That made scoring the title separately worth testing.
+
+`L2Tagger.tag_text` now accepts `title`, `title_weight`, and `title_combine`,
+with two ways to fold the title score into the body score:
+
+- **blend** — `(1 − w)·body + w·title`
+- **max** — `max(body, title)`
+
+`title_weight=0` (the shipped default) reproduces body-only scoring exactly.
+
+### The two eval sets disagreed
+
+Tuning was done on the silver set, never the gold set, so the reported number
+stays honest.
+
+| weight | Silver F1 | Gold F1 |
+|---|---|---|
+| 0.00 (baseline) | **0.168** | 0.517 |
+| 0.10 | 0.164 | — |
+| 0.20 | 0.159 | **0.522** |
+| 0.30 | 0.163 | 0.514 |
+| 0.50 | 0.144 | — |
+| max | 0.167 | — |
+
+No weight improved the silver set. The gold set gained +0.005 at w=0.20.
+
+### Why it was not shipped
+
+1. **The pre-committed decision rule selects on the silver set**, which says
+   zero. Choosing w=0.20 because the gold set liked it would be tuning on the
+   set used for reporting.
+2. **The gold gain is a precision/recall trade, not new information.** At
+   w=0.20 precision rose 0.427 → 0.466 while recall fell 0.654 → 0.593, and
+   total tags dropped 773 → 649. `blend` lowers the score of every concept the
+   short title does not mention, so it functions as an implicit threshold
+   increase. That is a known lever already measured in §4b, not a title effect.
+3. **`method` regressed sharply**, 0.462 → 0.300, against gains in
+   research_domain and research_discipline.
+4. **+0.005 on 81 tags is one tag**, inside the noise floor this set can
+   resolve.
+
+The silver set has its own defect worth restating: it carries no `nsf_*`
+labels, so every `research_discipline` prediction scores as a false positive
+and that category reads 0.00 throughout. Its absolute numbers are not
+comparable to the gold set's; only its *relative* ordering across weights was
+used, and only for the four categories it does cover.
+
+The capability is kept, tested, and documented rather than deleted. It costs
+nothing when disabled and becomes decidable once the gold set is large enough
+to resolve a change of this size — which is the same precondition every other
+open question here now depends on.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:

@@ -122,8 +122,16 @@ class TaggerPipeline:
         # 1. Run L1 (Exact/Synonyms)
         l1_evidence = self.l1.tag_text(full_text, excluded_spans=spans)
 
-        # 2. Run L2 (Semantic Embedding)
-        l2_evidence = self.l2.tag_text(full_text, excluded_spans=spans)
+        # 2. Run L2 (Semantic Embedding). The title is also passed separately so
+        # it can be scored on its own terms rather than diluted inside a chunk;
+        # a title_weight of 0 leaves the body-only behaviour unchanged.
+        l2_evidence = self.l2.tag_text(
+            full_text,
+            excluded_spans=spans,
+            title=record.get("title", ""),
+            title_weight=self.config.title_weight,
+            title_combine=self.config.title_combine,
+        )
 
         # 3. Merge and Disambiguate
         merged = self._merge_and_disambiguate(l1_evidence, l2_evidence, full_text)

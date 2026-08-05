@@ -161,6 +161,24 @@ class L2Tagger:
         return chunks
 
     @staticmethod
+    def combine_scores(
+        body_sim: float, title_sim: float, weight: float, combine: str = "blend"
+    ) -> float:
+        """
+        Fold a title score into a body score.
+
+        "blend" is a weighted average, so it lowers the score of any concept the
+        title does not mention — which means it also acts as an implicit
+        threshold increase, not purely as title evidence. "max" only ever
+        promotes. A weight of 0 returns the body score untouched under either.
+        """
+        if weight <= 0.0:
+            return body_sim
+        if combine == "max":
+            return max(body_sim, title_sim)
+        return (1.0 - weight) * body_sim + weight * title_sim
+
+    @staticmethod
     def _suppressed_categories(
         chunk_start: int,
         chunk_end: int,
@@ -182,6 +200,9 @@ class L2Tagger:
         self,
         text: str,
         excluded_spans: Optional[List[Tuple[int, int, FrozenSet[str]]]] = None,
+        title: Optional[str] = None,
+        title_weight: float = 0.0,
+        title_combine: str = "blend",
     ) -> List[TagEvidence]:
         """
         Embed text chunks and find ontology concepts above threshold.
@@ -191,6 +212,19 @@ class L2Tagger:
         an excluded region when the majority of its characters fall inside it —
         chunks overlap by design, so requiring only partial overlap would
         suppress chunks that are mostly ordinary programme text.
+
+        `title` is scored as its own unit rather than left buried in the body.
+        An FOA title averages 59 characters against ~3,100 of description, so
+        within a 250-word chunk it contributes almost nothing, even though a
+        title is the most information-dense part of the document.
+
+        `title_combine` selects how the two scores meet:
+          - "blend": ``(1 - w) * body + w * title`` — lowers scores for concepts
+            absent from the title, so it tightens as well as promotes.
+          - "max": ``max(body, title)`` — title can only add evidence.
+
+        ``title_weight=0`` reproduces the body-only behaviour exactly under
+        either mode.
         """
         if not text or not self.model or not self.concept_embeddings:
             return []
@@ -208,44 +242,59 @@ class L2Tagger:
         # Embed all chunks at once
         chunk_embs = self.model.encode(chunks, convert_to_numpy=True)
 
-        evidence_dict: Dict[str, TagEvidence] = {}
+        use_title = bool(title and title.strip()) and title_weight > 0.0
+        title_emb = (
+            self.model.encode([title], convert_to_numpy=True)[0] if use_title else None
+        )
 
-        # Compare each chunk against all concepts
+        # Best body score per concept, and the chunk that produced it. Scoring
+        # is separated from thresholding because the title has to be folded in
+        # before the threshold is applied — testing each chunk in isolation
+        # would decide a concept's fate before the title was consulted.
+        best_body: Dict[str, Tuple[float, int]] = {}
         for i, chunk_emb in enumerate(chunk_embs):
             suppressed = suppressed_per_chunk[i]
             for concept_id, concept_emb in self.concept_embeddings.items():
-                concept = self.concept_lookup[concept_id]
-
-                if concept.category in suppressed:
+                if self.concept_lookup[concept_id].category in suppressed:
                     continue
-
                 sim = cosine_similarity(chunk_emb, concept_emb)
+                current = best_body.get(concept_id)
+                if current is None or sim > current[0]:
+                    best_body[concept_id] = (sim, i)
 
-                # Determine threshold: per-concept override takes priority
-                # over the category default (e.g. a concept that is
-                # persistently over-triggered by generic boilerplate can
-                # be tightened without raising the threshold for its whole
-                # category and losing recall on other concepts in it).
-                threshold = self.thresholds.get(
-                    concept_id,
-                    self.thresholds.get(concept.category, self.thresholds.get("default", 0.75)),
+        evidence_dict: Dict[str, TagEvidence] = {}
+        for concept_id, (body_sim, chunk_index) in best_body.items():
+            concept = self.concept_lookup[concept_id]
+
+            score = body_sim
+            if use_title and title_emb is not None:
+                score = self.combine_scores(
+                    body_sim,
+                    cosine_similarity(title_emb, self.concept_embeddings[concept_id]),
+                    title_weight,
+                    title_combine,
                 )
 
-                if sim >= threshold:
-                    # Keep the chunk that gave the highest similarity for this concept
-                    existing = evidence_dict.get(concept_id)
-                    if existing is None or sim > existing.confidence:
-                        # Truncate snippet if too long
-                        snippet = chunks[i][:500] + ("..." if len(chunks[i]) > 500 else "")
+            # Threshold: per-concept override takes priority over the category
+            # default (a concept persistently over-triggered by generic
+            # boilerplate can be tightened without raising the threshold for
+            # its whole category and losing recall on the rest of it).
+            threshold = self.thresholds.get(
+                concept_id,
+                self.thresholds.get(concept.category, self.thresholds.get("default", 0.75)),
+            )
+            if score < threshold:
+                continue
 
-                        evidence_dict[concept_id] = TagEvidence(
-                            concept_id=concept.concept_id,
-                            label=concept.label,
-                            category=concept.category,
-                            source_layer="layer_2_embedding",
-                            confidence=sim,
-                            context_snippet=snippet,
-                            ontology_concept_id=concept.concept_id,
-                        )
+            chunk = chunks[chunk_index]
+            evidence_dict[concept_id] = TagEvidence(
+                concept_id=concept.concept_id,
+                label=concept.label,
+                category=concept.category,
+                source_layer="layer_2_embedding",
+                confidence=score,
+                context_snippet=chunk[:500] + ("..." if len(chunk) > 500 else ""),
+                ontology_concept_id=concept.concept_id,
+            )
 
         return list(evidence_dict.values())

@@ -7,6 +7,8 @@ deleting shifts Layer 2's chunk boundaries and perturbs unrelated categories,
 which was measured at -0.049 global F1.
 """
 
+import pytest
+
 from foa_pipeline.tagging.layer2_embedding import L2Tagger
 
 POPULATION = frozenset({"population"})
@@ -89,3 +91,39 @@ class TestSuppressionRule:
             [(0, 100, frozenset({"population"})), (0, 100, frozenset({"method"}))],
         )
         assert result == frozenset({"population", "method"})
+
+
+class TestTitleScoreCombination:
+    """
+    Folding a title score into a body score.
+
+    Measured on both eval sets and left disabled by default: the silver set got
+    worse at every weight tried, and the gold set's +0.005 came with precision
+    up and recall down, i.e. it behaved as a threshold change rather than as
+    title evidence. See EVALUATION.md 4d.
+    """
+
+    def test_zero_weight_is_a_no_op(self):
+        """The default must reproduce body-only scoring exactly."""
+        for combine in ("blend", "max"):
+            assert L2Tagger.combine_scores(0.42, 0.99, 0.0, combine) == 0.42
+            assert L2Tagger.combine_scores(0.42, 0.01, 0.0, combine) == 0.42
+
+    def test_negative_weight_is_also_a_no_op(self):
+        assert L2Tagger.combine_scores(0.42, 0.99, -0.5) == 0.42
+
+    def test_blend_is_a_weighted_average(self):
+        assert L2Tagger.combine_scores(0.40, 0.80, 0.25) == 0.50
+
+    def test_blend_lowers_score_when_title_is_unrelated(self):
+        """This is why blend doubles as a threshold increase."""
+        assert L2Tagger.combine_scores(0.60, 0.10, 0.30) < 0.60
+
+    def test_max_never_lowers_the_body_score(self):
+        assert L2Tagger.combine_scores(0.60, 0.10, 0.30, "max") == 0.60
+
+    def test_max_promotes_a_strong_title_match(self):
+        assert L2Tagger.combine_scores(0.30, 0.75, 0.30, "max") == 0.75
+
+    def test_full_weight_blend_is_title_only(self):
+        assert L2Tagger.combine_scores(0.20, 0.90, 1.0) == pytest.approx(0.90)
