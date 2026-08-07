@@ -751,6 +751,76 @@ Direct measurement replaced it, which is what §4e's corpus made affordable.
 
 ---
 
+## 4g. OpenAlex Fields — Staged, Deliberately Not Activated
+
+The OpenAlex research taxonomy (4 domains / 26 fields / 252 subfields, CC0) is
+the closest published analogue to `research_discipline`, and its field level is
+vendored to `data/ontology/openalex_fields.csv` by `cli harvest-openalex`.
+
+Three things it supplies that the current ontology lacks:
+
+| | Current ontology | OpenAlex fields |
+|---|---|---|
+| Descriptions | hand-written | external authority, all 26 |
+| Synonyms | 29 concepts have none | 23 of 26 carry `display_name_alternatives` |
+| Hierarchy | every `parent_id` empty | every field has a real domain parent |
+
+That third row matters beyond this category: `_propagate_hierarchies` has been
+implemented, tested and completely dormant, because no concept has ever had a
+parent.
+
+### Why it is vendored rather than fetched
+
+CC0 licensing allows redistribution, so the taxonomy is copied into the repo
+once and reviewed as a diff. The pipeline gains no runtime dependency on
+OpenAlex, and a future change on their side cannot silently alter tagging
+behaviour. Rows are sorted deterministically so re-harvesting produces an empty
+diff unless OpenAlex actually changed.
+
+### Why it is not loaded
+
+**`openalex_fields.csv` is not registered with `load_all_ontologies`, and a test
+asserts it stays that way.**
+
+Activating it would add a sixth category to the live ontology while no
+evaluation set carries a single OpenAlex label. Every prediction in that
+category would score as a false positive and global gold F1 would collapse —
+precisely the failure the silver set had with `research_discipline` (§2), where
+that category read 0.00 throughout for exactly this reason. The order of
+operations has to be *label first, then activate*.
+
+### The crosswalk is for analysis, not relabelling
+
+`ontology/openalex_crosswalk.py` maps all eight NSF directorates onto fields.
+Running the gold set's 23 `nsf_*` tags through it would be quick and wrong: it
+would manufacture labels no human ever checked, and the resulting metrics would
+measure the crosswalk rather than the tagger. Re-labelling for a genuine
+OpenAlex evaluation is a human pass.
+
+The mismatches are the informative part:
+
+- **Six of 26 OpenAlex fields have no NSF directorate at all** — Medicine,
+  Nursing, Dentistry, Veterinary, Health Professions, and Pharmacology. That is
+  NIH's remit, not NSF's. Nearly a quarter of the field space is unreachable
+  from an NSF label.
+- **NSF has a directorate that is not a discipline.** Technology, Innovation and
+  Partnerships is a funding *mechanism*; TIP awards come from every field. It is
+  mapped to business/engineering and flagged `WEAK_MAPPINGS`.
+- **STEM Education has no counterpart at field level.** OpenAlex places
+  education as a *subfield* of Social Sciences, so `nsf_edu` and `nsf_sbe`
+  collapse onto the same field — a real loss of resolution, also flagged weak.
+- **Materials Science and Energy straddle** Engineering and Mathematical &
+  Physical Sciences.
+
+This is the concrete answer to whether OpenAlex should *replace* the NSF axis:
+not straightforwardly. The two taxonomies encode different questions — who funds
+this, versus what literature it belongs to — and §4e's award corpus gives the
+NSF axis 1,248 free agency-assigned labels that no OpenAlex equivalent has.
+Replacing the axis would discard that benchmark. Adding it as a parallel axis
+keeps both, at the cost of a labelling pass.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:

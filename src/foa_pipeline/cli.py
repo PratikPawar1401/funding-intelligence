@@ -31,6 +31,11 @@ def _parse_args() -> argparse.Namespace:
     sub_scrape.add_argument(
         "--max-pages", type=int, default=50, help="Max pages to scrape"
     )
+    subparsers.add_parser(
+        "harvest-openalex",
+        help="Vendor the OpenAlex field taxonomy (CC0) to data/ontology/ "
+        "as a staged, inactive CSV",
+    )
     sub_awards = subparsers.add_parser(
         "harvest-nsf-awards",
         help="Harvest NSF awards as a directorate-labelled evaluation corpus "
@@ -186,6 +191,12 @@ def main() -> None:
             config, max_pages=args.max_pages, dry_run=args.dry_run
         )
         logging.info("NSF scrape complete: %s", stats)
+
+    elif args.command == "harvest-openalex":
+        from .ingestion.openalex import harvest_openalex_fields
+
+        stats = harvest_openalex_fields(config.ontology_dir)
+        logging.info("OpenAlex harvest complete: %s", stats)
 
     elif args.command == "harvest-nsf-awards":
         from .ingestion.nsf_awards import harvest_awards
