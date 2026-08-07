@@ -26,6 +26,18 @@ def calculate_metrics(tp, fp, fn):
     return precision, recall, f1
 
 
+def eval_set_slug(use_gold: bool) -> str:
+    """
+    Short name for the eval set, used to namespace this run's output files.
+
+    Both modes previously wrote to the same paths, so a silver run silently
+    replaced the gold error logs that EVALUATION.md 5 presents as the reported
+    error analysis — the files kept their names while describing a different
+    set of FOAs. Namespacing makes the two runs coexist.
+    """
+    return "gold" if use_gold else "silver"
+
+
 def run_evaluation(use_gold=False, use_db_tags=False):
     config = get_config()
     store = OntologyStore(config.app_db_path)
@@ -187,15 +199,17 @@ def run_evaluation(use_gold=False, use_db_tags=False):
             cat.upper(), cp, cr, cf1, cat_tp[cat], cat_fp[cat], cat_fn[cat]
         )
 
-    # Dump error logs
+    # Dump error logs, namespaced by eval set so a silver run cannot overwrite
+    # the gold analysis (or vice versa).
     out_dir = config.evaluation_dir
-    with open(out_dir / "false_positives.json", "w") as f:
+    slug = eval_set_slug(use_gold)
+    with open(out_dir / f"false_positives_{slug}.json", "w") as f:
         json.dump(false_positives_log, f, indent=2)
-    with open(out_dir / "false_negatives.json", "w") as f:
+    with open(out_dir / f"false_negatives_{slug}.json", "w") as f:
         json.dump(false_negatives_log, f, indent=2)
-    with open(out_dir / "true_positives.json", "w") as f:
+    with open(out_dir / f"true_positives_{slug}.json", "w") as f:
         json.dump(true_positives_log, f, indent=2)
-    with open(out_dir / "per_foa_results.json", "w") as f:
+    with open(out_dir / f"per_foa_results_{slug}.json", "w") as f:
         json.dump(per_foa_results, f, indent=2)
 
     # Summary JSON for the report
@@ -218,16 +232,21 @@ def run_evaluation(use_gold=False, use_db_tags=False):
             "precision": round(cp, 3), "recall": round(cr, 3), "f1": round(cf1, 3),
             "tp": cat_tp[cat], "fp": cat_fp[cat], "fn": cat_fn[cat],
         }
-    with open(out_dir / "evaluation_summary.json", "w") as f:
+    with open(out_dir / f"evaluation_summary_{slug}.json", "w") as f:
         json.dump(summary, f, indent=2)
 
     logging.info("")
     logging.info("Saved error analysis to %s", out_dir)
-    logging.info("  - false_positives.json (%d entries)", len(false_positives_log))
-    logging.info("  - false_negatives.json (%d entries)", len(false_negatives_log))
-    logging.info("  - true_positives.json (%d entries)", len(true_positives_log))
-    logging.info("  - per_foa_results.json (%d entries)", len(per_foa_results))
-    logging.info("  - evaluation_summary.json")
+    logging.info("  - false_positives_%s.json (%d entries)", slug, len(false_positives_log))
+    logging.info("  - false_negatives_%s.json (%d entries)", slug, len(false_negatives_log))
+    logging.info("  - true_positives_%s.json (%d entries)", slug, len(true_positives_log))
+    logging.info("  - per_foa_results_%s.json (%d entries)", slug, len(per_foa_results))
+    logging.info("  - evaluation_summary_%s.json", slug)
+    if slug != "gold":
+        logging.info(
+            "These are SILVER-set results (LLM-generated labels) for tuning only; "
+            "reported metrics come from --gold."
+        )
 
     store.close()
     db.close()

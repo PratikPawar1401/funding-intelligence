@@ -69,29 +69,41 @@ def _summarise(values: Sequence[float]) -> Dict[str, float]:
 
 def _load(path: Path) -> List[Dict[str, Any]]:
     if not path.exists():
+        legacy = path.with_name(path.name.replace("_gold", "").replace("_silver", ""))
+        hint = ""
+        if legacy.exists():
+            hint = (
+                f" An un-namespaced {legacy.name} exists from before error logs "
+                "were split per eval set; re-run the evaluation to regenerate it."
+            )
         raise FileNotFoundError(
             f"{path} not found. Run an evaluation first "
-            "(python -m foa_pipeline.cli evaluate --gold)."
+            f"(python -m foa_pipeline.cli evaluate --gold).{hint}"
         )
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
-def cosine_separation(evaluation_dir: Path) -> Dict[str, Any]:
+def cosine_separation(evaluation_dir: Path, eval_set: str = "gold") -> Dict[str, Any]:
     """
     Compare Layer 2 cosine scores for correct vs incorrect tags.
 
     Only Layer 2 evidence is considered: Layer 1 always reports confidence 1.0
     and Layer 3 reports a fixed 0.95, so neither carries a score whose
     separation is meaningful.
+
+    `eval_set` selects which run's error logs to read. It defaults to "gold"
+    because separation is a reported diagnostic, and the silver set's labels are
+    model-generated — measuring separation against them would describe agreement
+    with another model rather than with ground truth.
     """
-    true_positives = _load(evaluation_dir / "true_positives.json")
-    false_positives = _load(evaluation_dir / "false_positives.json")
+    true_positives = _load(evaluation_dir / f"true_positives_{eval_set}.json")
+    false_positives = _load(evaluation_dir / f"false_positives_{eval_set}.json")
 
     if not any(t.get("layer") for t in true_positives):
         raise ValueError(
-            "true_positives.json has no 'layer' field. It was produced by an "
-            "older runner that did not record evidence for true positives; "
+            f"true_positives_{eval_set}.json has no 'layer' field. It was produced "
+            "by an older runner that did not record evidence for true positives; "
             "re-run the evaluation to regenerate it."
         )
 

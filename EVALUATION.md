@@ -757,18 +757,18 @@ The evaluation framework generates detailed error logs for debugging:
 
 | File | Contents |
 |---|---|
-| `data/evaluation/false_positives.json` | Every incorrect tag with the triggering layer, confidence, and context snippet |
-| `data/evaluation/false_negatives.json` | Every missed tag with the expected concept and FOA title |
-| `data/evaluation/true_positives.json` | Every correct tag for validation |
-| `data/evaluation/per_foa_results.json` | Per-FOA breakdown of TP/FP/FN sets |
-| `data/evaluation/evaluation_summary.json` | Machine-readable metrics summary |
+| `data/evaluation/false_positives_gold.json` | Every incorrect tag with the triggering layer, confidence, and context snippet |
+| `data/evaluation/false_negatives_gold.json` | Every missed tag with the expected concept and FOA title |
+| `data/evaluation/true_positives_gold.json` | Every correct tag for validation |
+| `data/evaluation/per_foa_results_gold.json` | Per-FOA breakdown of TP/FP/FN sets |
+| `data/evaluation/evaluation_summary_gold.json` | Machine-readable metrics summary |
 
 ### How to Use Error Logs
 
-1. Open `false_positives.json` and sort by `category` to identify which concept categories generate the most noise
+1. Open `false_positives_gold.json` and sort by `category` to identify which concept categories generate the most noise
 2. Check the `layer` field — if mostly `layer_2_embedding`, the cosine threshold for that category should be raised
 3. Check the `context` field — if the triggering text is tangential, the concept's description may need refinement
-4. Check `false_negatives.json` to identify missing synonyms that should be added to `synonym_expander.py`
+4. Check `false_negatives_gold.json` to identify missing synonyms that should be added to `synonym_expander.py`
 
 ---
 
@@ -786,7 +786,7 @@ PYTHONPATH=src python -m foa_pipeline.cli tag-all
 PYTHONPATH=src python -m foa_pipeline.cli evaluate --gold
 
 # 4. View results
-cat data/evaluation/evaluation_summary.json
+cat data/evaluation/evaluation_summary_gold.json
 ```
 
 The evaluation is fully deterministic: given the same database, ontology, and thresholds, it will always produce identical metrics.

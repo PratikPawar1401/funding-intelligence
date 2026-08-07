@@ -26,11 +26,60 @@ def _row(concept, category, layer, confidence):
 @pytest.fixture
 def eval_dir(tmp_path):
     def _write(true_positives, false_positives):
-        (tmp_path / "true_positives.json").write_text(json.dumps(true_positives))
-        (tmp_path / "false_positives.json").write_text(json.dumps(false_positives))
+        (tmp_path / "true_positives_gold.json").write_text(json.dumps(true_positives))
+        (tmp_path / "false_positives_gold.json").write_text(json.dumps(false_positives))
         return tmp_path
 
     return _write
+
+
+class TestEvalSetNamespacing:
+    """
+    Gold and silver runs must not overwrite each other's error logs.
+
+    They previously shared filenames, so a silver run left files that kept the
+    gold names while describing 46 different FOAs — and EVALUATION.md presents
+    those files as the reported gold error analysis.
+    """
+
+    def test_slug_per_eval_set(self):
+        from foa_pipeline.evaluation.runner import eval_set_slug
+
+        assert eval_set_slug(True) == "gold"
+        assert eval_set_slug(False) == "silver"
+
+    def test_reads_the_gold_logs_by_default(self, tmp_path):
+        gold = [_row("c1", "method", "layer_2_embedding", 0.9)]
+        silver = [_row("c2", "method", "layer_2_embedding", 0.1)]
+        (tmp_path / "true_positives_gold.json").write_text(json.dumps(gold))
+        (tmp_path / "false_positives_gold.json").write_text(json.dumps([]))
+        (tmp_path / "true_positives_silver.json").write_text(json.dumps(silver))
+        (tmp_path / "false_positives_silver.json").write_text(json.dumps([]))
+
+        report = cosine_separation(tmp_path)
+        assert report["overall"]["correct"]["n"] == 1
+        assert report["overall"]["correct"]["mean"] == pytest.approx(0.9)
+
+    def test_can_read_the_silver_logs_explicitly(self, tmp_path):
+        (tmp_path / "true_positives_gold.json").write_text(json.dumps([]))
+        (tmp_path / "false_positives_gold.json").write_text(json.dumps([]))
+        (tmp_path / "true_positives_silver.json").write_text(
+            json.dumps([_row("c2", "method", "layer_2_embedding", 0.1)])
+        )
+        (tmp_path / "false_positives_silver.json").write_text(json.dumps([]))
+
+        report = cosine_separation(tmp_path, eval_set="silver")
+        assert report["overall"]["correct"]["mean"] == pytest.approx(0.1)
+
+    def test_missing_file_names_the_command_to_run(self, tmp_path):
+        with pytest.raises(FileNotFoundError, match="evaluate --gold"):
+            cosine_separation(tmp_path)
+
+    def test_legacy_unnamespaced_file_is_called_out(self, tmp_path):
+        """Anyone upgrading has the old filenames sitting there; say so."""
+        (tmp_path / "true_positives.json").write_text(json.dumps([]))
+        with pytest.raises(FileNotFoundError, match="before error logs"):
+            cosine_separation(tmp_path)
 
 
 class TestAuc:

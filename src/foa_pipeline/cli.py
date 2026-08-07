@@ -102,10 +102,16 @@ def _parse_args() -> argparse.Namespace:
         help="Evaluate DB tags against the hand-labelled gold set "
         "(default: re-tag in-memory against the LLM-generated silver set)",
     )
-    subparsers.add_parser(
+    sep_p = subparsers.add_parser(
         "diagnose-separation",
         help="Report how well Layer 2 cosine scores separate correct from "
         "incorrect tags (run an evaluation first)",
+    )
+    sep_p.add_argument(
+        "--eval-set",
+        choices=["gold", "silver"],
+        default="gold",
+        help="Which run's error logs to read (default: gold)",
     )
     bench_p = subparsers.add_parser(
         "benchmark-disciplines",
@@ -229,7 +235,7 @@ def main() -> None:
         _run_evaluate(args)
 
     elif args.command == "diagnose-separation":
-        _run_diagnose_separation(config)
+        _run_diagnose_separation(config, args)
 
     elif args.command == "benchmark-disciplines":
         _run_benchmark_disciplines(config, args)
@@ -653,12 +659,12 @@ def _run_evaluate(args) -> None:
     run_evaluation(use_gold=args.gold, use_db_tags=args.gold)
 
 
-def _run_diagnose_separation(config) -> None:
+def _run_diagnose_separation(config, args) -> None:
     """Report how well Layer 2 scores separate correct from incorrect tags."""
     from .evaluation.diagnostics import cosine_separation, format_separation_report
 
     try:
-        report = cosine_separation(config.evaluation_dir)
+        report = cosine_separation(config.evaluation_dir, eval_set=args.eval_set)
     except (FileNotFoundError, ValueError) as exc:
         logging.error("%s", exc)
         return
