@@ -524,14 +524,17 @@ penalise the tagger for being right about genuinely interdisciplinary work.
 
 ### Results (V7, 1,248 awards, Layer 2 only)
 
-| Metric | Value |
-|---|---|
-| Top-1 accuracy (strict) | **0.639** |
-| Top-1 accuracy (lenient) | 0.679 |
-| Top-3 accuracy (strict) | **0.884** |
-| Top-3 accuracy (lenient) | 0.901 |
-| Mean reciprocal rank | 0.774 |
-| Macro F1 | 0.572 |
+These are the **baseline that motivated §4f** — the state of the system when the
+corpus was first built. Post-fix numbers are in the right-hand column and in §4f.
+
+| Metric | V7 baseline | After §4f fix |
+|---|---|---|
+| Top-1 accuracy (strict) | 0.639 | 0.641 |
+| Top-1 accuracy (lenient) | 0.679 | 0.686 |
+| Top-3 accuracy (strict) | 0.884 | **0.908** |
+| Top-3 accuracy (lenient) | 0.901 | 0.922 |
+| Mean reciprocal rank | 0.774 | 0.782 |
+| Macro F1 | 0.572 | **0.585** |
 
 For reference, OpenAlex's production classifier — a fine-tuned transformer, not
 an untrained cosine ranker — reports top-1 0.53 and top-3 0.73 over 26 fields.
@@ -539,6 +542,8 @@ That is a larger and harder label space, so this is a reference point rather tha
 a like-for-like comparison, and it should be quoted as such. It does establish
 that an untrained dual-encoder at 0.639/0.884 over 8 classes is a reasonable
 baseline rather than a broken one.
+
+Per directorate, at the V7 baseline:
 
 | Directorate | n | P | R | F1 |
 |---|---|---|---|---|
