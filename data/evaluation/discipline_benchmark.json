@@ -1,0 +1,122 @@
+{
+  "total": 1248,
+  "unranked": 0,
+  "top_k": 3,
+  "strict_top1_accuracy": 0.6386217948717948,
+  "lenient_top1_accuracy": 0.6794871794871795,
+  "strict_topk_accuracy": 0.8838141025641025,
+  "lenient_topk_accuracy": 0.9014423076923077,
+  "mrr": 0.7738162011599522,
+  "macro_f1": 0.5722059952886219,
+  "per_concept": {
+    "nsf_tip": {
+      "support": 129,
+      "predicted": 134,
+      "precision": 0.5,
+      "recall": 0.5193798449612403,
+      "f1": 0.5095057034220533
+    },
+    "nsf_edu": {
+      "support": 145,
+      "predicted": 224,
+      "precision": 0.5892857142857143,
+      "recall": 0.9103448275862069,
+      "f1": 0.7154471544715447
+    },
+    "nsf_cise": {
+      "support": 145,
+      "predicted": 226,
+      "precision": 0.4557522123893805,
+      "recall": 0.7103448275862069,
+      "f1": 0.555256064690027
+    },
+    "nsf_geo": {
+      "support": 277,
+      "predicted": 332,
+      "precision": 0.7650602409638554,
+      "recall": 0.9169675090252708,
+      "f1": 0.8341543513957308
+    },
+    "nsf_eng": {
+      "support": 146,
+      "predicted": 3,
+      "precision": 0.6666666666666666,
+      "recall": 0.0136986301369863,
+      "f1": 0.02684563758389262
+    },
+    "nsf_mps": {
+      "support": 137,
+      "predicted": 160,
+      "precision": 0.63125,
+      "recall": 0.7372262773722628,
+      "f1": 0.68013468013468
+    },
+    "nsf_sbe": {
+      "support": 126,
+      "predicted": 77,
+      "precision": 0.7922077922077922,
+      "recall": 0.48412698412698413,
+      "f1": 0.6009852216748769
+    },
+    "nsf_bio": {
+      "support": 143,
+      "predicted": 92,
+      "precision": 0.8369565217391305,
+      "recall": 0.5384615384615384,
+      "f1": 0.6553191489361703
+    }
+  },
+  "confusion": {
+    "nsf_tip->nsf_tip": 67,
+    "nsf_tip->nsf_edu": 26,
+    "nsf_tip->nsf_cise": 32,
+    "nsf_geo->nsf_tip": 5,
+    "nsf_edu->nsf_edu": 132,
+    "nsf_eng->nsf_cise": 38,
+    "nsf_mps->nsf_mps": 101,
+    "nsf_tip->nsf_mps": 2,
+    "nsf_cise->nsf_cise": 103,
+    "nsf_eng->nsf_edu": 31,
+    "nsf_tip->nsf_geo": 2,
+    "nsf_eng->nsf_tip": 20,
+    "nsf_edu->nsf_geo": 7,
+    "nsf_edu->nsf_mps": 1,
+    "nsf_geo->nsf_edu": 4,
+    "nsf_edu->nsf_cise": 5,
+    "nsf_sbe->nsf_sbe": 61,
+    "nsf_sbe->nsf_cise": 24,
+    "nsf_sbe->nsf_edu": 14,
+    "nsf_sbe->nsf_bio": 4,
+    "nsf_sbe->nsf_tip": 14,
+    "nsf_sbe->nsf_geo": 9,
+    "nsf_cise->nsf_sbe": 2,
+    "nsf_bio->nsf_bio": 77,
+    "nsf_geo->nsf_geo": 254,
+    "nsf_geo->nsf_sbe": 4,
+    "nsf_mps->nsf_geo": 3,
+    "nsf_bio->nsf_geo": 37,
+    "nsf_geo->nsf_mps": 2,
+    "nsf_cise->nsf_edu": 11,
+    "nsf_cise->nsf_geo": 11,
+    "nsf_cise->nsf_tip": 9,
+    "nsf_mps->nsf_cise": 18,
+    "nsf_cise->nsf_mps": 9,
+    "nsf_eng->nsf_mps": 42,
+    "nsf_bio->nsf_sbe": 9,
+    "nsf_bio->nsf_cise": 3,
+    "nsf_bio->nsf_tip": 11,
+    "nsf_bio->nsf_edu": 3,
+    "nsf_bio->nsf_mps": 3,
+    "nsf_geo->nsf_cise": 3,
+    "nsf_geo->nsf_bio": 5,
+    "nsf_eng->nsf_geo": 9,
+    "nsf_eng->nsf_bio": 4,
+    "nsf_eng->nsf_eng": 2,
+    "nsf_mps->nsf_tip": 8,
+    "nsf_mps->nsf_edu": 3,
+    "nsf_mps->nsf_bio": 2,
+    "nsf_mps->nsf_eng": 1,
+    "nsf_mps->nsf_sbe": 1
+  },
+  "corpus_size": 1248
+}

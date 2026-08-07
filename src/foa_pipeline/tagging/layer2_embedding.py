@@ -196,6 +196,68 @@ class L2Tagger:
                 suppressed |= set(categories)
         return frozenset(suppressed)
 
+    def _best_scores(
+        self,
+        text: str,
+        excluded_spans: Optional[List[Tuple[int, int, FrozenSet[str]]]] = None,
+    ) -> Tuple[List[str], Dict[str, Tuple[float, int]]]:
+        """
+        Highest cosine score per concept across all chunks, and its chunk index.
+
+        Split out of `tag_text` so that scoring and thresholding are separable:
+        the discipline benchmark needs a *ranking* over concepts, which
+        thresholded output cannot provide. Keeping one implementation means the
+        benchmark measures the production scoring path rather than a
+        reimplementation that could drift from it.
+        """
+        if not text or not self.model or not self.concept_embeddings:
+            return [], {}
+
+        spans = self.chunk_text_with_spans(text)
+        if not spans:
+            return [], {}
+
+        chunks = [c for c, _s, _e in spans]
+        suppressed_per_chunk = [
+            self._suppressed_categories(start, end, excluded_spans)
+            for _c, start, end in spans
+        ]
+
+        # Embed all chunks at once
+        chunk_embs = self.model.encode(chunks, convert_to_numpy=True)
+
+        best: Dict[str, Tuple[float, int]] = {}
+        for i, chunk_emb in enumerate(chunk_embs):
+            suppressed = suppressed_per_chunk[i]
+            for concept_id, concept_emb in self.concept_embeddings.items():
+                if self.concept_lookup[concept_id].category in suppressed:
+                    continue
+                sim = cosine_similarity(chunk_emb, concept_emb)
+                current = best.get(concept_id)
+                if current is None or sim > current[0]:
+                    best[concept_id] = (sim, i)
+
+        return chunks, best
+
+    def score_concepts(
+        self,
+        text: str,
+        category: Optional[str] = None,
+        excluded_spans: Optional[List[Tuple[int, int, FrozenSet[str]]]] = None,
+    ) -> Dict[str, float]:
+        """
+        Unthresholded cosine score for every concept, optionally one category.
+
+        This is the ranking view of Layer 2, used for benchmarks that ask "is
+        the right concept ranked first" rather than "did it clear a threshold".
+        """
+        _chunks, best = self._best_scores(text, excluded_spans)
+        return {
+            concept_id: score
+            for concept_id, (score, _index) in best.items()
+            if category is None or self.concept_lookup[concept_id].category == category
+        }
+
     def tag_text(
         self,
         text: str,
@@ -226,41 +288,18 @@ class L2Tagger:
         ``title_weight=0`` reproduces the body-only behaviour exactly under
         either mode.
         """
-        if not text or not self.model or not self.concept_embeddings:
-            return []
-
-        spans = self.chunk_text_with_spans(text)
-        if not spans:
-            return []
-
-        chunks = [c for c, _s, _e in spans]
-        suppressed_per_chunk = [
-            self._suppressed_categories(start, end, excluded_spans)
-            for _c, start, end in spans
-        ]
-
-        # Embed all chunks at once
-        chunk_embs = self.model.encode(chunks, convert_to_numpy=True)
-
-        use_title = bool(title and title.strip()) and title_weight > 0.0
-        title_emb = (
-            self.model.encode([title], convert_to_numpy=True)[0] if use_title else None
-        )
-
         # Best body score per concept, and the chunk that produced it. Scoring
         # is separated from thresholding because the title has to be folded in
         # before the threshold is applied — testing each chunk in isolation
         # would decide a concept's fate before the title was consulted.
-        best_body: Dict[str, Tuple[float, int]] = {}
-        for i, chunk_emb in enumerate(chunk_embs):
-            suppressed = suppressed_per_chunk[i]
-            for concept_id, concept_emb in self.concept_embeddings.items():
-                if self.concept_lookup[concept_id].category in suppressed:
-                    continue
-                sim = cosine_similarity(chunk_emb, concept_emb)
-                current = best_body.get(concept_id)
-                if current is None or sim > current[0]:
-                    best_body[concept_id] = (sim, i)
+        chunks, best_body = self._best_scores(text, excluded_spans)
+        if not chunks:
+            return []
+
+        title_emb = None
+        if title and title.strip() and title_weight > 0.0 and self.model is not None:
+            title_emb = self.model.encode([title], convert_to_numpy=True)[0]
+        use_title = title_emb is not None
 
         evidence_dict: Dict[str, TagEvidence] = {}
         for concept_id, (body_sim, chunk_index) in best_body.items():

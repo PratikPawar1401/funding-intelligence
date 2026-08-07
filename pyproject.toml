@@ -11,7 +11,14 @@ authors = [
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
-addopts = "-v --tb=short"
+# Network tests are deselected by default so the suite stays fast and passes
+# offline; they assert that third-party APIs still return the shape this code
+# depends on. Run them deliberately with `pytest -m network`, which overrides
+# the marker expression below.
+addopts = "-v --tb=short -m 'not network'"
+markers = [
+    "network: hits a live third-party API (deselected by default)",
+]
 
 [tool.ruff]
 line-length = 100

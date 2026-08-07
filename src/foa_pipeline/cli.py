@@ -31,6 +31,23 @@ def _parse_args() -> argparse.Namespace:
     sub_scrape.add_argument(
         "--max-pages", type=int, default=50, help="Max pages to scrape"
     )
+    sub_awards = subparsers.add_parser(
+        "harvest-nsf-awards",
+        help="Harvest NSF awards as a directorate-labelled evaluation corpus "
+        "(written to the evaluation directory, never to the FOA database)",
+    )
+    sub_awards.add_argument(
+        "--per-directorate",
+        type=int,
+        default=200,
+        help="Max awards to keep per directorate (default: 200)",
+    )
+    sub_awards.add_argument(
+        "--date-start", default="01/01/2023", help="MM/DD/YYYY (default: 01/01/2023)"
+    )
+    sub_awards.add_argument(
+        "--date-end", default="12/31/2025", help="MM/DD/YYYY (default: 12/31/2025)"
+    )
 
     # ── Normalisation ──
     subparsers.add_parser("normalise", help="Normalise raw records to canonical schema")
@@ -90,6 +107,17 @@ def _parse_args() -> argparse.Namespace:
         help="Report how well Layer 2 cosine scores separate correct from "
         "incorrect tags (run an evaluation first)",
     )
+    bench_p = subparsers.add_parser(
+        "benchmark-disciplines",
+        help="Rank NSF directorates on the agency-labelled award corpus "
+        "(run harvest-nsf-awards first)",
+    )
+    bench_p.add_argument(
+        "--limit", type=int, default=None, help="Score only the first N awards"
+    )
+    bench_p.add_argument(
+        "--top-k", type=int, default=3, help="k for top-k accuracy (default: 3)"
+    )
     curate_p = subparsers.add_parser(
         "curate-eval-set", help="Generate a stratified sample of FOAs for evaluation"
     )
@@ -127,6 +155,17 @@ def main() -> None:
             config, max_pages=args.max_pages, dry_run=args.dry_run
         )
         logging.info("NSF scrape complete: %s", stats)
+
+    elif args.command == "harvest-nsf-awards":
+        from .ingestion.nsf_awards import harvest_awards
+
+        stats = harvest_awards(
+            config,
+            date_start=args.date_start,
+            date_end=args.date_end,
+            per_directorate=args.per_directorate,
+        )
+        logging.info("NSF award harvest complete: %s", stats)
 
     elif args.command == "normalise":
         _run_normalise(config, args)
@@ -166,6 +205,9 @@ def main() -> None:
 
     elif args.command == "diagnose-separation":
         _run_diagnose_separation(config)
+
+    elif args.command == "benchmark-disciplines":
+        _run_benchmark_disciplines(config, args)
 
     elif args.command == "pdf-parse":
         _run_pdf_parse(args)
@@ -592,6 +634,31 @@ def _run_diagnose_separation(config) -> None:
         return
 
     print(format_separation_report(report))
+
+
+def _run_benchmark_disciplines(config, args) -> None:
+    """Rank NSF directorates on the agency-labelled award corpus."""
+    from .evaluation.discipline_benchmark import (
+        format_benchmark_report,
+        run_discipline_benchmark,
+    )
+    from .ontology.store import OntologyStore
+
+    store = OntologyStore(config.app_db_path)
+    try:
+        report = run_discipline_benchmark(
+            config, store, limit=args.limit, top_k=args.top_k
+        )
+    except (FileNotFoundError, ValueError) as exc:
+        logging.error("%s", exc)
+        return
+
+    print(format_benchmark_report(report, store))
+
+    output_path = config.evaluation_dir / "discipline_benchmark.json"
+    with open(output_path, "w", encoding="utf-8") as handle:
+        json.dump(report, handle, indent=2)
+    logging.info("Wrote %s", output_path)
 
 
 def _run_server(config) -> None:

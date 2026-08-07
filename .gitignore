@@ -55,3 +55,9 @@ Thumbs.db
 models/
 *.bin
 *.safetensors
+
+# Harvested NSF award corpus (~4MB, regenerable in one command).
+# Kept out of the repo to avoid tripling its size; the benchmark *results*
+# derived from it (discipline_benchmark.json) are committed instead.
+# Regenerate with: make harvest-nsf-awards
+data/evaluation/nsf_awards.jsonl

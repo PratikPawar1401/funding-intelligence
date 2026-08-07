@@ -1,4 +1,5 @@
-.PHONY: install dev test lint run ingest tag serve docker-up
+.PHONY: install dev test lint run ingest tag serve docker-up \
+        harvest-nsf-awards benchmark-disciplines diagnose-separation
 
 install:
 	pip install -r requirements.txt
@@ -46,6 +47,20 @@ export-csv:
 
 precompute-embeddings:
 	PYTHONPATH=src python -m foa_pipeline.cli precompute-embeddings
+
+# ── Evaluation ──
+
+# Harvests NSF awards as a directorate-labelled corpus. Awards are written to
+# the evaluation directory only -- they are not FOAs and must never enter the
+# FOA database. See src/foa_pipeline/ingestion/nsf_awards.py.
+harvest-nsf-awards:
+	PYTHONPATH=src python -m foa_pipeline.cli harvest-nsf-awards
+
+benchmark-disciplines:
+	PYTHONPATH=src python -m foa_pipeline.cli benchmark-disciplines
+
+diagnose-separation:
+	PYTHONPATH=src python -m foa_pipeline.cli diagnose-separation
 
 # ── Full Pipeline ──
 

@@ -451,6 +451,137 @@ open question here now depends on.
 
 ---
 
+## 4e. The NSF Award Benchmark — Buying Measurement Resolution
+
+Every open question in §4c and §4d ended the same way: *the gold set is too
+small to resolve a change of this size*. 20 FOAs carry 81 tags, of which 23 are
+`research_discipline` — roughly three per directorate. At that scale a single
+annotation disagreement moves per-concept F1 by tens of points, so no per-concept
+claim about disciplines was defensible.
+
+The NSF Award Search API closes that gap for one category at zero annotation
+cost. Every award carries a directorate assigned by NSF itself, which is exactly
+the label `research_discipline` encodes.
+
+### The corpus
+
+`cli harvest-nsf-awards` → `data/evaluation/nsf_awards.jsonl`.
+
+The corpus itself is gitignored (~4MB, and it would triple the repo). Regenerate
+it with the parameters used for the results below, then re-run the benchmark:
+
+```bash
+make harvest-nsf-awards          # defaults: 01/01/2023-12/31/2025, 150/directorate
+make benchmark-disciplines
+```
+
+| | |
+|---|---|
+| Awards | **1,248** |
+| Per directorate | 126–277 (GEO is largest: it absorbs both Geosciences and Polar Programs) |
+| Co-funded across directorates | 123 (9.9%) |
+| Median abstract length | 368 words |
+| Unlabelled, skipped | 3 |
+
+Partitioning the harvest by CFDA number rather than taking one undifferentiated
+sample is what makes it usable: NSF funds MPS and BIO far more heavily than TIP,
+and an unpartitioned sample would leave the small directorates with a handful of
+documents each — reintroducing exactly the problem the corpus exists to solve.
+
+Three properties of the connector are load-bearing and are enforced by tests:
+
+- **Awards never enter `foa_records`.** They are a different genre — an award
+  describes funded work, an FOA solicits it — and mixing them would silently
+  change what the FOA corpus and search index mean.
+- **Unmappable organisations are dropped, never guessed.** Office of the
+  Director awards have no discipline; inventing one would fabricate ground truth.
+- **The crosswalk is explicit, not derived.** NSF's abbreviation for Computer &
+  Information Science is `CSE`, not `CISE`, and the Office of the Director's is
+  `O/D` with a slash. Generating concept IDs from abbreviations would have been
+  wrong twice, dropping an entire directorate without any error.
+
+Every CFDA → directorate mapping was verified empirically by querying the number
+and confirming that awards carrying it alone agree unanimously on `dirAbbr`.
+
+### Why it is scored as ranking, not thresholding
+
+Production tagging asks "did this concept clear its threshold". Here each award
+has exactly one correct directorate, so the informative question is "is the right
+one ranked first". Both accuracies are reported because ~10% of awards are
+co-funded, and scoring a prediction of the co-funding directorate as wrong would
+penalise the tagger for being right about genuinely interdisciplinary work.
+
+### Results (V7, 1,248 awards, Layer 2 only)
+
+| Metric | Value |
+|---|---|
+| Top-1 accuracy (strict) | **0.639** |
+| Top-1 accuracy (lenient) | 0.679 |
+| Top-3 accuracy (strict) | **0.884** |
+| Top-3 accuracy (lenient) | 0.901 |
+| Mean reciprocal rank | 0.774 |
+| Macro F1 | 0.572 |
+
+For reference, OpenAlex's production classifier — a fine-tuned transformer, not
+an untrained cosine ranker — reports top-1 0.53 and top-3 0.73 over 26 fields.
+That is a larger and harder label space, so this is a reference point rather than
+a like-for-like comparison, and it should be quoted as such. It does establish
+that an untrained dual-encoder at 0.639/0.884 over 8 classes is a reasonable
+baseline rather than a broken one.
+
+| Directorate | n | P | R | F1 |
+|---|---|---|---|---|
+| Geosciences | 277 | 0.765 | 0.917 | 0.834 |
+| STEM Education | 145 | 0.589 | 0.910 | 0.715 |
+| Mathematical and Physical Sciences | 137 | 0.631 | 0.737 | 0.680 |
+| Biological Sciences | 143 | 0.837 | 0.538 | 0.655 |
+| Social, Behavioral and Economic Sciences | 126 | 0.792 | 0.484 | 0.601 |
+| Computer and Information Science | 145 | 0.456 | 0.710 | 0.555 |
+| Technology, Innovation and Partnerships | 129 | 0.500 | 0.519 | 0.510 |
+| **Engineering** | **146** | 0.667 | **0.014** | **0.027** |
+
+### The finding this corpus was built to make possible
+
+**Engineering recall is 0.014 — 2 awards out of 146.**
+
+At n=146 this is not sampling noise, and it is not a benchmark artefact. Scoring
+60 true-Engineering awards directly, the `nsf_eng` concept vector ranks **sixth
+of eight**:
+
+```
+nsf_cise  mean cosine 0.2325     nsf_geo   0.1652
+nsf_edu               0.2147     nsf_eng   0.1604   <- the correct label
+nsf_mps               0.2046     nsf_sbe   0.0874
+nsf_tip               0.1739     nsf_bio   0.0782
+```
+
+The Engineering concept is genuinely mis-positioned in the embedding space. Its
+description is a bare list of subdiscipline adjectives — "civil mechanical
+electrical chemical environmental and bioengineering systems" — which shares
+little vocabulary with how engineering research is actually written about, while
+the token "engineering" itself appears inside *two competing* descriptions:
+CISE's ("...and software engineering") and STEM Education's ("science technology
+engineering and mathematics").
+
+This is the §4c label-side hypothesis confirmed at a sample size that can carry
+the claim. `research_methods.csv` and `populations.csv` were enriched in V6;
+`nsf_directorates.csv` never was. The gold set's three-examples-per-directorate
+could never have surfaced this — which is precisely the argument for the corpus.
+
+### Honest limits
+
+- **Distribution shift is real.** Awards describe funded projects in the past
+  tense; FOAs solicit them and carry eligibility, deadlines and submission
+  mechanics that awards have none of. This benchmark answers "can Layer 2
+  separate the eight directorates given clean research prose", not "does the
+  tagger work on FOAs". It complements the gold set; it does not replace it.
+- **It covers one category.** The other four are untouched by it.
+- **Labels are administrative, not semantic.** A directorate assignment reflects
+  which programme funded the work, which is usually but not always the same as
+  what the work is about. The 9.9% co-funding rate is the visible part of that.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:

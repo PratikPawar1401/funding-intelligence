@@ -2,16 +2,6 @@
   {
     "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
     "title": "Foundational Research in Robotics",
-    "concept": "nsf_eng",
-    "label": "Engineering",
-    "category": "research_discipline",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "and proposals are encouraged across the full range of fundamental engineering and computer science research challenges arising in robotics. To"
-  },
-  {
-    "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
-    "title": "Foundational Research in Robotics",
     "concept": "great_05",
     "label": "General Science",
     "category": "sponsor_theme",
@@ -20,14 +10,14 @@
     "context": "robot or a class of robots, as defined above. [Is there a robot?] The goal of the project should be to endow a robot or a class of robots with new and useful capabilities or to significantly enhance e"
   },
   {
-    "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
-    "title": "Circuits and Systems for Communications and Sensing (CSCS)",
+    "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
+    "title": "Foundational Research in Robotics",
     "concept": "nsf_eng",
     "label": "Engineering",
     "category": "research_discipline",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "(CSCS) program supports the key role of electrical engineering in future communications, sensing, circuits, and signal"
+    "context": "and proposals are encouraged across the full range of fundamental engineering and computer science research challenges arising in robotics. To"
   },
   {
     "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
@@ -38,6 +28,16 @@
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": "at once, enabling faster computation and better security. Machine learning can further improve signal processing, enabling new applications in"
+  },
+  {
+    "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
+    "title": "Circuits and Systems for Communications and Sensing (CSCS)",
+    "concept": "nsf_eng",
+    "label": "Engineering",
+    "category": "research_discipline",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "(CSCS) program supports the key role of electrical engineering in future communications, sensing, circuits, and signal"
   },
   {
     "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
@@ -62,21 +62,21 @@
   {
     "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
     "title": "SBIR/STTR: Developing Deep Technologies",
-    "concept": "pop_19",
-    "label": "Small Business Owners",
-    "category": "population",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4697,
-    "context": "Small Business Innovation Research / Small Business Technology Transfer Phase I, Phase II, Fast-Track Programs SBIR/STTR: Developing Deep Technologies that Advance U.S. Competitiveness and Security Su"
-  },
-  {
-    "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
-    "title": "SBIR/STTR: Developing Deep Technologies",
     "concept": "nsf_tip",
     "label": "Technology Innovation and Partnerships",
     "category": "research_discipline",
     "layer": "layer_2_embedding",
     "confidence": 0.51,
+    "context": "Small Business Innovation Research / Small Business Technology Transfer Phase I, Phase II, Fast-Track Programs SBIR/STTR: Developing Deep Technologies that Advance U.S. Competitiveness and Security Su"
+  },
+  {
+    "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
+    "title": "SBIR/STTR: Developing Deep Technologies",
+    "concept": "pop_19",
+    "label": "Small Business Owners",
+    "category": "population",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4697,
     "context": "Small Business Innovation Research / Small Business Technology Transfer Phase I, Phase II, Fast-Track Programs SBIR/STTR: Developing Deep Technologies that Advance U.S. Competitiveness and Security Su"
   },
   {
@@ -102,6 +102,16 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
+    "concept": "method_06",
+    "label": "Survey Research",
+    "category": "method",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4157,
+    "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
+  },
+  {
+    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
+    "title": "Sociology",
     "concept": "nsf_sbe",
     "label": "Social Behavioral and Economic Sciences",
     "category": "research_discipline",
@@ -120,34 +130,14 @@
     "context": "[Resolved against Income Security] must be appropriate to the questions asked; and (4) the proposed research must advance our understanding of social processes, structures and methods. NSF also offers"
   },
   {
-    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
-    "title": "Sociology",
-    "concept": "method_06",
-    "label": "Survey Research",
-    "category": "method",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4157,
-    "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
-  },
-  {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
-    "concept": "great_05",
-    "label": "General Science",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4958,
-    "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology (CREST) program provides sup"
-  },
-  {
-    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
-    "title": "Centers of Research Excellence in Science and Technology (CREST)",
-    "concept": "great_09",
-    "label": "Education and Training",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3286,
-    "context": "institutions, at the time of proposal submission, that have enrollments of 50% or moreU.S. resident students (non-international) (based on total student enrollment) who are members of minority groups "
+    "concept": "pop_12",
+    "label": "Students",
+    "category": "population",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "postdoctoral scholars, and an expanded presence of research doctoral students in science, technology, engineering, and mathematics ("
   },
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
@@ -162,6 +152,16 @@
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
+    "concept": "great_05",
+    "label": "General Science",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4958,
+    "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology (CREST) program provides sup"
+  },
+  {
+    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
+    "title": "Centers of Research Excellence in Science and Technology (CREST)",
     "concept": "pop_08",
     "label": "Racial and Ethnic Minorities",
     "category": "population",
@@ -172,12 +172,12 @@
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
-    "concept": "pop_12",
-    "label": "Students",
-    "category": "population",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "postdoctoral scholars, and an expanded presence of research doctoral students in science, technology, engineering, and mathematics ("
+    "concept": "great_09",
+    "label": "Education and Training",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3286,
+    "context": "institutions, at the time of proposal submission, that have enrollments of 50% or moreU.S. resident students (non-international) (based on total student enrollment) who are members of minority groups "
   },
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
@@ -212,22 +212,22 @@
   {
     "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
     "title": "Robert Noyce Teacher Scholarship Program",
-    "concept": "great_09",
-    "label": "Education and Training",
-    "category": "sponsor_theme",
-    "layer": "layer_3_llm",
-    "confidence": 0.95,
-    "context": "[Resolved against General Science] Robert Noyce Teacher Scholarship Program The National Science FoundationRobert Noyce Teacher Scholarship Program (Noyce)invites innovative proposals that address the"
-  },
-  {
-    "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
-    "title": "Robert Noyce Teacher Scholarship Program",
     "concept": "pop_12",
     "label": "Students",
     "category": "population",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": ", senior personnel, postdoctoral scholars, graduate or undergraduate students or trainees. In addition, the Noyce program supports"
+  },
+  {
+    "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
+    "title": "Robert Noyce Teacher Scholarship Program",
+    "concept": "great_09",
+    "label": "Education and Training",
+    "category": "sponsor_theme",
+    "layer": "layer_3_llm",
+    "confidence": 0.95,
+    "context": "[Resolved against General Science] Robert Noyce Teacher Scholarship Program The National Science FoundationRobert Noyce Teacher Scholarship Program (Noyce)invites innovative proposals that address the"
   },
   {
     "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
@@ -252,16 +252,6 @@
   {
     "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
     "title": "Unleashing Tribal Energy Development",
-    "concept": "sdg_07",
-    "label": "Affordable and Clean Energy",
-    "category": "research_domain",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4517,
-    "context": "Unleashing Tribal Energy Development DE-FOA-0003548: Unleashing Tribal Energy Development Under this Notice of Funding Opportunity (NOFO), the DOE Office of Indian Energy Policy and Programs is solici"
-  },
-  {
-    "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
-    "title": "Unleashing Tribal Energy Development",
     "concept": "pop_07",
     "label": "Indigenous Peoples",
     "category": "population",
@@ -270,14 +260,24 @@
     "context": "Unleashing Tribal Energy Development DE-FOA-0003548: Unleashing Tribal Energy Development"
   },
   {
+    "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
+    "title": "Unleashing Tribal Energy Development",
+    "concept": "sdg_07",
+    "label": "Affordable and Clean Energy",
+    "category": "research_domain",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4517,
+    "context": "Unleashing Tribal Energy Development DE-FOA-0003548: Unleashing Tribal Energy Development Under this Notice of Funding Opportunity (NOFO), the DOE Office of Indian Energy Policy and Programs is solici"
+  },
+  {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
     "title": "Engineering for Civil Infrastructure",
-    "concept": "nsf_eng",
-    "label": "Engineering",
-    "category": "research_discipline",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI"
+    "concept": "sdg_09",
+    "label": "Industry Innovation and Infrastructure",
+    "category": "research_domain",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4548,
+    "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI) program supports fundamental research in geotechnical, structural, materials, architectural, and coastal engineering"
   },
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
@@ -292,12 +292,12 @@
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
     "title": "Engineering for Civil Infrastructure",
-    "concept": "sdg_09",
-    "label": "Industry Innovation and Infrastructure",
-    "category": "research_domain",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4548,
-    "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI) program supports fundamental research in geotechnical, structural, materials, architectural, and coastal engineering"
+    "concept": "nsf_eng",
+    "label": "Engineering",
+    "category": "research_discipline",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI"
   },
   {
     "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
@@ -312,12 +312,12 @@
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
     "title": "Electrochemical Systems",
-    "concept": "sdg_07",
-    "label": "Affordable and Clean Energy",
-    "category": "research_domain",
+    "concept": "nsf_mps",
+    "label": "Mathematical and Physical Sciences",
+    "category": "research_discipline",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "and high-power density batteries suitable for transportation and renewable energy storage applications are of primary interest. Advanced systems involving"
+    "context": "in the Division of Materials Research of the Directorate for Mathematical and Physical Sciences. Proposals that focus on the generation of thermal energy"
   },
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
@@ -332,12 +332,12 @@
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
     "title": "Electrochemical Systems",
-    "concept": "nsf_mps",
-    "label": "Mathematical and Physical Sciences",
-    "category": "research_discipline",
+    "concept": "sdg_07",
+    "label": "Affordable and Clean Energy",
+    "category": "research_domain",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "in the Division of Materials Research of the Directorate for Mathematical and Physical Sciences. Proposals that focus on the generation of thermal energy"
+    "context": "and high-power density batteries suitable for transportation and renewable energy storage applications are of primary interest. Advanced systems involving"
   },
   {
     "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
@@ -412,6 +412,16 @@
   {
     "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
     "title": "Science of Science: Biomedical Research Enterprise",
+    "concept": "great_02",
+    "label": "Health",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4138,
+    "context": "A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Health (NIH) are interested in proposa"
+  },
+  {
+    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
+    "title": "Science of Science: Biomedical Research Enterprise",
     "concept": "nsf_sbe",
     "label": "Social Behavioral and Economic Sciences",
     "category": "research_discipline",
@@ -427,16 +437,6 @@
     "category": "sponsor_theme",
     "layer": "layer_2_embedding",
     "confidence": 0.5083,
-    "context": "A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Health (NIH) are interested in proposa"
-  },
-  {
-    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
-    "title": "Science of Science: Biomedical Research Enterprise",
-    "concept": "great_02",
-    "label": "Health",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4138,
     "context": "A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Health (NIH) are interested in proposa"
   },
   {

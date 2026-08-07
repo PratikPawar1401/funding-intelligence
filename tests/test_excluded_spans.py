@@ -7,11 +7,34 @@ deleting shifts Layer 2's chunk boundaries and perturbs unrelated categories,
 which was measured at -0.049 global F1.
 """
 
+import numpy as np
 import pytest
 
+from foa_pipeline.ontology.store import OntologyConcept
 from foa_pipeline.tagging.layer2_embedding import L2Tagger
 
 POPULATION = frozenset({"population"})
+
+
+def _concept(concept_id, category):
+    return OntologyConcept(
+        concept_id=concept_id,
+        label=concept_id.replace("_", " ").title(),
+        category=category,
+        parent_id=None,
+        source_ontology="custom",
+        description=None,
+    )
+
+
+class _StubModel:
+    """Returns a fixed vector per text, so cosine scores are predictable."""
+
+    def __init__(self, vectors):
+        self.vectors = vectors
+
+    def encode(self, texts, convert_to_numpy=True):
+        return np.array([self.vectors[t] for t in texts], dtype=float)
 
 
 class TestChunkSpans:
@@ -91,6 +114,70 @@ class TestSuppressionRule:
             [(0, 100, frozenset({"population"})), (0, 100, frozenset({"method"}))],
         )
         assert result == frozenset({"population", "method"})
+
+
+class TestScoreConcepts:
+    """
+    The unthresholded ranking view of Layer 2.
+
+    Extracted from `tag_text` so the discipline benchmark can rank concepts
+    rather than threshold them. These tests pin the contract that makes the two
+    callers share one scoring implementation.
+    """
+
+    def _tagger(self):
+        tagger = L2Tagger()
+        tagger.model = _StubModel({
+            "alpha beta": np.array([1.0, 0.0]),
+        })
+        tagger.concept_embeddings = {
+            "d1": np.array([1.0, 0.0]),    # identical -> 1.0
+            "d2": np.array([0.0, 1.0]),    # orthogonal -> 0.0
+            "m1": np.array([1.0, 1.0]),    # 45 degrees -> ~0.707
+        }
+        tagger.concept_lookup = {
+            "d1": _concept("d1", "research_discipline"),
+            "d2": _concept("d2", "research_discipline"),
+            "m1": _concept("m1", "method"),
+        }
+        return tagger
+
+    def test_returns_a_score_for_every_concept(self):
+        scores = self._tagger().score_concepts("alpha beta")
+        assert set(scores) == {"d1", "d2", "m1"}
+
+    def test_scores_are_cosine_similarities(self):
+        scores = self._tagger().score_concepts("alpha beta")
+        assert scores["d1"] == pytest.approx(1.0)
+        assert scores["d2"] == pytest.approx(0.0)
+        assert scores["m1"] == pytest.approx(0.7071, abs=1e-3)
+
+    def test_category_filter_restricts_the_output(self):
+        scores = self._tagger().score_concepts("alpha beta", category="research_discipline")
+        assert set(scores) == {"d1", "d2"}
+
+    def test_is_not_thresholded(self):
+        """A zero-similarity concept must still be returned, so it can be ranked."""
+        scores = self._tagger().score_concepts("alpha beta")
+        assert "d2" in scores
+
+    def test_unknown_category_returns_nothing(self):
+        assert self._tagger().score_concepts("alpha beta", category="nope") == {}
+
+    def test_empty_text_returns_nothing(self):
+        assert self._tagger().score_concepts("") == {}
+
+    def test_missing_model_returns_nothing_rather_than_raising(self):
+        tagger = L2Tagger()
+        tagger.concept_embeddings = {"d1": np.array([1.0, 0.0])}
+        assert tagger.score_concepts("alpha beta") == {}
+
+    def test_excluded_spans_suppress_a_category(self):
+        tagger = self._tagger()
+        scores = tagger.score_concepts(
+            "alpha beta", excluded_spans=[(0, 100, frozenset({"research_discipline"}))]
+        )
+        assert set(scores) == {"m1"}
 
 
 class TestTitleScoreCombination:
