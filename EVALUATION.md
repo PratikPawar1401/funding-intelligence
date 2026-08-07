@@ -503,6 +503,17 @@ Three properties of the connector are load-bearing and are enforced by tests:
 Every CFDA → directorate mapping was verified empirically by querying the number
 and confirming that awards carrying it alone agree unanimously on `dirAbbr`.
 
+### The corpus is split, because descriptions get tuned against it
+
+Concept descriptions are hand-edited in response to what this benchmark reports.
+That is tuning, and reporting on the same awards that motivated the edits would
+repeat the error §4d was careful to avoid on the gold set. `assign_split` hashes
+each award ID into a `tune` or `eval` half — hashing rather than shuffling, so an
+award held out once stays held out after the corpus grows, and a before/after
+comparison measures the change rather than a reshuffle of which documents are
+easy. The split is 633/615. `--split tune` prints "not a reportable result" in
+its own header.
+
 ### Why it is scored as ranking, not thresholding
 
 Production tagging asks "did this concept clear its threshold". Here each award
@@ -579,6 +590,111 @@ could never have surfaced this — which is precisely the argument for the corpu
 - **Labels are administrative, not semantic.** A directorate assignment reflects
   which programme funded the work, which is usually but not always the same as
   what the work is about. The 9.9% co-funding rate is the visible part of that.
+
+---
+
+## 4f. Fixing the Engineering Concept — and Why the Bigger Rewrite Was Rejected
+
+§4e diagnosed Engineering's description as the cause of its 0.014 recall. Three
+variants were tried against the **tuning half only**, then the winner was scored
+once on the held-out half.
+
+### Variants, on the tuning half (n=633)
+
+| Variant | Top-1 | Top-3 | MRR | Macro F1 | ENG F1 | SBE F1 |
+|---|---|---|---|---|---|---|
+| A — original descriptions | 0.659 | 0.883 | 0.785 | 0.589 | 0.028 | 0.627 |
+| B — all 8 rewritten | — | — | — | — | — | — |
+| C — B plus disambiguation clauses | 0.637 | **0.916** | 0.783 | 0.593 | **0.220** | 0.432 |
+| **D — Engineering only** | **0.660** | 0.905 | **0.792** | **0.599** | 0.103 | 0.627 |
+
+(B was scored on the full corpus before the split existed: top-1 0.613 against
+A's 0.639, top-3 0.904 against 0.884 — a net regression on the headline metric.)
+
+**Rewriting all eight descriptions did not reduce error; it redistributed it.**
+Four directorates improved and four regressed, with aggregate metrics flat. The
+largest single casualty was SBE, F1 0.627 → 0.432: the rewrite put "natural
+language processing" into the CISE description against SBE's "language
+acquisition and linguistics", and SBE→CISE confusions doubled from 24 to 47.
+CISE became a general attractor, its precision falling 0.456 → 0.404 while recall
+rose 0.710 → 0.766.
+
+Variant D — changing *only* the concept actually diagnosed as broken — beat both
+on top-1, MRR and macro F1, and left SBE, Geosciences and STEM Education
+bit-identical to the baseline.
+
+It also corrected the story about variant C. C appeared to lift Engineering to
+0.220, but isolating the change shows the Engineering description alone is worth
+0.103. **The rest of C's apparent gain came from degrading Engineering's
+competitors, not from improving Engineering.** An aggregate metric would have
+scored that as a win.
+
+### Held-out result (n=615, variant D)
+
+| Metric | Before | After | Δ |
+|---|---|---|---|
+| Top-1 accuracy (strict) | 0.618 | 0.621 | +0.003 |
+| Top-1 accuracy (lenient) | 0.662 | 0.670 | +0.008 |
+| Top-3 accuracy (strict) | 0.885 | **0.911** | **+0.026** |
+| Top-3 accuracy (lenient) | 0.906 | 0.925 | +0.019 |
+| Mean reciprocal rank | 0.762 | 0.771 | +0.009 |
+| Macro F1 | 0.553 | **0.568** | +0.015 |
+| **Engineering F1** | 0.026 | **0.154** | **+0.128** |
+| **Engineering recall** | 0.013 | **0.092** | **7×** |
+
+Every metric improved. Top-3 gained 0.026 (≈2.2 standard errors at n=615);
+Geosciences, SBE and STEM Education were unchanged to three decimals, confirming
+the edit did only what it claimed.
+
+### The gold set could not see this change at all
+
+Re-tagging every FOA and re-running the gold evaluation after the fix produced
+**no change whatsoever** — P 0.427, R 0.654, F1 0.517, with all five per-category
+scores identical to three decimals.
+
+That is not because the gold set lacks Engineering. It has 5 `nsf_eng` tags. The
+reason is sharper: **all 15 `nsf_eng` decisions on the gold set (5 true positives,
+10 false positives) come from `layer_1_terminological`. None come from Layer 2.**
+
+FOAs name their own directorate — "Directorate for Engineering" appears verbatim
+in NSF programme text — so Layer 1's exact matcher fires at confidence 1.0 and
+Layer 2's ranking is never consulted. Award abstracts describe the science
+without naming the funding directorate, so there Layer 2 has to carry the
+decision alone.
+
+A Layer 2 description change therefore *cannot* move the gold set's Engineering
+numbers, no matter how much it improves the model. This is the concrete form of
+the argument for §4e: the project's headline metric was structurally blind to a
+defect affecting 98.6% of a category, and stayed blind to the fix.
+
+It also flags a separate problem the award corpus does not address: Engineering
+on the gold set is 5 TP against 10 FP, all from Layer 1. That is a *precision*
+failure in exact matching, unrelated to the recall failure fixed here, and it
+needs the expanded gold set (A5) to diagnose.
+
+### What this does and does not establish
+
+Top-1 moved only +0.003 while top-3 moved +0.026. Engineering is now *ranked*
+far better — it appears in the top three where it previously did not — but still
+wins outright in only 9% of its own awards. **A better description made a broken
+concept mediocre; it did not make it good.**
+
+That is the strongest evidence yet for Track B item 1. Layer 2 is an *untrained*
+dual-encoder, and there is a ceiling on how far hand-written label text can push
+it. Engineering is hard here because engineering abstracts are written in the
+vocabulary of whatever they are engineering — materials, biology, computation —
+so lexical similarity to a generic engineering definition is genuinely weak.
+Contrastive fine-tuning (SetFit) learns that mapping from examples instead, and
+the 1,248-award corpus built in §4e is exactly the supervision it would need.
+
+### A retired diagnostic
+
+§4c introduced intra-category concept similarity as a proxy, on the observation
+that it tracked category performance inversely. It does not survive this
+experiment: the full rewrite moved `research_discipline` similarity 0.308 →
+0.340 (worse by the proxy) while Engineering's F1 improved 5.6×. The proxy
+described a correlation across categories, not a reliable predictor within one.
+Direct measurement replaced it, which is what §4e's corpus made affordable.
 
 ---
 

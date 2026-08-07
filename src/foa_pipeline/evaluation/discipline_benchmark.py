@@ -27,6 +27,7 @@ here: awards describe funded projects in the past tense, FOAs solicit them.
 This complements the gold set; it does not replace it.
 """
 
+import hashlib
 import json
 import logging
 from pathlib import Path
@@ -37,9 +38,38 @@ logger = logging.getLogger(__name__)
 DISCIPLINE_CATEGORY = "research_discipline"
 CORPUS_FILENAME = "nsf_awards.jsonl"
 
+SPLITS = ("tune", "eval", "all")
 
-def load_award_corpus(evaluation_dir: Path, limit: Optional[int] = None) -> List[Dict[str, Any]]:
-    """Read the harvested award corpus, skipping malformed lines."""
+
+def assign_split(award_id: str) -> str:
+    """
+    Deterministically place an award in the tuning or held-out half.
+
+    Hashing the award ID rather than shuffling means the split is stable across
+    runs, machines and re-harvests: an award that was held out stays held out
+    even after the corpus grows. That is what makes a before/after comparison on
+    the eval half meaningful rather than a reshuffle of which documents are easy.
+    """
+    digest = hashlib.sha256(award_id.encode("utf-8")).hexdigest()
+    return "tune" if int(digest[:8], 16) % 2 == 0 else "eval"
+
+
+def load_award_corpus(
+    evaluation_dir: Path,
+    limit: Optional[int] = None,
+    split: str = "all",
+) -> List[Dict[str, Any]]:
+    """
+    Read the harvested award corpus, skipping malformed lines.
+
+    `split` selects half the corpus. Concept descriptions are edited by hand in
+    response to what the benchmark reports, which is tuning — so the numbers
+    quoted as results must come from awards that played no part in those edits.
+    Use "tune" while iterating and "eval" when reporting.
+    """
+    if split not in SPLITS:
+        raise ValueError(f"split must be one of {SPLITS}, got {split!r}")
+
     path = evaluation_dir / CORPUS_FILENAME
     if not path.exists():
         raise FileNotFoundError(
@@ -56,8 +86,11 @@ def load_award_corpus(evaluation_dir: Path, limit: Optional[int] = None) -> List
                 record = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if record.get("abstract") and record.get("primary_concept_id"):
-                records.append(record)
+            if not (record.get("abstract") and record.get("primary_concept_id")):
+                continue
+            if split != "all" and assign_split(str(record.get("award_id", ""))) != split:
+                continue
+            records.append(record)
             if limit and len(records) >= limit:
                 break
     return records
@@ -177,6 +210,7 @@ def run_discipline_benchmark(
     store: Any,
     limit: Optional[int] = None,
     top_k: int = 3,
+    split: str = "all",
 ) -> Dict[str, Any]:
     """
     Tag the award corpus with Layer 2 and score the resulting rankings.
@@ -188,9 +222,9 @@ def run_discipline_benchmark(
     """
     from ..tagging.layer2_embedding import L2Tagger
 
-    records = load_award_corpus(config.evaluation_dir, limit=limit)
+    records = load_award_corpus(config.evaluation_dir, limit=limit, split=split)
     if not records:
-        raise ValueError("Award corpus is empty")
+        raise ValueError(f"Award corpus is empty for split={split!r}")
 
     tagger = L2Tagger(
         model_name=config.embedding_model,
@@ -211,6 +245,7 @@ def run_discipline_benchmark(
 
     report = evaluate_predictions(records, rankings, top_k=top_k)
     report["corpus_size"] = len(records)
+    report["split"] = split
     return report
 
 
@@ -224,9 +259,12 @@ def format_benchmark_report(report: Dict[str, Any], store: Any = None) -> str:
         return concept.label if concept else concept_id
 
     top_k = report["top_k"]
+    split = report.get("split", "all")
     lines = [
         "NSF Award Discipline Benchmark",
         "=" * 62,
+        f"Split             : {split}"
+        + ("  (tuning half — not a reportable result)" if split == "tune" else ""),
         f"Awards scored     : {report['total']}",
     ]
     if report["unranked"]:

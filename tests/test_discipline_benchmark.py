@@ -10,6 +10,7 @@ import json
 import pytest
 
 from foa_pipeline.evaluation.discipline_benchmark import (
+    assign_split,
     evaluate_predictions,
     format_benchmark_report,
     load_award_corpus,
@@ -17,13 +18,38 @@ from foa_pipeline.evaluation.discipline_benchmark import (
 )
 
 
-def record(primary, acceptable=None, abstract="text"):
+def record(primary, acceptable=None, abstract="text", award_id="1"):
     return {
-        "award_id": "1",
+        "award_id": award_id,
         "abstract": abstract,
         "primary_concept_id": primary,
         "acceptable_concept_ids": acceptable or [primary],
     }
+
+
+class TestSplitAssignment:
+    """
+    Descriptions are hand-edited in response to the benchmark, so the reported
+    half must be disjoint from the half those edits were made against.
+    """
+
+    def test_split_is_deterministic(self):
+        assert assign_split("2349311") == assign_split("2349311")
+
+    def test_split_is_stable_across_corpus_growth(self):
+        """An award held out once stays held out after a re-harvest."""
+        before = {i: assign_split(str(i)) for i in range(50)}
+        after = {i: assign_split(str(i)) for i in range(200)}
+        assert all(after[i] == before[i] for i in before)
+
+    def test_both_halves_are_populated_and_roughly_even(self):
+        assignments = [assign_split(str(i)) for i in range(1000)]
+        tune = assignments.count("tune")
+        assert 400 < tune < 600, f"lopsided split: {tune}/1000"
+        assert tune + assignments.count("eval") == 1000
+
+    def test_only_two_values_are_produced(self):
+        assert {assign_split(str(i)) for i in range(200)} == {"tune", "eval"}
 
 
 class TestRankConcepts:
@@ -208,6 +234,25 @@ class TestLoadAwardCorpus:
         d = self._write(tmp_path, [json.dumps(record("nsf_bio")) for _ in range(10)])
         assert len(load_award_corpus(d, limit=3)) == 3
 
+    def test_splits_partition_the_corpus_without_overlap(self, tmp_path):
+        d = self._write(tmp_path, [
+            json.dumps(record("nsf_bio", award_id=str(i))) for i in range(200)
+        ])
+        everything = load_award_corpus(d, split="all")
+        tune = load_award_corpus(d, split="tune")
+        held_out = load_award_corpus(d, split="eval")
+
+        tune_ids = {r["award_id"] for r in tune}
+        eval_ids = {r["award_id"] for r in held_out}
+        assert len(everything) == 200
+        assert tune_ids & eval_ids == set()
+        assert tune_ids | eval_ids == {r["award_id"] for r in everything}
+
+    def test_invalid_split_is_rejected(self, tmp_path):
+        d = self._write(tmp_path, [json.dumps(record("nsf_bio"))])
+        with pytest.raises(ValueError, match="split must be one of"):
+            load_award_corpus(d, split="train")
+
 
 class TestReportFormatting:
     def test_report_contains_headline_metrics(self):
@@ -231,6 +276,16 @@ class TestReportFormatting:
 
     def test_report_handles_an_empty_corpus(self):
         assert "Awards scored" in format_benchmark_report(evaluate_predictions([], []))
+
+    def test_tuning_half_is_labelled_as_not_reportable(self):
+        report = evaluate_predictions([record("nsf_bio")], [["nsf_bio"]])
+        report["split"] = "tune"
+        assert "not a reportable result" in format_benchmark_report(report)
+
+    def test_held_out_half_carries_no_such_warning(self):
+        report = evaluate_predictions([record("nsf_bio")], [["nsf_bio"]])
+        report["split"] = "eval"
+        assert "not a reportable result" not in format_benchmark_report(report)
 
     def test_labels_are_resolved_through_the_store_when_given(self):
         class FakeConcept:

@@ -137,7 +137,28 @@ PYTHONPATH=src python -m foa_pipeline.cli evaluate --gold
 
 # Against the larger LLM-generated silver set (threshold tuning only)
 PYTHONPATH=src python -m foa_pipeline.cli evaluate
+
+# How well Layer 2 separates correct from incorrect tags (run an evaluation first)
+PYTHONPATH=src python -m foa_pipeline.cli diagnose-separation
 ```
+
+### Benchmark Discipline Tagging at Scale
+
+The hand-labelled gold set carries only ~3 examples per NSF directorate, too few
+to say anything reliable per concept. NSF's Award Search API supplies thousands
+of abstracts whose directorate NSF assigned itself, giving a discipline benchmark
+at zero annotation cost:
+
+```bash
+make harvest-nsf-awards      # ~1,250 awards -> data/evaluation/nsf_awards.jsonl
+make benchmark-disciplines   # top-1/top-3 accuracy, MRR, confusion matrix
+```
+
+Awards are written to the evaluation directory only. They are deliberately kept
+out of the FOA database: an award describes work that was funded, an FOA solicits
+it, and mixing the two genres would change what the corpus and search index mean.
+Treat the resulting numbers as a complementary benchmark, not a gold-set result —
+see [EVALUATION.md](EVALUATION.md) §4e.
 
 ### Run the API Server
 

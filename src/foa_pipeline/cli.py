@@ -118,6 +118,14 @@ def _parse_args() -> argparse.Namespace:
     bench_p.add_argument(
         "--top-k", type=int, default=3, help="k for top-k accuracy (default: 3)"
     )
+    bench_p.add_argument(
+        "--split",
+        choices=["tune", "eval", "all"],
+        default="all",
+        help="Corpus half to score. Use 'tune' while editing concept "
+        "descriptions and 'eval' when reporting, so results are held out "
+        "from the edits that produced them (default: all)",
+    )
     curate_p = subparsers.add_parser(
         "curate-eval-set", help="Generate a stratified sample of FOAs for evaluation"
     )
@@ -647,7 +655,7 @@ def _run_benchmark_disciplines(config, args) -> None:
     store = OntologyStore(config.app_db_path)
     try:
         report = run_discipline_benchmark(
-            config, store, limit=args.limit, top_k=args.top_k
+            config, store, limit=args.limit, top_k=args.top_k, split=args.split
         )
     except (FileNotFoundError, ValueError) as exc:
         logging.error("%s", exc)
@@ -655,7 +663,8 @@ def _run_benchmark_disciplines(config, args) -> None:
 
     print(format_benchmark_report(report, store))
 
-    output_path = config.evaluation_dir / "discipline_benchmark.json"
+    suffix = "" if args.split == "all" else f"_{args.split}"
+    output_path = config.evaluation_dir / f"discipline_benchmark{suffix}.json"
     with open(output_path, "w", encoding="utf-8") as handle:
         json.dump(report, handle, indent=2)
     logging.info("Wrote %s", output_path)

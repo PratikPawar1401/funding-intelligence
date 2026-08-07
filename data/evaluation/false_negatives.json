@@ -2,13 +2,6 @@
   {
     "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
     "title": "Foundational Research in Robotics",
-    "concept": "method_01",
-    "label": "Machine Learning",
-    "category": "method"
-  },
-  {
-    "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
-    "title": "Foundational Research in Robotics",
     "concept": "nsf_cise",
     "label": "Computer and Information Science and Engineering",
     "category": "research_discipline"
@@ -18,6 +11,13 @@
     "title": "Foundational Research in Robotics",
     "concept": "method_04",
     "label": "Computer Vision",
+    "category": "method"
+  },
+  {
+    "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
+    "title": "Foundational Research in Robotics",
+    "concept": "method_01",
+    "label": "Machine Learning",
     "category": "method"
   },
   {
@@ -100,20 +100,6 @@
   {
     "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
     "title": "Cognitive Neuroscience",
-    "concept": "great_02",
-    "label": "Health",
-    "category": "sponsor_theme"
-  },
-  {
-    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
-    "title": "Cognitive Neuroscience",
-    "concept": "nsf_sbe",
-    "label": "Social Behavioral and Economic Sciences",
-    "category": "research_discipline"
-  },
-  {
-    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
-    "title": "Cognitive Neuroscience",
     "concept": "nsf_bio",
     "label": "Biological Sciences",
     "category": "research_discipline"
@@ -126,11 +112,18 @@
     "category": "method"
   },
   {
-    "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
-    "title": "Electrochemical Systems",
-    "concept": "great_04",
-    "label": "Energy",
+    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
+    "title": "Cognitive Neuroscience",
+    "concept": "great_02",
+    "label": "Health",
     "category": "sponsor_theme"
+  },
+  {
+    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
+    "title": "Cognitive Neuroscience",
+    "concept": "nsf_sbe",
+    "label": "Social Behavioral and Economic Sciences",
+    "category": "research_discipline"
   },
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
@@ -140,11 +133,11 @@
     "category": "sponsor_theme"
   },
   {
-    "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
-    "title": "Documenting Endangered Languages",
-    "concept": "nsf_sbe",
-    "label": "Social Behavioral and Economic Sciences",
-    "category": "research_discipline"
+    "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
+    "title": "Electrochemical Systems",
+    "concept": "great_04",
+    "label": "Energy",
+    "category": "sponsor_theme"
   },
   {
     "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
@@ -159,6 +152,13 @@
     "concept": "great_05",
     "label": "General Science",
     "category": "sponsor_theme"
+  },
+  {
+    "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
+    "title": "Documenting Endangered Languages",
+    "concept": "nsf_sbe",
+    "label": "Social Behavioral and Economic Sciences",
+    "category": "research_discipline"
   },
   {
     "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",

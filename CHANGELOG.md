@@ -12,6 +12,17 @@ Research (ISSR).
 ## [Unreleased]
 
 ### Added
+- `ingestion/nsf_awards.py` — NSF Award Search connector producing an
+  agency-labelled evaluation corpus (~1,250 abstracts whose research directorate
+  NSF assigned itself). Written to the evaluation directory only: awards are a
+  different genre from FOAs and must never enter `foa_records`. Crosswalks are
+  explicit rather than derived from abbreviations, because NSF reports `CSE` for
+  Computer & Information Science and `O/D` for the Office of the Director.
+- `evaluation/discipline_benchmark.py` — ranks the eight directorates per award
+  and reports top-1/top-3 accuracy, MRR, macro F1 and a confusion matrix. Strict
+  scoring uses the managing directorate; lenient also accepts a co-funder, since
+  9.9% of awards are co-funded. Includes a deterministic `tune`/`eval` split so
+  concept-description edits are never reported on the awards that motivated them.
 - `normalisation/boilerplate.py` — administrative boilerplate removal before
   tagging. Only HTML markup stripping is enabled by default; the text-level
   pattern groups (eligibility blocks, deadline tables, PAPPG references) are
@@ -98,6 +109,38 @@ Layer 2 separation AUC 0.633 → 0.666 (added as a second metric because F1 on a
 Largest per-category gain: `method` F1 0.250 → 0.462. See `EVALUATION.md` §4a,
 §4b, and §4c for the per-change breakdown, including several candidate changes
 that were tested and rejected for making held-out F1 worse.
+
+#### Discipline benchmark (NSF award corpus, 1,248 awards)
+
+A second, independent benchmark added because the gold set carries only ~3
+examples per NSF directorate — too few for any per-concept claim. Layer 2 ranking
+over the eight directorates:
+
+| Metric | Value |
+|---|---|
+| Top-1 accuracy (strict) | 0.639 |
+| Top-3 accuracy (strict) | 0.884 |
+| Mean reciprocal rank | 0.774 |
+| Macro F1 | 0.572 |
+
+This immediately surfaced a defect invisible at gold-set scale: **Engineering
+recall 0.014** (2 of 146), with its concept vector ranking sixth of eight on
+awards NSF itself labelled Engineering. See `EVALUATION.md` §4e.
+
+Rewriting the Engineering description fixed it, measured on a held-out half of
+the corpus that played no part in choosing the wording (n=615):
+
+| Metric | Before | After |
+|---|---|---|
+| Top-3 accuracy (strict) | 0.885 | 0.911 |
+| Macro F1 | 0.553 | 0.568 |
+| Engineering F1 | 0.026 | 0.154 |
+| Engineering recall | 0.013 | 0.092 |
+
+Rewriting *all eight* directorate descriptions was tried first and **rejected**:
+it redistributed error rather than reducing it (four categories better, four
+worse, top-1 0.639 → 0.613), and its apparent Engineering gain came largely from
+degrading Engineering's competitors. See `EVALUATION.md` §4f.
 
 ---
 
