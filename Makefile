@@ -1,5 +1,6 @@
 .PHONY: install dev test lint run ingest tag serve docker-up \
-        harvest-nsf-awards benchmark-disciplines diagnose-separation
+        harvest-nsf-awards benchmark-disciplines diagnose-separation \
+        harvest-openalex annotate-eval-set
 
 install:
 	pip install -r requirements.txt
@@ -56,11 +57,21 @@ precompute-embeddings:
 harvest-nsf-awards:
 	PYTHONPATH=src python -m foa_pipeline.cli harvest-nsf-awards
 
+# Vendors the CC0 OpenAlex field taxonomy to data/ontology/. The resulting CSV
+# is staged, NOT loaded: see EVALUATION.md 4g before registering it.
+harvest-openalex:
+	PYTHONPATH=src python -m foa_pipeline.cli harvest-openalex
+
 benchmark-disciplines:
 	PYTHONPATH=src python -m foa_pipeline.cli benchmark-disciplines
 
 diagnose-separation:
 	PYTHONPATH=src python -m foa_pipeline.cli diagnose-separation
+
+# Drafts SILVER labels for eval_set_50.json with the local LLM. Never the gold
+# set, and never a reported metric -- tuning signal only.
+annotate-eval-set:
+	PYTHONPATH=src python -m foa_pipeline.cli annotate-eval-set
 
 # ── Full Pipeline ──
 

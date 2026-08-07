@@ -23,6 +23,19 @@ Research (ISSR).
   scoring uses the managing directorate; lenient also accepts a co-funder, since
   9.9% of awards are co-funded. Includes a deterministic `tune`/`eval` split so
   concept-description edits are never reported on the awards that motivated them.
+- `ingestion/openalex.py` + `ontology/openalex_crosswalk.py` — vendors the CC0
+  OpenAlex field taxonomy (26 fields, 4 domains) to `data/ontology/` and maps
+  all eight NSF directorates onto it. The CSV is **staged, not registered**: a
+  test asserts `load_all_ontologies` never picks it up, because adding a sixth
+  category while no eval set carries an OpenAlex label would make every
+  prediction in it a false positive and collapse global gold F1. It supplies
+  descriptions from an external authority, synonyms for 23 of 26 fields, and
+  the first real `parent_id` values in the project — which would activate the
+  dormant hierarchy propagation. See `EVALUATION.md` §4g.
+- Namespaced evaluation error logs (`false_positives_gold.json` /
+  `_silver.json`, etc.). Both runs previously shared filenames, so a silver run
+  silently replaced the gold error analysis that `EVALUATION.md` §5 documents.
+  `diagnose-separation` gains `--eval-set`, defaulting to gold.
 - `research_discipline` prompt in `evaluation/synthetic_annotator.py`, plus
   per-category annotation. The silver set was annotated before that category
   existed, so it scored 0/0/0 there by construction and any tuning against it
