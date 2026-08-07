@@ -23,6 +23,19 @@ Research (ISSR).
   scoring uses the managing directorate; lenient also accepts a co-funder, since
   9.9% of awards are co-funded. Includes a deterministic `tune`/`eval` split so
   concept-description edits are never reported on the awards that motivated them.
+- `research_discipline` prompt in `evaluation/synthetic_annotator.py`, plus
+  per-category annotation. The silver set was annotated before that category
+  existed, so it scored 0/0/0 there by construction and any tuning against it
+  was blind to the project's second-best category. Topping it up required
+  replacing the "skip any FOA that already has tags" rule — with all 46 already
+  labelled in four categories, it would have skipped every one forever. A run
+  now touches only FOAs missing the requested category. 52 discipline tags
+  added across 38 of 46 FOAs; the silver set now scores `research_discipline`
+  at F1 0.368, second of five and matching the gold set's ordering.
+- `annotation_provenance` on every silver-set FOA, recording which categories
+  were model-generated, by which model, and when. The labels live in a field
+  called `human_tags` for runner compatibility, so without this there was
+  nothing in the file distinguishing a model's guess from a person's judgement.
 - `normalisation/boilerplate.py` — administrative boilerplate removal before
   tagging. Only HTML markup stripping is enabled by default; the text-level
   pattern groups (eligibility blocks, deadline tables, PAPPG references) are

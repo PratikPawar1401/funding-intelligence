@@ -9,8 +9,16 @@
     "human_tags": [
       "great_05",
       "sdg_07",
-      "method_04"
-    ]
+      "method_04",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:06.536946+00:00"
+      }
+    }
   },
   {
     "foa_id": "8f0c11a6-dc6c-493a-ae5f-d84736ede4fd",
@@ -23,8 +31,16 @@
       "great_05",
       "sdg_08",
       "method_17",
-      "pop_12"
-    ]
+      "pop_12",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:09.957688+00:00"
+      }
+    }
   },
   {
     "foa_id": "9e445553-31b2-453d-b12f-6dce5868c3e4",
@@ -40,8 +56,16 @@
       "method_13",
       "method_17",
       "pop_01",
-      "pop_20"
-    ]
+      "pop_20",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:12.157214+00:00"
+      }
+    }
   },
   {
     "foa_id": "5651cdfc-b484-4d9f-b8bb-c4df4e686aee",
@@ -53,7 +77,14 @@
     "human_tags": [
       "great_05",
       "pop_12"
-    ]
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:43.619397+00:00"
+      }
+    }
   },
   {
     "foa_id": "9650fd51-5b18-4dcb-b84c-e63c7cc92835",
@@ -65,7 +96,14 @@
     "human_tags": [
       "great_05",
       "pop_12"
-    ]
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:46.870006+00:00"
+      }
+    }
   },
   {
     "foa_id": "fcbf8a52-ec83-4959-b363-b6fbf360c374",
@@ -75,8 +113,16 @@
     "eligibility_description": null,
     "additional_info": null,
     "human_tags": [
-      "great_05"
-    ]
+      "great_05",
+      "nsf_eng"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:48.614171+00:00"
+      }
+    }
   },
   {
     "foa_id": "2b4d063e-9285-44e4-bab3-4b29d969eb59",
@@ -93,8 +139,17 @@
       "method_02",
       "method_17",
       "method_20",
-      "pop_12"
-    ]
+      "pop_12",
+      "nsf_edu",
+      "nsf_tip"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:51.909464+00:00"
+      }
+    }
   },
   {
     "foa_id": "8c05ba84-43c8-4483-b102-ddcb9c82a788",
@@ -112,8 +167,16 @@
       "method_17",
       "pop_01",
       "pop_02",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:54.604664+00:00"
+      }
+    }
   },
   {
     "foa_id": "a76b75e3-e1e2-4176-a1c8-15fdd10afc4a",
@@ -125,7 +188,14 @@
     "human_tags": [
       "great_05",
       "pop_19"
-    ]
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:37:58.622520+00:00"
+      }
+    }
   },
   {
     "foa_id": "58c33a4e-a91a-4f65-9993-eaaa3f726bfe",
@@ -138,8 +208,17 @@
       "great_05",
       "sdg_08",
       "sdg_09",
-      "method_17"
-    ]
+      "method_17",
+      "nsf_cise",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:02.096182+00:00"
+      }
+    }
   },
   {
     "foa_id": "3a674591-b13f-4722-b5b7-861981b431d4",
@@ -157,8 +236,16 @@
       "method_04",
       "method_13",
       "method_17",
-      "pop_12"
-    ]
+      "pop_12",
+      "nsf_eng"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:06.017353+00:00"
+      }
+    }
   },
   {
     "foa_id": "0143c93a-e0ec-4d38-8a32-a4dc01c0a2d5",
@@ -176,7 +263,14 @@
       "method_02",
       "method_15",
       "pop_04"
-    ]
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:08.318316+00:00"
+      }
+    }
   },
   {
     "foa_id": "a08d00bb-77e9-4316-b0be-82d5a4cb997e",
@@ -191,8 +285,16 @@
       "method_02",
       "method_04",
       "method_13",
-      "method_22"
-    ]
+      "method_22",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:11.024842+00:00"
+      }
+    }
   },
   {
     "foa_id": "d722b40e-4a35-417a-b78c-5295a104fee1",
@@ -210,8 +312,16 @@
       "method_25",
       "pop_01",
       "pop_02",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_bio"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:12.736477+00:00"
+      }
+    }
   },
   {
     "foa_id": "f8d9f605-9585-4301-a992-9a812086e239",
@@ -234,8 +344,16 @@
       "method_16",
       "method_24",
       "pop_03",
-      "pop_12"
-    ]
+      "pop_12",
+      "nsf_eng"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:14.886434+00:00"
+      }
+    }
   },
   {
     "foa_id": "ad36e400-a7d9-45d2-a3cf-c3fb3097be87",
@@ -246,8 +364,17 @@
     "additional_info": "eBRAP Help Desk Phone: 301-682-5507 Email: help@eBRAP.org",
     "human_tags": [
       "pop_18",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_mps",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:17.424107+00:00"
+      }
+    }
   },
   {
     "foa_id": "b5c34b17-d760-4894-a0c5-6f31e93d38bd",
@@ -257,8 +384,16 @@
     "eligibility_description": "Only United States small business concerns (SBCs), as defined by the Small Business Administration (SBA)(sbir.gov/apply) are eligible to submit applications for this opportunity.Refer to Section III. Eligibility Information in the NOFO for additional information on eligibility.Foreign Organizations/International Collaborations:Non-domestic (non-U.S.) Entities (Foreign Organizations) are not eligible to apply.Non-domestic (non-U.S.) components of U.S. Organizations are not eligible to apply.Unfunded international collaborations or unfunded foreign components, as defined in the NIH Grants Policy Statement, may be allowed.",
     "additional_info": "NIH SEED (Small business Education and Entrepreneurial Development) SEEDinfo@nih.gov",
     "human_tags": [
-      "great_05"
-    ]
+      "great_05",
+      "nsf_tip"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:19.050668+00:00"
+      }
+    }
   },
   {
     "foa_id": "47246898-cdfa-40f4-8c7d-4c2942a0bf7f",
@@ -272,8 +407,16 @@
       "method_02",
       "method_03",
       "method_17",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_sbe"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:22.410161+00:00"
+      }
+    }
   },
   {
     "foa_id": "b24f1220-a15b-4056-bf94-28aeed4eea65",
@@ -299,7 +442,14 @@
       "pop_17",
       "pop_18",
       "pop_19"
-    ]
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:54.175714+00:00"
+      }
+    }
   },
   {
     "foa_id": "5309c859-fcf1-4a9a-bfca-3233e1fb947e",
@@ -311,8 +461,17 @@
     "human_tags": [
       "great_06",
       "sdg_13",
-      "method_04"
-    ]
+      "method_04",
+      "nsf_geo",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:38:58.180818+00:00"
+      }
+    }
   },
   {
     "foa_id": "2a4d9d9d-a2e3-414f-81c1-f347a2138f01",
@@ -322,8 +481,16 @@
     "eligibility_description": null,
     "additional_info": null,
     "human_tags": [
-      "great_05"
-    ]
+      "great_05",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:00.885953+00:00"
+      }
+    }
   },
   {
     "foa_id": "e149d4db-3437-4cd6-a33a-ba252b6bd0d5",
@@ -338,7 +505,14 @@
       "sdg_13",
       "pop_01",
       "pop_19"
-    ]
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:06.144226+00:00"
+      }
+    }
   },
   {
     "foa_id": "475563c2-f5c7-42bb-927c-784ee44ec822",
@@ -359,8 +533,16 @@
       "method_01",
       "method_02",
       "method_17",
-      "pop_12"
-    ]
+      "pop_12",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:09.544402+00:00"
+      }
+    }
   },
   {
     "foa_id": "a7f9643b-d530-468b-bd1a-e2768bb71f05",
@@ -377,8 +559,17 @@
       "sdg_16",
       "method_12",
       "method_14",
-      "pop_08"
-    ]
+      "pop_08",
+      "nsf_mps",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:13.447148+00:00"
+      }
+    }
   },
   {
     "foa_id": "1cd42e40-0472-4f1a-b853-651824bc46c1",
@@ -394,8 +585,16 @@
       "sdg_17",
       "method_02",
       "method_17",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_tip"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:16.872304+00:00"
+      }
+    }
   },
   {
     "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
@@ -413,8 +612,18 @@
       "method_20",
       "method_23",
       "pop_11",
-      "pop_13"
-    ]
+      "pop_13",
+      "nsf_cise",
+      "nsf_mps",
+      "nsf_tip"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:21.860367+00:00"
+      }
+    }
   },
   {
     "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
@@ -427,7 +636,14 @@
       "great_05",
       "pop_17",
       "pop_18"
-    ]
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:27.627926+00:00"
+      }
+    }
   },
   {
     "foa_id": "4c74a796-f3d0-4845-a507-e4e5d88849ab",
@@ -437,8 +653,17 @@
     "eligibility_description": null,
     "additional_info": null,
     "human_tags": [
-      "great_05"
-    ]
+      "great_05",
+      "nsf_eng",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:30.858333+00:00"
+      }
+    }
   },
   {
     "foa_id": "c978b553-30f9-4570-be4d-8199520794d1",
@@ -448,8 +673,16 @@
     "eligibility_description": null,
     "additional_info": null,
     "human_tags": [
-      "great_05"
-    ]
+      "great_05",
+      "nsf_tip"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:34.186777+00:00"
+      }
+    }
   },
   {
     "foa_id": "9d46ffb7-3af7-4f2b-9df1-d0ff46b195bd",
@@ -465,8 +698,16 @@
       "sdg_16",
       "method_01",
       "method_17",
-      "pop_12"
-    ]
+      "pop_12",
+      "nsf_tip"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:37.636783+00:00"
+      }
+    }
   },
   {
     "foa_id": "a086cd2a-cfa1-4403-8083-eedf28110c6d",
@@ -487,8 +728,17 @@
       "method_17",
       "pop_03",
       "pop_12",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_eng",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:40.967051+00:00"
+      }
+    }
   },
   {
     "foa_id": "793fc6cf-e115-422f-a57e-97fb2f5374b0",
@@ -506,8 +756,16 @@
       "method_23",
       "pop_04",
       "pop_08",
-      "pop_09"
-    ]
+      "pop_09",
+      "nsf_eng"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:45.021127+00:00"
+      }
+    }
   },
   {
     "foa_id": "947908eb-8224-4d73-9603-158e07db322e",
@@ -517,8 +775,16 @@
     "eligibility_description": "*Who May Submit Proposals: Proposals may only be submitted by the following: -Institutions of Higher Education (IHEs): Two- and four-year IHEs (including community colleges) accredited in, and having a campus located in the US, acting on behalf of their faculty members. Special Instructions for International Branch Campuses of US IHEs: If the proposal includes funding to be provided to an international branch campus of a US institution of higher education (including through use of sub-awards and consultant arrangements), the proposer must explain the benefit(s) to the project of performance at the international branch campus, and justify why the project activities cannot be performed at the US campus. *Who May Serve as PI: For all tracks, the Principal Investigator (PI) must be a Department Chair/Head (or equivalent) of a department for whom a significant percentage of students will graduate or transfer to a program with a bachelor&rsquo;s degree in engineering or engineering technology. The PI must be empowered to provide leadership for the proposed change process. In cases where the institutional responsibilities of a Department Chair/Head do not enable them to support the degree of change being sought, a Dean, Provost, or other senior leader may serve as PI, provided they will be responsible for the active leadership of the RED project. The qualifications of the PI can be justified in the required letter from senior institutional leadership. It is recommended that projects consider including individuals with expertise in (a) engineering education research and (b) organizational change on the leadership team.",
     "additional_info": "NSF grants.gov support grantsgovsupport@nsf.gov",
     "human_tags": [
-      "great_05"
-    ]
+      "great_05",
+      "nsf_edu"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:48.322085+00:00"
+      }
+    }
   },
   {
     "foa_id": "d5cb1c8c-e400-4647-95a9-e610a9663ab2",
@@ -531,8 +797,16 @@
       "great_05",
       "sdg_13",
       "method_04",
-      "pop_16"
-    ]
+      "pop_16",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:50.617118+00:00"
+      }
+    }
   },
   {
     "foa_id": "73b42cd8-8f17-4883-a907-ae6a90b45658",
@@ -542,8 +816,16 @@
     "eligibility_description": null,
     "additional_info": "NSF grants.gov support grantsgovsupport@nsf.gov",
     "human_tags": [
-      "pop_12"
-    ]
+      "pop_12",
+      "nsf_geo"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:53.564541+00:00"
+      }
+    }
   },
   {
     "foa_id": "febbf3b4-8b5c-489f-9405-8d7290725080",
@@ -558,8 +840,17 @@
       "sdg_09",
       "method_17",
       "method_23",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_cise",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:39:58.285474+00:00"
+      }
+    }
   },
   {
     "foa_id": "0bccfdd2-7ee0-40c3-bf99-139fdf9c6e95",
@@ -569,8 +860,16 @@
     "eligibility_description": null,
     "additional_info": null,
     "human_tags": [
-      "pop_12"
-    ]
+      "pop_12",
+      "nsf_bio"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:02.086192+00:00"
+      }
+    }
   },
   {
     "foa_id": "8f9de61a-72e9-46b2-b1b7-bd3bd3d634dd",
@@ -589,8 +888,16 @@
       "method_23",
       "method_24",
       "pop_08",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_sbe"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:05.815611+00:00"
+      }
+    }
   },
   {
     "foa_id": "5c3dce62-c328-4405-8b79-a5aca11b855f",
@@ -601,8 +908,17 @@
     "additional_info": "NSF grants.gov support grantsgovsupport@nsf.gov",
     "human_tags": [
       "pop_08",
-      "pop_13"
-    ]
+      "pop_13",
+      "nsf_mps",
+      "nsf_sbe"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:10.039358+00:00"
+      }
+    }
   },
   {
     "foa_id": "1065a9cc-6964-41ae-82f5-480f45716933",
@@ -617,8 +933,16 @@
       "sdg_13",
       "method_04",
       "method_18",
-      "method_22"
-    ]
+      "method_22",
+      "nsf_geo"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:13.978671+00:00"
+      }
+    }
   },
   {
     "foa_id": "bafccefc-90e1-42f7-87ad-91836ba2ea02",
@@ -635,8 +959,16 @@
       "sdg_17",
       "method_04",
       "method_11",
-      "method_18"
-    ]
+      "method_18",
+      "nsf_geo"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:16.260693+00:00"
+      }
+    }
   },
   {
     "foa_id": "41e10113-8750-4a06-838e-27f7a66c8193",
@@ -647,8 +979,17 @@
     "additional_info": "NSF grants.gov support grantsgovsupport@nsf.gov",
     "human_tags": [
       "pop_08",
-      "pop_13"
-    ]
+      "pop_13",
+      "nsf_mps",
+      "nsf_cise"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:21.017379+00:00"
+      }
+    }
   },
   {
     "foa_id": "672805e5-bc9e-482e-b279-ee14ffaa45b8",
@@ -665,8 +1006,17 @@
       "method_13",
       "method_21",
       "method_22",
-      "pop_17"
-    ]
+      "pop_17",
+      "nsf_eng",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:24.786982+00:00"
+      }
+    }
   },
   {
     "foa_id": "5791f0a6-8fa7-4f33-8ad9-1f9042fe73bd",
@@ -680,7 +1030,14 @@
       "sdg_09",
       "method_04",
       "pop_19"
-    ]
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:30.367933+00:00"
+      }
+    }
   },
   {
     "foa_id": "2152fb97-4b83-42ec-83e0-0fa0075bd449",
@@ -690,8 +1047,16 @@
     "eligibility_description": null,
     "additional_info": null,
     "human_tags": [
-      "great_05"
-    ]
+      "great_05",
+      "nsf_eng"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:33.596969+00:00"
+      }
+    }
   },
   {
     "foa_id": "1ea87232-6b29-4f92-8210-6dbf1de355eb",
@@ -705,7 +1070,16 @@
       "sdg_08",
       "method_05",
       "method_23",
-      "pop_19"
-    ]
+      "pop_19",
+      "nsf_cise",
+      "nsf_mps"
+    ],
+    "annotation_provenance": {
+      "research_discipline": {
+        "source": "llm",
+        "model": "mistral:7b-instruct",
+        "annotated_at": "2026-08-07T10:40:37.573069+00:00"
+      }
+    }
   }
 ]

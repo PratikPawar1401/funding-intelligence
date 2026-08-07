@@ -126,6 +126,23 @@ def _parse_args() -> argparse.Namespace:
         "descriptions and 'eval' when reporting, so results are held out "
         "from the edits that produced them (default: all)",
     )
+    annot_p = subparsers.add_parser(
+        "annotate-eval-set",
+        help="Draft SILVER labels for eval_set_50.json with the local LLM "
+        "(never the gold set; requires Ollama)",
+    )
+    annot_p.add_argument(
+        "--category",
+        action="append",
+        dest="categories",
+        help="Annotate only this ontology category; repeatable. Omit for all. "
+        "Only FOAs missing the category are touched.",
+    )
+    annot_p.add_argument(
+        "--overwrite",
+        action="store_true",
+        help="Re-annotate even where labels already exist, discarding them",
+    )
     curate_p = subparsers.add_parser(
         "curate-eval-set", help="Generate a stratified sample of FOAs for evaluation"
     )
@@ -216,6 +233,11 @@ def main() -> None:
 
     elif args.command == "benchmark-disciplines":
         _run_benchmark_disciplines(config, args)
+
+    elif args.command == "annotate-eval-set":
+        from .evaluation.synthetic_annotator import annotate_foas
+
+        annotate_foas(categories=args.categories, overwrite=args.overwrite)
 
     elif args.command == "pdf-parse":
         _run_pdf_parse(args)

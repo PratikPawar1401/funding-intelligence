@@ -61,6 +61,46 @@ This means the set:
 - **Should only be used as a validation set for threshold tuning** (grid search, config sweeps) — never as a reported, held-out metric. All headline P/R/F1 numbers in this document are, and must remain, computed against the 20-FOA hand-labeled `eval_set_gold.json` only.
 - Required two bug fixes to populate correctly: (1) `synthetic_annotator.py`'s Ollama response parser only read dict *values*, but the model sometimes returns `{concept_id: [description, ...]}` with the ID as the *key* — every tag failed ID validation and silently came back empty (only 16/46 entries had any tags before this fix); (2) a sanity guard was added to discard any category response that echoes back more than half of that category's full concept list, a failure mode observed on 4 FOAs with long or complex text.
 
+Since every label carries a model's judgement rather than a person's, each FOA
+now also stores `annotation_provenance` recording which categories were
+model-generated, by which model, and when. The `human_tags` field name is kept
+only because the evaluation runner reads it; the provenance record is what makes
+the distinction visible in the file itself.
+
+#### All five categories are now covered (2026-08-07)
+
+The set originally carried labels for four categories only — it was annotated
+before `research_discipline` existed — so that category scored 0/0/0 on it by
+construction and any tuning done against it was blind to the project's
+second-best category. A fifth prompt was added and the set topped up: **52
+discipline tags across 38 of 46 FOAs**, all eight directorates represented.
+
+Filling it required changing how the annotator decides what to skip. The
+original rule skipped any FOA that already had *any* tags, so with all 46
+already labelled in four categories it would have skipped every one forever.
+Annotation is now per-category: a run touches only FOAs missing the requested
+category and leaves the other four untouched.
+
+**Independent spot-check.** LLM annotations were checked against reference
+labels assigned by hand from NSF programme names alone, restricted to the 21
+FOAs whose titles name a division, directorate or unmistakable field
+("Linguistics", "Ocean Drilling Program", "Gravitational Physics"). Agreement
+was **16/19 labelled = 0.842**, with 2 unlabelled. This is an *upper bound* —
+the subset was chosen for being easy — but it bounds the noise floor of any
+tuning done on this set.
+
+The three disagreements show the expected failure mode:
+
+| FOA | Reference | Model | Reading |
+|---|---|---|---|
+| Law & Science | `nsf_sbe` | `nsf_mps`, `nsf_cise` | Model error; it keyed on "Science" |
+| SBIR/STTR Phase I/II | `nsf_tip` | `nsf_cise`, `nsf_mps` | Model error; read the body's topic areas rather than the programme type — and inconsistently, since it labelled the *same* programme correctly twice elsewhere |
+| IUSE/PFE: RED | `nsf_eng` | `nsf_edu` | Arguably the model is right — IUSE is education, PFE is engineering, and the programme is genuinely joint |
+
+This is consistent with the literature: LLM annotation approaches human
+agreement on easy labels and degrades on domain expertise and rare classes. It
+supports the set's role as tuning signal and confirms it is not gold quality.
+
 **Inter-annotator agreement remains unmeasured** for this project. A genuine second human annotation pass is the only valid way to close this gap and has not been performed. See [ANNOTATION_CODEBOOK.md](ANNOTATION_CODEBOOK.md) for the guidelines and protocol needed to run one.
 
 ---
@@ -142,7 +182,7 @@ V3's numbers above were reproducible in isolation, but two measurement-infrastru
 2. **L1 dependency-filter hardening** (`tagger_l1_spacy.py`): added `"npadvmod"` to the rejected-dependency set (catches hyphenated compound-adjective patterns like "energy-efficient system components"); added `"statistics"`/`"transportation"`/`"transport"` to `ambiguous_terms`.
 3. **Per-concept cosine threshold override** (`tagger_l2_embedding.py`, `config.py`): `L2Tagger` previously only supported per-*category* thresholds. Added a per-*concept* override checked first. `method_25` (Citizen Science) was set to 0.65, since it alone caused 8/18 (44%) of all method-category false positives (all in the 0.44–0.60 confidence range, on generic "broader participation in science" boilerplate) with zero true positives for it in the gold set.
 4. **Method-concept description enrichment** (`research_methods.csv`): enriched Machine Learning, Computer Vision, Field Experiment, and Survey Research descriptions with paraphrases found in real false-negative FOA text (e.g. "artificial intelligence", "visual perception", "fieldwork"), since `L2Tagger` embeds `label + description + top-5 synonyms` per concept.
-5. **Threshold grid search** against the (now-repaired) `eval_set_50.json` silver set. Found a candidate improvement for `research_domain` (0.35→0.30 raised its own F1 on both the silver set and, marginally, the gold set) but declined to adopt it: it cost more precision elsewhere than it gained, producing a net *decrease* in global gold F1 (0.490→0.484). Recorded here as a validated-but-rejected direction rather than silently discarded. The grid search also revealed that `eval_set_50.json` structurally cannot evaluate `research_discipline` at all — `synthetic_annotator.py`'s prompts only ever ask about the original 4 categories, so this category always scores 0/0/0 on that set; anyone extending the silver set to cover `research_discipline` needs to add a 5th category prompt first.
+5. **Threshold grid search** against the (now-repaired) `eval_set_50.json` silver set. Found a candidate improvement for `research_domain` (0.35→0.30 raised its own F1 on both the silver set and, marginally, the gold set) but declined to adopt it: it cost more precision elsewhere than it gained, producing a net *decrease* in global gold F1 (0.490→0.484). Recorded here as a validated-but-rejected direction rather than silently discarded. The grid search also revealed that `eval_set_50.json` structurally cannot evaluate `research_discipline` at all — `synthetic_annotator.py`'s prompts only ever ask about the original 4 categories, so this category always scores 0/0/0 on that set; anyone extending the silver set to cover `research_discipline` needs to add a 5th category prompt first. **(Resolved 2026-08-07 — the fifth prompt was added and the set topped up; see §2.)**
 6. **L3 JSON-mode output** (`tagger_l3_llm.py`): replaced fragile substring parsing (`result_text.startswith("A")` / `"candidate a" in text.lower()`) with Ollama's `format: "json"` mode, parsing a `{"winner": "A"}`/`{"winner": "B"}` response, with the old substring heuristic retained only as a fallback.
 
 ### Global Metrics (V4)
@@ -438,11 +478,19 @@ No weight improved the silver set. The gold set gained +0.005 at w=0.20.
 4. **+0.005 on 81 tags is one tag**, inside the noise floor this set can
    resolve.
 
-The silver set has its own defect worth restating: it carries no `nsf_*`
-labels, so every `research_discipline` prediction scores as a false positive
-and that category reads 0.00 throughout. Its absolute numbers are not
+The silver set had its own defect at the time of this sweep: it carried no
+`nsf_*` labels, so every `research_discipline` prediction scored as a false
+positive and that category read 0.00 throughout. Its absolute numbers are not
 comparable to the gold set's; only its *relative* ordering across weights was
-used, and only for the four categories it does cover.
+used, and only for the four categories it then covered.
+
+**That gap has since been closed** (§2). The silver set now carries 52
+discipline labels and scores `research_discipline` at F1 0.368 — second of five
+categories, matching the gold set's ordering, where it is also second. A future
+re-run of this sweep would therefore see the category that was invisible to it.
+The title-weighting conclusion above is *not* revisited here, because rerunning
+it on labels that did not exist when the decision was made would be rewriting
+history; it is flagged as worth redoing.
 
 The capability is kept, tested, and documented rather than deleted. It costs
 nothing when disabled and becomes decidable once the gold set is large enough
