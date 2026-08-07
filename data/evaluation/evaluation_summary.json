@@ -1,54 +1,54 @@
 {
-  "eval_set": "eval_set_50.json",
-  "total_foas_evaluated": 46,
+  "eval_set": "eval_set_gold.json",
+  "total_foas_evaluated": 20,
   "global": {
-    "precision": 0.278,
-    "recall": 0.243,
-    "f1": 0.259,
-    "tp": 73,
-    "fp": 190,
-    "fn": 228
+    "precision": 0.427,
+    "recall": 0.654,
+    "f1": 0.517,
+    "tp": 53,
+    "fp": 71,
+    "fn": 28
   },
   "per_category": {
     "method": {
-      "precision": 0.227,
-      "recall": 0.066,
-      "f1": 0.102,
-      "tp": 5,
-      "fp": 17,
-      "fn": 71
+      "precision": 0.4,
+      "recall": 0.545,
+      "f1": 0.462,
+      "tp": 6,
+      "fp": 9,
+      "fn": 5
     },
     "population": {
-      "precision": 0.25,
-      "recall": 0.109,
-      "f1": 0.152,
+      "precision": 0.375,
+      "recall": 0.75,
+      "f1": 0.5,
       "tp": 6,
-      "fp": 18,
-      "fn": 49
+      "fp": 10,
+      "fn": 2
     },
     "research_discipline": {
-      "precision": 0.27,
-      "recall": 0.577,
-      "f1": 0.368,
-      "tp": 30,
-      "fp": 81,
-      "fn": 22
+      "precision": 0.386,
+      "recall": 0.739,
+      "f1": 0.507,
+      "tp": 17,
+      "fp": 27,
+      "fn": 6
     },
     "research_domain": {
-      "precision": 0.182,
-      "recall": 0.094,
-      "f1": 0.124,
-      "tp": 6,
-      "fp": 27,
-      "fn": 58
+      "precision": 0.231,
+      "recall": 0.3,
+      "f1": 0.261,
+      "tp": 3,
+      "fp": 10,
+      "fn": 7
     },
     "sponsor_theme": {
-      "precision": 0.356,
-      "recall": 0.481,
-      "f1": 0.409,
-      "tp": 26,
-      "fp": 47,
-      "fn": 28
+      "precision": 0.583,
+      "recall": 0.724,
+      "f1": 0.646,
+      "tp": 21,
+      "fp": 15,
+      "fn": 8
     }
   }
 }
