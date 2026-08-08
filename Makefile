@@ -1,6 +1,6 @@
 .PHONY: install dev test lint run ingest tag serve docker-up \
         harvest-nsf-awards benchmark-disciplines diagnose-separation \
-        harvest-openalex annotate-eval-set
+        harvest-openalex annotate-eval-set enrich-foas export-json
 
 install:
 	pip install -r requirements.txt
@@ -34,8 +34,11 @@ parse-pdf:
 normalise:
 	PYTHONPATH=src python -m foa_pipeline.cli normalise
 
-enrich-grants:
-	PYTHONPATH=src python -m foa_pipeline.cli enrich-grants
+# Downloads and parses FOA PDFs for both sources. The CLI command is
+# enrich-foas; this target used to invoke a non-existent "enrich-grants",
+# which broke `make pipeline` partway through.
+enrich-foas:
+	PYTHONPATH=src python -m foa_pipeline.cli enrich-foas
 
 setup-ontology:
 	PYTHONPATH=src python -m foa_pipeline.cli setup-ontology
@@ -45,6 +48,9 @@ tag:
 
 export-csv:
 	PYTHONPATH=src python -m foa_pipeline.cli export-csv
+
+export-json:
+	PYTHONPATH=src python -m foa_pipeline.cli export-json
 
 precompute-embeddings:
 	PYTHONPATH=src python -m foa_pipeline.cli precompute-embeddings
@@ -75,7 +81,7 @@ annotate-eval-set:
 
 # ── Full Pipeline ──
 
-pipeline: ingest-grants ingest-nsf-rss normalise enrich-grants tag export-csv
+pipeline: ingest-grants ingest-nsf-rss normalise enrich-foas tag export-csv export-json
 
 # ── Server ──
 

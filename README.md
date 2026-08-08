@@ -109,10 +109,19 @@ make ingest-grants       # Poll Grants.gov API
 make ingest-nsf-rss      # Poll NSF RSS feed
 make ingest-nsf-scrape   # Scrape pending NSF URLs via Playwright
 make normalise           # Normalise + validate + load into SQLite
+make enrich-foas         # Download and parse FOA PDFs
 make setup-ontology      # Load ontology concepts into store
 make tag                 # Run semantic tagging (L1 + L2 + L3) and build the FAISS index
 make export-csv          # Export tagged records to CSV
+make export-json         # Export tagged records to JSON
 ```
+
+Both exports land in `data/normalised/` and carry the same records in different
+shapes. **CSV** is flattened for humans — tags collapsed into one column, the
+description truncated — because research development officers open it in Excel.
+**JSON** keeps the full structure: untruncated descriptions and tags as objects
+with their category, confidence, source layer and evidence snippet. Re-exporting
+unchanged data produces a byte-identical file, so a diff means the data moved.
 
 ### Match a Researcher Profile to Funding Opportunities
 

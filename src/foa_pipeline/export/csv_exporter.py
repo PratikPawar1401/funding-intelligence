@@ -66,11 +66,21 @@ def export_foas_to_csv(
             for t in tags
         )
 
-        eligibility = foa.get("eligibility", [])
+        # Structured eligibility codes when present, otherwise the prose the
+        # source actually published. `list_foas` returns
+        # `eligibility_description` and no `eligibility` key at all, so reading
+        # only the latter left this column empty for every row in the export —
+        # while 65 of 136 records held eligibility text the whole time. The
+        # scope of work lists eligibility as a required field, so falling back
+        # matters rather than being a nicety.
+        eligibility = foa.get("eligibility") or []
         if isinstance(eligibility, list):
             eligibility_str = ";".join(str(e) for e in eligibility if e)
         else:
             eligibility_str = str(eligibility)
+
+        if not eligibility_str:
+            eligibility_str = (foa.get("eligibility_description") or "").strip()
 
         rows.append(
             {

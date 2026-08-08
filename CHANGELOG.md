@@ -23,6 +23,11 @@ Research (ISSR).
   scoring uses the managing directorate; lenient also accepts a co-funder, since
   9.9% of awards are co-funded. Includes a deterministic `tune`/`eval` split so
   concept-description edits are never reported on the awards that motivated them.
+- `export/json_exporter.py` + `cli export-json` — JSON export of the tagged
+  dataset. The scope of work asks for JSON *and* CSV; only CSV was written to
+  disk, with JSON available solely as an API response, which requires running a
+  server and so is not a reproducible artefact. Output is key-sorted and
+  byte-stable across runs.
 - `ingestion/openalex.py` + `ontology/openalex_crosswalk.py` — vendors the CC0
   OpenAlex field taxonomy (26 fields, 4 domains) to `data/ontology/` and maps
   all eight NSF directorates onto it. The CSV is **staged, not registered**: a
@@ -88,6 +93,21 @@ Research (ISSR).
   false negatives.
 
 ### Fixed
+- **`source_url` was null on every Grants.gov record** (115 of 136), a field the
+  scope of work lists as required. The search API returns no link of any kind —
+  `raw_url` is always None and the fetch payload's `assistURL` is empty — so it
+  is now derived from the opportunity ID. The URL pattern was verified rather
+  than assumed: the site is a single-page app that returns HTTP 200 for any
+  path including nonsense IDs, so confirmation came from finding the matching
+  opportunity number in the fetched page. Coverage is now 136/136.
+- **The CSV export's `eligibility` column was empty for every row.** The
+  exporter read `foa["eligibility"]`, but `list_foas` returns
+  `eligibility_description` and no such key, so eligibility text — another
+  required field — never reached the deliverable despite being present on 65
+  records. It now falls back to the description.
+- **`make pipeline` was broken.** It invoked `enrich-grants`, which is not a
+  CLI command (the command is `enrich-foas`), so the documented one-command
+  update workflow failed partway through. All seven steps now resolve.
 - **`tag-all` skipped closed FOAs, making the gold metric decay with the
   calendar.** Status is recomputed from the close date on every `normalise`, so
   an expiring FOA silently left the tagging set and all of its tags became false

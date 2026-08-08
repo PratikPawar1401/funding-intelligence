@@ -138,6 +138,29 @@ def generate_foa_id() -> str:
 # ═══════════════════════════════════════════════
 
 
+GRANTS_GOV_DETAIL_URL = "https://www.grants.gov/search-results-detail/{opportunity_id}"
+
+
+def grants_gov_detail_url(opportunity_id: Optional[Any]) -> Optional[str]:
+    """
+    Build the public Grants.gov page URL for an opportunity ID.
+
+    The search API returns no link of any kind — `raw_url` is always None and
+    the fetch payload's `assistURL` is empty — so without this every
+    Grants.gov record had a null `source_url`, which the scope of work lists as
+    a required field. That was 115 of 136 records.
+
+    The pattern was verified rather than assumed: HTTP status alone proves
+    nothing because the site is a single-page app that returns 200 for any
+    path, including nonsense IDs. Confirmation came from fetching
+    `/search-results-detail/362551` and finding opportunity number 26-511 in
+    the response, matching what `fetchOpportunity` reports for that ID.
+    """
+    if opportunity_id in (None, ""):
+        return None
+    return GRANTS_GOV_DETAIL_URL.format(opportunity_id=str(opportunity_id).strip())
+
+
 def _normalise_grants_gov(raw: Dict[str, Any]) -> Dict[str, Any]:
     """Extract and normalise fields from a Grants.gov raw record."""
     hit = raw.get("raw_payload", {}).get("search_hit", {})
@@ -180,7 +203,9 @@ def _normalise_grants_gov(raw: Dict[str, Any]) -> Dict[str, Any]:
         "foa_id": generate_foa_id(),
         "source": "grants_gov",
         "source_id": str(raw.get("source_id", "")),
-        "source_url": raw.get("raw_url"),
+        "source_url": _coalesce(
+            raw.get("raw_url"), grants_gov_detail_url(raw.get("source_id"))
+        ),
         "title": normalise_text(_coalesce(raw.get("title"), synopsis.get("opportunityTitle"))),
         "agency": normalise_text(
             _coalesce(synopsis.get("agencyName"), hit.get("AgencyName"))

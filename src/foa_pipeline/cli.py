@@ -99,6 +99,19 @@ def _parse_args() -> argparse.Namespace:
     sub_csv = subparsers.add_parser("export-csv", help="Export FOAs to CSV")
     sub_csv.add_argument("--output", "-o", default=None, help="Output file path")
 
+    sub_json = subparsers.add_parser(
+        "export-json",
+        help="Export FOAs to JSON (full nested records, unlike the flattened CSV)",
+    )
+    sub_json.add_argument("--output", "-o", default=None, help="Output file path")
+    sub_json.add_argument(
+        "--include-raw",
+        dest="include_raw",
+        action="store_true",
+        help="Include the untouched upstream API payload. Off by default: it is "
+        "large, source-specific, and already kept in data/raw/*.jsonl",
+    )
+
     # ── Search ──
     sub_search = subparsers.add_parser(
         "search", help="Search FOAs by researcher profile"
@@ -242,6 +255,9 @@ def main() -> None:
 
     elif args.command == "precompute-embeddings":
         _run_precompute_embeddings(config)
+
+    elif args.command == "export-json":
+        _run_export_json(config, args)
 
     elif args.command == "export-csv":
         _run_export_csv(config, args)
@@ -638,6 +654,20 @@ def _run_export_csv(config, args) -> None:
 
     output = args.output or str(config.normalised_output_dir / "foa_normalised.csv")
     export_foas_to_csv(records, output)
+    logging.info("Exported %d FOAs to %s", len(records), output)
+
+
+def _run_export_json(config, args) -> None:
+    """Export all FOAs from the database to JSON."""
+    from .export.json_exporter import export_foas_to_json
+    from .storage.database import Database
+
+    db = Database(config.app_db_path)
+    records, total = db.list_foas(page=1, size=100000)
+    db.close()
+
+    output = args.output or str(config.normalised_output_dir / "foa_normalised.json")
+    export_foas_to_json(records, output, include_raw_payload=args.include_raw)
     logging.info("Exported %d FOAs to %s", len(records), output)
 
 
