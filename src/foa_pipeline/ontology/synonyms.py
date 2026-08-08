@@ -103,6 +103,22 @@ NOISY_SYNONYMS = {
     "learning",  # Matches inside "machine learning"/"deep learning"
     "statistics",  # Matches org names like "...Center for ... Statistics"
     "job creation",
+    # WordNet noise for Engineering (nsf_eng): synonyms of the *verb* "to
+    # engineer" ("he engineered the merger"), not the discipline. All seven
+    # below were exclusive to nsf_eng, so blacklisting costs no other concept.
+    "mastermind", "orchestrate", "organise", "organize", "engine room",
+    "direct",
+    # "technology" was the single largest source of Layer 1 false positives on
+    # the gold set: it fired on "the sociology of science and technology",
+    # "human-language technology", and — worst — on "Directorate for
+    # Technology, Innovation and Partnerships", whose correct label is nsf_tip.
+    # NSF treats technology and engineering as different directorates; the
+    # ontology should not equate them.
+    "technology",
+    # "accessibility" in research prose usually means data or software
+    # accessibility ("improve efficiency and accessibility", FAIR principles),
+    # not disability. Exclusive to People with Disabilities.
+    "accessibility",
 }
 
 

@@ -6,6 +6,7 @@ import pytest
 from foa_pipeline.ontology.store import OntologyStore
 from foa_pipeline.ontology.synonyms import (
     ABBREVIATIONS,
+    NOISY_SYNONYMS,
     expand_synonyms_for_store,
 )
 
@@ -116,3 +117,39 @@ class TestAbbreviationsDictionary:
         for key, values in ABBREVIATIONS.items():
             for v in values:
                 assert v == v.lower(), f"Non-lowercase abbreviation: {v}"
+
+
+class TestNoisySynonymBlacklist:
+    """
+    Terms confirmed to cause false positives on the gold set.
+
+    These are blacklisted from evidence, not taste, and each removal was
+    measured. Re-adding one should fail here rather than quietly cost
+    precision several evaluation runs later.
+    """
+
+    @pytest.mark.parametrize(
+        "term",
+        ["mastermind", "orchestrate", "organise", "organize", "engine room", "direct"],
+    )
+    def test_verb_sense_engineering_synonyms_are_blacklisted(self, term):
+        """WordNet synonyms of the verb "to engineer", not the discipline."""
+        assert term in NOISY_SYNONYMS
+
+    def test_technology_is_blacklisted(self):
+        """
+        NSF runs separate Engineering and Technology, Innovation and
+        Partnerships directorates, so "technology" must not imply nsf_eng. It
+        was the largest single source of Layer 1 false positives, firing on
+        "the sociology of science and technology" and on the TIP directorate's
+        own name.
+        """
+        assert "technology" in NOISY_SYNONYMS
+
+    def test_accessibility_is_blacklisted(self):
+        """In research prose this usually means data/software accessibility."""
+        assert "accessibility" in NOISY_SYNONYMS
+
+    def test_blacklist_is_lowercase(self):
+        for term in NOISY_SYNONYMS:
+            assert term == term.lower(), f"Non-lowercase blacklist entry: {term}"

@@ -93,6 +93,34 @@ Research (ISSR).
   false negatives.
 
 ### Fixed
+- **Layer 1 rejected a match *after* marking its concept as seen**, so the first
+  rejected occurrence consumed the concept's single slot and any later
+  legitimate mention was never considered — "energy-efficient components …
+  energy remains the central concern" returned no tag at all. The
+  `excluded_spans` check was already ordered correctly; the dependency checks
+  were not. This is a recall defect in its own right and a prerequisite for the
+  scope filters below, which would otherwise have destroyed valid later matches.
+- **Layer 1 had no notion of aboutness**, giving it 0.412 precision on the gold
+  set (21 TP / 30 FP) despite being exact string matching — every match was a
+  real occurrence of the word. `out_of_scope_context` adds five filters
+  (`stem_idiom`, `referral`, `agency_mission`, `permissive`, `proper_name`) for
+  contexts where a term names something other than the opportunity's subject: an
+  acronym expansion, a redirect to another programme, agency mission
+  boilerplate, an optional technique, a proper name. Validated against all 51
+  gold matches — removes 9 false positives, no true positives. Layer 1 precision
+  0.412 → **0.500**. Two candidate rules were measured and rejected: general
+  acronym-gloss detection (0 FP, 2 TP — it discards "Directorate for Engineering
+  (ENG)") and enumeration membership (one list yields a TP and an FP).
+- **`nsf_eng` carried WordNet synonyms of the verb "to engineer"** —
+  `mastermind`, `orchestrate`, `organise`, `organize`, `engine room`, `direct` —
+  plus `technology`, the single largest source of Layer 1 false positives, which
+  fired on "the sociology of science and technology" and on the **TIP
+  directorate's own name** although NSF runs Engineering and Technology,
+  Innovation and Partnerships separately. All were exclusive to `nsf_eng`.
+  `accessibility` was blacklisted from People with Disabilities on the same
+  basis. Gold F1 0.517 → **0.527** (P 0.427 → 0.442, recall unchanged).
+  See EVALUATION.md §4h — including the measurement that the top-3-per-category
+  cap re-admits five of the nine removals through Layer 2.
 - **`source_url` was null on every Grants.gov record** (115 of 136), a field the
   scope of work lists as required. The search API returns no link of any kind —
   `raw_url` is always None and the fetch payload's `assistURL` is empty — so it

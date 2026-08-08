@@ -2,6 +2,7 @@
 
 
 import pytest
+from spacy.tokens import Span
 
 from foa_pipeline.ontology.store import OntologyStore
 from foa_pipeline.ontology.synonyms import expand_synonyms_for_store
@@ -174,6 +175,78 @@ class TestL1TaggerDeduplication:
         concept_ids = [ev.concept_id for ev in result]
         # Each concept should appear at most once
         assert len(concept_ids) == len(set(concept_ids))
+
+
+class TestL1TaggerScopeFilters:
+    """
+    Contexts in which a term does not indicate the opportunity's subject.
+
+    Layer 1 matched 51 concepts across the 20-FOA gold set and 30 were wrong,
+    despite every match being a genuine occurrence of the word. The filters
+    encode the difference between funding a topic and merely mentioning one.
+    """
+
+    def test_referral_to_another_programme_is_rejected(self, l1_tagger):
+        """"... is supported through programs in the Directorate for X" is a redirect."""
+        text = "Research on natural hazards is supported through programs in climate action."
+        assert "sdg_13" not in {ev.concept_id for ev in l1_tagger.tag_text(text)}
+
+    def test_agency_mission_boilerplate_is_rejected(self, l1_tagger):
+        text = "Proposals must describe broadening participation efforts in climate action."
+        assert "sdg_13" not in {ev.concept_id for ev in l1_tagger.tag_text(text)}
+
+    def test_permissive_modality_is_rejected(self, l1_tagger):
+        """An optional technique is not the programme's subject."""
+        text = "Proposals may use machine learning to advance the research."
+        assert "meth_ml" not in {ev.concept_id for ev in l1_tagger.tag_text(text)}
+
+    def test_proper_name_is_rejected(self, l1_tagger):
+        text = "Awards are made under the Climate Action Act of 2021."
+        assert "sdg_13" not in {ev.concept_id for ev in l1_tagger.tag_text(text)}
+
+    def test_stem_idiom_is_rejected(self, l1_tagger):
+        """The STEM expansion names an acronym, not a discipline."""
+        doc = l1_tagger.nlp(
+            "Noyce supports talented science, technology, engineering, and mathematics majors."
+        )
+        idx = [t.i for t in doc if t.text.lower() == "engineering"][0]
+        span = Span(doc, idx, idx + 1)
+        assert L1Tagger.out_of_scope_context(doc, span) == "stem_idiom"
+
+    def test_stem_idiom_spares_an_adjacent_term(self, l1_tagger):
+        """
+        A proximity-based version of this filter also discarded the legitimate
+        "students" match sitting beside a STEM expansion. Only words inside the
+        idiom, and supplied by it, are rejected.
+        """
+        doc = l1_tagger.nlp(
+            "An expanded presence of doctoral students in science, technology, "
+            "engineering, and mathematics fields."
+        )
+        idx = [t.i for t in doc if t.text.lower() == "students"][0]
+        assert L1Tagger.out_of_scope_context(doc, Span(doc, idx, idx + 1)) is None
+
+    def test_plain_topical_mention_survives(self, l1_tagger):
+        """The filters must not fire on ordinary subject-matter prose."""
+        text = "Machine learning can further improve signal processing in these systems."
+        assert "meth_ml" in {ev.concept_id for ev in l1_tagger.tag_text(text)}
+
+    def test_cue_after_the_match_does_not_fire(self, l1_tagger):
+        """Referral and permissive cues precede their target; look backwards only."""
+        text = "This programme funds climate action. Other proposals may use other methods."
+        assert "sdg_13" in {ev.concept_id for ev in l1_tagger.tag_text(text)}
+
+    def test_rejected_match_does_not_block_a_later_valid_one(self, l1_tagger):
+        """
+        A concept is marked as seen only once a match is accepted. Marking it
+        earlier let the first rejected occurrence consume the concept's single
+        slot, silently hiding a genuine mention further down the document.
+        """
+        text = (
+            "Proposals may use machine learning to advance the research. "
+            "Machine learning is the central concern of this programme."
+        )
+        assert "meth_ml" in {ev.concept_id for ev in l1_tagger.tag_text(text)}
 
 
 class TestL1TaggerExcludedSpans:

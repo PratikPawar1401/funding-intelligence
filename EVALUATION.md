@@ -821,6 +821,155 @@ keeps both, at the cost of a labelling pass.
 
 ---
 
+## 4h. Layer 1 Scope Filters — Aboutness, and the Cap That Absorbs It
+
+Layer 1 is deterministic exact string matching, so it should be the precise
+layer. On the gold set it was the *least* precise: **21 true positives against
+30 false positives, precision 0.412**.
+
+Every one of those 30 matches was a genuine occurrence of the word. The
+annotation codebook asks for a concept's *primary focus, not merely mentioned*,
+and nothing in the matcher represented that distinction. Attributing each false
+positive to its trigger term showed 20 of 30 fired on a single generic word.
+
+### What the words were actually doing
+
+| Matched text | What it is |
+|---|---|
+| "the sociology of science and **technology**" | a subject *studied*, not funded |
+| "Women in Academic Science and **Engineering** Careers" | a *different programme's* name |
+| "science, **technology**, **engineering**, and mathematics (STEM)" | an acronym expansion |
+| "Research Advanced by Interdisciplinary Science and **Engineering** (RAISE)" | a funding-mechanism name |
+| "health and vitality of science and **engineering**" | agency mission boilerplate |
+| "Proposals **may use** machine learning" | an optional technique |
+| "is supported through programs in the Directorate for **Geosciences**" | a redirect to another unit |
+
+Five filters were added to `L1Tagger.out_of_scope_context`, each validated
+against all 51 gold matches before inclusion: `stem_idiom`, `referral`,
+`agency_mission`, `permissive`, `proper_name`. Together they remove **9 false
+positives and no true positives**.
+
+### Two rules were tested and rejected
+
+- **Acronym glosses in general.** A rule matching any parenthesised acronym
+  against surrounding initials removed **0 false positives and 2 true
+  positives** — "Directorate for Engineering (ENG)" is the FOA's own owning
+  unit. Only the fixed STEM idiom survived.
+- **Enumeration membership.** "computing, communications, healthcare, energy
+  and other critical technologies" yields a true positive (Energy) and a false
+  positive (Good Health) from the *same list*. List membership carries no
+  signal; the distinction is semantic, not syntactic.
+
+### A recall bug found on the way
+
+`seen_concepts.add()` ran *before* the validity checks, so the first *rejected*
+occurrence consumed a concept's single slot and a later legitimate mention was
+never considered — "energy-efficient components … energy remains the central
+concern" returned nothing at all. The `excluded_spans` check was already
+written correctly; the dependency checks were not. This had to be fixed first:
+otherwise every new filter would have destroyed a valid later match.
+
+### Synonym blacklist
+
+Attribution also exposed `nsf_eng` carrying WordNet synonyms of the *verb* "to
+engineer" — `mastermind`, `orchestrate`, `organise`, `organize`, `engine room`,
+`direct` — plus `technology`, which fired on the **TIP directorate's own name**
+even though NSF runs Engineering and Technology, Innovation and Partnerships as
+separate directorates. All were exclusive to `nsf_eng`, so blacklisting cost no
+other concept. `accessibility` was blacklisted from People with Disabilities on
+the same basis.
+
+### Results (V8)
+
+| Metric | V6 | V7 (filters + recall fix) | V8 (+ blacklist) |
+|---|---|---|---|
+| **Precision** | 0.427 | 0.434 | **0.442** |
+| **Recall** | 0.654 | 0.654 | 0.654 |
+| **F1** | 0.517 | 0.522 | **0.527** |
+| **Layer 1 precision** | 0.412 | — | **0.500** |
+
+`research_discipline` 0.507 → **0.523**. Recall is unchanged at every step:
+no true positive was lost, which distinguishes this from the threshold sweeps
+of §4b, all of which traded recall for precision along one curve.
+
+### The finding that matters more than the delta
+
+Layer 1 false positives fell **30 → 21**, but global false positives fell only
+**71 → 67**. Layer 2's rose **32 → 37**.
+
+`pipeline.py` applies a hard `ev_list[:3]` cap per category. Removing a Layer 1
+false positive frees a slot, and the next Layer 2 candidate — often also wrong
+— fills it. **Five of the nine removals were re-admitted downstream.**
+
+This is the same mechanism that made boilerplate filtering deliver +0.007
+against a predicted +0.05 (§4b), now measured directly rather than inferred. It
+means Layer 1 precision work is *structurally capped* in its global effect: the
+gain is real and shows up cleanly at the layer, but the cap converts roughly
+half of it back into Layer 2 noise. Raising precision further requires either
+a decision rule that does not backfill a fixed number of slots, or a Layer 2
+that ranks better — which is what the oracle analysis in §4i points at.
+
+> **Caveat.** +0.010 global F1 on an 81-tag set is within what the set can
+> resolve. The defensible numbers here are the Layer 1 precision movement
+> (0.412 → 0.500, a mechanism with an identified cause) and the refill
+> measurement, both of which would hold on any corpus.
+
+---
+
+## 4i. The Oracle Analysis — Where the Remaining Headroom Actually Is
+
+Every tuning experiment in §4b–§4d moved F1 by less than 0.01, in both
+directions. Rather than run more, the question was made explicit: **how much is
+recoverable by changing the decision rule at all?**
+
+Two bounds, computed on the V8 output (TP 53, FP 67, FN 28):
+
+| Scenario | P | R | F1 |
+|---|---|---|---|
+| Current | 0.442 | 0.654 | **0.527** |
+| Best possible by re-cutting the emitted list (any N) | 0.472 | 0.617 | **0.535** |
+| Same candidates, ranked perfectly | 1.000 | 0.654 | **0.791** |
+
+The top-N sweep is flat across its whole useful range — N=5 gives 0.526, N=7
+gives 0.535, N=10 gives 0.533. **The best conceivable re-thresholding is worth
++0.008.** No cap, floor, or confidence cut-off does better, because the scores
+do not order correct tags above incorrect ones.
+
+A worked example makes the failure concrete. On the *Sociology* FOA, the correct
+tag `Survey Research` scores **0.416** — ranked sixth of eight within Layer 2,
+below four false positives, three of which cite the same NSF review-criteria
+boilerplate chunk as their evidence. Any threshold that excludes those three
+also excludes the tag it was trying to keep.
+
+### What 0.791 is and is not
+
+It is **perfect precision at current recall**, not perfection. Recall stays at
+0.654 because 28 gold tags are never proposed by *any* layer — they are absent
+from the candidate pool, so no re-ranking can retrieve them. Closing that gap is
+a separate problem from ranking.
+
+### Consequence for the roadmap
+
+The candidate pool already contains the right answers; the scoring function
+cannot find them. This is the same conclusion the separation diagnostic reached
+independently — AUC 0.666, correct-tag mean cosine 0.420 against incorrect 0.381
+— now expressed in F1 terms.
+
+It explains the whole run of negative results. Boilerplate filtering, title
+weighting, threshold sweeps and cap changes all move *where the list is cut*;
+none changes *how the list is ordered*. The two changes that did work — the
+`method` description rewrite (§4c, F1 0.250 → 0.462) and the Engineering
+concept (§4f) — worked because those concepts were mis-*positioned*, so fixing
+them changed the ordering. That the eight-directorate rewrite then failed
+(§4f) shows description editing is not a general lever.
+
+Closing the remaining 0.26 requires a **trained discriminator** rather than a
+better hand-written rule. The §4e award corpus makes this newly feasible: 1,248
+agency-labelled documents with a held-out split, which did not exist when this
+tuning campaign began.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:
