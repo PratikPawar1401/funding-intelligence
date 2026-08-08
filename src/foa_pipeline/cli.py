@@ -78,6 +78,16 @@ def _parse_args() -> argparse.Namespace:
     # ── Tagging ──
     tag_all_p = subparsers.add_parser("tag-all", help="Run tagging pipeline on all FOAs")
     tag_all_p.add_argument("--limit", type=int, default=0, help="Limit number of FOAs to tag")
+    tag_all_p.add_argument(
+        "--open-only",
+        dest="all_statuses",
+        action="store_false",
+        default=True,
+        help="Tag only FOAs still accepting applications. Off by default: "
+        "skipping closed FOAs makes gold-set metrics decay as the calendar "
+        "advances and gold FOAs expire. Search results are unaffected either "
+        "way, since the vector index filters to open FOAs separately.",
+    )
 
     # ── Embeddings ──
     subparsers.add_parser(
@@ -548,14 +558,30 @@ def _run_tag_all(config, args) -> None:
     db.conn.execute("DELETE FROM foa_tags")
     db.conn.commit()
 
-    # Get all untagged FOAs (or all FOAs if forcing)
-    # For simplicity here, we re-tag everything that is open
-    foas, total = db.list_foas(status="open", page=1, size=100000)
+    # Tag every FOA regardless of status, not just open ones.
+    #
+    # Restricting to open FOAs made the gold-standard metric decay with the
+    # calendar: an FOA closes, tag-all silently skips it, all of its tags become
+    # false negatives, and F1 drops with no change to the tagger. This was
+    # measured, not theorised — one gold FOA ("Unleashing Tribal Energy
+    # Development", closed 2026-07-24) expired and took global gold F1 from
+    # 0.517 to 0.500 on its own.
+    #
+    # Tagging is a property of a document's text, not of whether it is still
+    # accepting applications. Availability is a *serving* concern, and the
+    # vector index below applies its own open-only filter, so search results
+    # are unaffected by this.
+    status_filter = None if getattr(args, "all_statuses", True) else "open"
+    foas, total = db.list_foas(status=status_filter, page=1, size=100000)
 
     if args.limit > 0:
         foas = foas[:args.limit]
 
-    logging.info("Tagging %d open FOAs...", len(foas))
+    logging.info(
+        "Tagging %d FOAs (%s)...",
+        len(foas),
+        "all statuses" if status_filter is None else f"status={status_filter}",
+    )
 
     tagged_count = 0
     total_tags_saved = 0

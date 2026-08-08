@@ -9,15 +9,15 @@
   {
     "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
     "title": "Foundational Research in Robotics",
-    "concept": "method_04",
-    "label": "Computer Vision",
+    "concept": "method_01",
+    "label": "Machine Learning",
     "category": "method"
   },
   {
     "foa_id": "fc26e105-5735-4841-a25f-d002ca3e4e8d",
     "title": "Foundational Research in Robotics",
-    "concept": "method_01",
-    "label": "Machine Learning",
+    "concept": "method_04",
+    "label": "Computer Vision",
     "category": "method"
   },
   {
@@ -44,16 +44,16 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
-    "concept": "sdg_10",
-    "label": "Reduced Inequalities",
-    "category": "research_domain"
+    "concept": "method_14",
+    "label": "Field Experiment",
+    "category": "method"
   },
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
-    "concept": "method_14",
-    "label": "Field Experiment",
-    "category": "method"
+    "concept": "sdg_10",
+    "label": "Reduced Inequalities",
+    "category": "research_domain"
   },
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
@@ -65,8 +65,8 @@
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
-    "concept": "sdg_10",
-    "label": "Reduced Inequalities",
+    "concept": "sdg_04",
+    "label": "Quality Education",
     "category": "research_domain"
   },
   {
@@ -79,8 +79,8 @@
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
-    "concept": "sdg_04",
-    "label": "Quality Education",
+    "concept": "sdg_10",
+    "label": "Reduced Inequalities",
     "category": "research_domain"
   },
   {
@@ -100,16 +100,9 @@
   {
     "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
     "title": "Cognitive Neuroscience",
-    "concept": "method_08",
-    "label": "Mixed Methods Research",
-    "category": "method"
-  },
-  {
-    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
-    "title": "Cognitive Neuroscience",
-    "concept": "nsf_bio",
-    "label": "Biological Sciences",
-    "category": "research_discipline"
+    "concept": "great_02",
+    "label": "Health",
+    "category": "sponsor_theme"
   },
   {
     "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
@@ -121,9 +114,16 @@
   {
     "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
     "title": "Cognitive Neuroscience",
-    "concept": "great_02",
-    "label": "Health",
-    "category": "sponsor_theme"
+    "concept": "method_08",
+    "label": "Mixed Methods Research",
+    "category": "method"
+  },
+  {
+    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
+    "title": "Cognitive Neuroscience",
+    "concept": "nsf_bio",
+    "label": "Biological Sciences",
+    "category": "research_discipline"
   },
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
@@ -142,6 +142,13 @@
   {
     "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
     "title": "Documenting Endangered Languages",
+    "concept": "nsf_sbe",
+    "label": "Social Behavioral and Economic Sciences",
+    "category": "research_discipline"
+  },
+  {
+    "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
+    "title": "Documenting Endangered Languages",
     "concept": "method_14",
     "label": "Field Experiment",
     "category": "method"
@@ -152,13 +159,6 @@
     "concept": "great_05",
     "label": "General Science",
     "category": "sponsor_theme"
-  },
-  {
-    "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",
-    "title": "Documenting Endangered Languages",
-    "concept": "nsf_sbe",
-    "label": "Social Behavioral and Economic Sciences",
-    "category": "research_discipline"
   },
   {
     "foa_id": "28dd695e-853a-492e-aa20-0eb388519ff0",

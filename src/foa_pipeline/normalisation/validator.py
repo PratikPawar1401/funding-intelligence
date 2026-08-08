@@ -18,7 +18,28 @@ from jsonschema import Draft7Validator, FormatChecker
 
 logger = logging.getLogger(__name__)
 
-SCHEMA_PATH = Path(__file__).parent.parent.parent / "data" / "foa_schema.json"
+def _find_schema() -> Path:
+    """
+    Locate `data/foa_schema.json` by walking up from this module.
+
+    Previously a fixed number of `.parent` hops from `__file__`. Moving this
+    module one directory deeper during the package restructure (41fb3ae) made
+    that path resolve to `src/data/`, which does not exist — and the miss is
+    silent, falling back to a permissive minimal schema. Draft-7 validation was
+    therefore switched off for every record without a single error.
+
+    Walking up removes the coupling between this file's depth and the path, so
+    the same class of move cannot break it again.
+    """
+    for directory in Path(__file__).resolve().parents:
+        candidate = directory / "data" / "foa_schema.json"
+        if candidate.exists():
+            return candidate
+    # Return the conventional location so the warning names a useful path.
+    return Path(__file__).resolve().parents[3] / "data" / "foa_schema.json"
+
+
+SCHEMA_PATH = _find_schema()
 
 _cached_schema: Optional[Dict[str, Any]] = None
 

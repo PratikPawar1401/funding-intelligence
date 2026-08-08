@@ -88,6 +88,22 @@ Research (ISSR).
   false negatives.
 
 ### Fixed
+- **`tag-all` skipped closed FOAs, making the gold metric decay with the
+  calendar.** Status is recomputed from the close date on every `normalise`, so
+  an expiring FOA silently left the tagging set and all of its tags became false
+  negatives. One gold FOA expiring took global F1 from 0.517 to 0.500 with no
+  change to the tagger. `tag-all` now covers all statuses (`--open-only`
+  restores the old behaviour); search is unaffected because the FAISS index
+  filters to open FOAs separately.
+- **JSON Schema validation had been silently disabled since the package
+  restructure.** `validator.py` located `foa_schema.json` by a fixed number of
+  `.parent` hops; moving the module one directory deeper made that resolve to
+  `src/data/`, which does not exist. `load_schema` then fell back to a
+  permissive minimal schema, leaving 20 of 27 properties unvalidated — every
+  money field, date and free-text field — with only a log line as a symptom.
+  The path is now found by walking up, so the same class of move cannot break
+  it, and a test asserts the real schema is the one loaded. No existing record
+  fails the restored validation (136/136 pass).
 - **Stale tags corrupted every evaluation comparison.** `tag-all` never cleared
   `foa_tags` before re-tagging, and `save_tags` uses `INSERT OR REPLACE` keyed
   on `(foa_id, concept_id, source_layer)` — so any concept that stopped being

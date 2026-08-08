@@ -859,7 +859,17 @@ PYTHONPATH=src python -m foa_pipeline.cli evaluate --gold
 cat data/evaluation/evaluation_summary_gold.json
 ```
 
-The evaluation is fully deterministic: given the same database, ontology, and thresholds, it will always produce identical metrics.
+The evaluation is deterministic: given the same database, ontology, and thresholds, it produces identical metrics. This was verified rather than assumed — three consecutive `tag-all` runs produced byte-identical tag counts (698, split 290/335/73 across the three layers) and identical F1, and `precompute-embeddings` is bitwise reproducible.
+
+### One thing that is *not* held constant: the calendar
+
+**`tag-all` used to tag only FOAs with `status="open"`.** Since status is recomputed from the close date on every `normalise`, an FOA silently left the tagging set the day it expired, and all of its tags became false negatives.
+
+This was measured, not theorised. A full pipeline re-run on 2026-08-07 moved gold F1 from 0.517 to **0.500** with no change to the tagger, the ontology, or the corpus text. The entire difference was one gold FOA — "Unleashing Tribal Energy Development", close date 2026-07-24 — expiring and going untagged, taking 5 tags with it. Thirteen FOAs closed corpus-wide, dropping total tags 773 → 698.
+
+`tag-all` now covers every status by default (`--open-only` restores the old behaviour). Tagging is a property of a document's text, not of whether it is still accepting applications; availability is a *serving* concern, and the FAISS index applies its own open-only filter, so search results are unchanged. Re-running with the fix restored F1 to exactly 0.517 with all five per-category scores matching.
+
+**Any F1 in this document measured before 2026-08-08 was taken under the old behaviour**, and would drift downward on re-run as gold FOAs age. The numbers are internally consistent because they were all taken while the same set of gold FOAs was open, but this is the reason a gold set of long-closed FOAs is not automatically reproducible. It is a further argument for the gold-set expansion in A5: the smaller the set, the more a single expiry moves the headline.
 
 ---
 
