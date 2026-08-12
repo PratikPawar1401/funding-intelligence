@@ -16,8 +16,9 @@ class FakeVectorIndex:
         self._results = results
         self.last_k = None
 
-    def search(self, query, k=10, threshold=0.0):
+    def search(self, query, k=10, threshold=0.0, db=None):
         self.last_k = k
+        self.last_db = db
         return [dict(r) for r in self._results]
 
 
@@ -161,6 +162,20 @@ class TestMatchProfileToFoas:
             "profile", db, index, tagger=FakeTagger(["method_01"]), k=1
         )
         assert results[0]["matched_tags"] == ["Machine Learning"]
+
+    def test_forwards_db_to_vector_index_search(self):
+        """
+        vector_index.search() accepts an optional per-call `db` because a
+        cached, cross-request VectorIndex holds no connection of its own (see
+        api/deps.py get_vector_index). match_profile_to_foas must forward its
+        own `db` argument through, or a cached index has no way to resolve
+        tags/records and raises at request time -- caught only by an
+        end-to-end run against a live server, not by these unit tests alone.
+        """
+        index = FakeVectorIndex([{"foa_id": "a", "similarity_score": 0.5}])
+        db = FakeDatabase({})
+        match_profile_to_foas("profile", db, index, k=1)
+        assert index.last_db is db
 
     def test_retrieves_wider_candidate_pool_than_k(self):
         """Re-ranking needs headroom, or tag overlap could never promote anything."""

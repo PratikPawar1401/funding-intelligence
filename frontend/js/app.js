@@ -164,26 +164,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!text) return;
 
         const threshold = parseFloat(elements.thresholdInput.value);
-        
+
         renderLoading(elements.semanticGrid);
-        
+
         try {
-            const data = await ApiClient.searchSemantic(text, 15, threshold, state.statusFilter);
-            
+            // Hybrid match: FAISS vector similarity + ontology tag overlap,
+            // with an LLM explanation/relevance rating layered onto the top
+            // results when a local LLM is reachable (MATCHING.md).
+            const data = await ApiClient.matchProfile(text, 15, threshold, state.statusFilter, true);
+
             if (data.items && data.items.length > 0) {
-                renderFoaGrid(elements.semanticGrid, data.items, true);
+                renderMatchGrid(elements.semanticGrid, data.items, data.llm_available);
             } else {
                 elements.semanticGrid.innerHTML = `
                     <div class="empty-state">
                         <i class="fa-solid fa-ghost"></i>
-                        <p>No matching grants found above the threshold. Try lowering the threshold or providing a more detailed profile.</p>
+                        <p>No matching grants found. Try providing a more detailed profile.</p>
                         <p class="subtitle">${data.message || ''}</p>
                     </div>
                 `;
             }
         } catch (error) {
             console.error(error);
-            elements.semanticGrid.innerHTML = `<div class="empty-state"><p>Semantic search failed. Did you run the 'tag-all' command to build the FAISS index?</p></div>`;
+            elements.semanticGrid.innerHTML = `<div class="empty-state"><p>Matching failed. Did you run the 'tag-all' command to build the FAISS index?</p></div>`;
         }
     }
 
@@ -280,6 +283,98 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="meta-item"><i class="fa-regular fa-calendar"></i> ${dateStr}</div>
                     <div class="meta-item"><i class="fa-solid fa-sack-dollar"></i> ${amountStr}</div>
                 </div>
+                <div class="card-tags">
+                    ${tagsHtml}
+                </div>
+            `;
+
+            card.addEventListener('click', () => openFoaModal(foa.foa_id));
+            container.appendChild(card);
+        });
+    }
+
+    /**
+     * Renders results from /api/match: the hybrid score (vector similarity +
+     * ontology tag overlap) plus, for the top results when a local LLM was
+     * reachable, a plain-language explanation and relevance rating. Falls
+     * back gracefully per-card when a result has no match_explanation
+     * (explain=false, or the result fell outside the LLM-reviewed window).
+     */
+    function renderMatchGrid(container, items, llmAvailable) {
+        if (!items || items.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <i class="fa-solid fa-folder-open"></i>
+                    <p>No opportunities found matching your criteria.</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = '';
+
+        if (!llmAvailable) {
+            const notice = document.createElement('div');
+            notice.className = 'subtitle';
+            notice.style.marginBottom = '1rem';
+            notice.innerHTML = `<i class="fa-solid fa-circle-info"></i> AI-generated explanations are unavailable right now (local LLM unreachable) — showing ranked matches only.`;
+            container.appendChild(notice);
+        }
+
+        items.forEach(foa => {
+            const card = document.createElement('div');
+            card.className = 'foa-card';
+            card.setAttribute('data-status', foa.status);
+
+            const agencyStr = foa.agency_code || foa.agency || 'Unknown Agency';
+            const dateStr = foa.close_date ? `Due ${formatDate(foa.close_date)}` : 'Continuous';
+            const amountStr = foa.award_ceiling ? formatMoney(foa.award_ceiling) : 'Variable Amount';
+
+            const matchedTags = foa.matched_tags || [];
+            const tagsHtml = matchedTags.slice(0, 4)
+                .map(label => `<span class="tag">${label}</span>`)
+                .join('');
+
+            const scoreHtml = (foa.hybrid_score != null) ? `
+                <div class="match-score">
+                    <i class="fa-solid fa-bolt"></i> ${(foa.hybrid_score * 100).toFixed(0)}% Match
+                </div>
+            ` : '';
+
+            const detailHtml = (foa.cosine_score != null) ? `
+                <div class="match-detail-row">
+                    <span><i class="fa-solid fa-vector-square"></i> ${(foa.cosine_score * 100).toFixed(0)}% topic similarity</span>
+                    <span><i class="fa-solid fa-tags"></i> ${(foa.tag_overlap_ratio * 100).toFixed(0)}% tag overlap</span>
+                </div>
+            ` : '';
+
+            let explanationHtml = '';
+            if (foa.match_explanation) {
+                const relevance = foa.llm_relevance;
+                const badge = relevance
+                    ? `<span class="relevance-badge relevance-${relevance}">${relevance}</span>`
+                    : '';
+                explanationHtml = `
+                    <div class="ai-explanation">
+                        <div class="ai-label"><i class="fa-solid fa-wand-magic-sparkles"></i> AI Explanation ${badge}</div>
+                        ${foa.match_explanation}
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                ${scoreHtml}
+                <div class="card-header">
+                    <span class="card-agency">${agencyStr}</span>
+                    <span class="card-number">${foa.opportunity_number || foa.foa_id.substring(0,8)}</span>
+                </div>
+                <h3 class="card-title">${foa.title}</h3>
+                <div class="card-meta">
+                    <div class="meta-item"><i class="fa-regular fa-calendar"></i> ${dateStr}</div>
+                    <div class="meta-item"><i class="fa-solid fa-sack-dollar"></i> ${amountStr}</div>
+                </div>
+                ${detailHtml}
+                ${explanationHtml}
                 <div class="card-tags">
                     ${tagsHtml}
                 </div>

@@ -38,10 +38,22 @@ class OntologyConcept:
 class OntologyStore:
     """SQLite-backed ontology concept store."""
 
-    def __init__(self, db_path: Path):
+    def __init__(self, db_path: Path, check_same_thread: bool = True):
+        """
+        `check_same_thread=False` is for long-lived, read-only callers such as
+        the API's cached TaggerPipeline (see api/deps.py). FastAPI dispatches
+        sync routes onto a threadpool, so a store cached once at process
+        startup will be used from a different thread on every request; after
+        `TaggerPipeline.initialize()` this store only serves read-only
+        crosswalk/hierarchy lookups against reference data that the running
+        API never writes to, so there is no concurrent-write hazard to guard
+        against. Every other caller (CLI commands, `setup-ontology`, tests)
+        keeps the default, since sqlite3's same-thread check is a real safety
+        net when a connection might see concurrent writes.
+        """
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(str(db_path))
+        self.conn = sqlite3.connect(str(db_path), check_same_thread=check_same_thread)
         self.conn.row_factory = sqlite3.Row
         self._ensure_schema()
 

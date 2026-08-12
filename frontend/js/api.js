@@ -70,6 +70,23 @@ class ApiClient {
     }
 
     /**
+     * Hybrid Grant Matching: vector similarity + ontology tag overlap,
+     * optionally annotated with an LLM explanation and relevance rating for
+     * the top results. See MATCHING.md.
+     */
+    static async matchProfile(profileText, k = 15, threshold = 0.0, status = 'open', explain = true) {
+        const payload = { profile_text: profileText, k, threshold, status, explain };
+
+        const res = await fetch(`${API_BASE}/match`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error('Match failed');
+        return res.json();
+    }
+
+    /**
      * Get Tag Categories Summary
      */
     static async getTagCategories() {

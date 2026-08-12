@@ -202,6 +202,199 @@ class TestSemanticSearch:
         assert resp.status_code == 422
 
 
+class FakeVectorIndex:
+    """Stand-in for VectorIndex returning canned FAISS hits, shaped like real
+    search() output: full FOA fields plus an injected similarity_score."""
+
+    def __init__(self, results):
+        self.index = True  # truthy: route treats this as "index loaded"
+        self._results = results
+
+    def search(self, query, k=10, threshold=0.0, db=None):
+        self.last_threshold = threshold
+        self.last_db = db
+        return [dict(r) for r in self._results]
+
+
+class FakeExplainer:
+    """Stand-in for MatchExplainer with a scripted availability and answer."""
+
+    def __init__(self, available=True, relevance="strong"):
+        self._available = available
+        self._relevance = relevance
+        self.calls = []
+
+    def is_available(self):
+        return self._available
+
+    def explain_one(self, profile_text, foa):
+        self.calls.append(foa["foa_id"])
+        return {
+            "explanation": f"Fake explanation for {foa['foa_id']}.",
+            "relevance": self._relevance,
+        }
+
+
+class TestMatch:
+    """/api/match: hybrid ranking, optionally annotated with LLM explanations."""
+
+    PROFILE = "machine learning for rural health"
+
+    def _index(self):
+        return FakeVectorIndex([
+            {
+                "foa_id": "api-foa-open",
+                "title": "Rural Health Machine Learning Initiative",
+                "status": "open",
+                "program_description": "Studies rural health using machine learning.",
+                "similarity_score": 0.81,
+            },
+            {
+                "foa_id": "api-foa-closed",
+                "title": "Archived Coastal Erosion Study",
+                "status": "closed",
+                "program_description": "Coastal erosion research.",
+                "similarity_score": 0.40,
+            },
+        ])
+
+    def _patch(self, monkeypatch, index=None, tagger=None, explainer=None):
+        from foa_pipeline.api.routes import match as match_route
+
+        monkeypatch.setattr(match_route, "get_vector_index", lambda: index or self._index())
+        monkeypatch.setattr(match_route, "get_tagger_pipeline", lambda: tagger)
+        monkeypatch.setattr(
+            match_route, "get_match_explainer", lambda: explainer or FakeExplainer()
+        )
+
+    def test_reports_missing_index_gracefully(self, client, tmp_path, monkeypatch):
+        from foa_pipeline.api.routes import match as match_route
+        from foa_pipeline.matching.vector_index import VectorIndex
+
+        empty_index = VectorIndex(db=None, model_name="unused", cache_dir=tmp_path / "no-index")
+        monkeypatch.setattr(match_route, "get_vector_index", lambda: empty_index)
+
+        resp = client.post("/api/match", json={"profile_text": self.PROFILE})
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["items"] == []
+        assert body["llm_available"] is False
+        assert "FAISS index not found" in body["message"]
+
+    def test_rejects_too_short_profile(self, client, monkeypatch):
+        self._patch(monkeypatch)
+        resp = client.post("/api/match", json={"profile_text": "short"})
+        assert resp.status_code == 422
+
+    def test_rejects_out_of_range_k(self, client, monkeypatch):
+        self._patch(monkeypatch)
+        resp = client.post("/api/match", json={"profile_text": self.PROFILE, "k": 0})
+        assert resp.status_code == 422
+
+    def test_status_filter_applied_after_ranking(self, client, monkeypatch):
+        self._patch(monkeypatch)
+        resp = client.post(
+            "/api/match",
+            json={"profile_text": self.PROFILE, "status": "open", "explain": False},
+        )
+        body = resp.json()
+        assert [i["foa_id"] for i in body["items"]] == ["api-foa-open"]
+
+    def test_forwards_the_request_scoped_db_to_vector_search(self, client, monkeypatch):
+        """
+        The cached VectorIndex holds no Database of its own (api/deps.py) --
+        a real request 500s if match_profile_to_foas does not forward its db
+        argument into vector_index.search(). Caught only by exercising the
+        real route end-to-end, not by matcher.py's unit tests alone, since
+        those construct match_profile_to_foas' inputs directly.
+        """
+        index = self._index()
+        self._patch(monkeypatch, index=index)
+
+        resp = client.post("/api/match", json={"profile_text": self.PROFILE, "explain": False})
+        assert resp.status_code == 200
+        assert index.last_db is not None
+
+    def test_explain_false_skips_llm_entirely(self, client, monkeypatch):
+        explainer = FakeExplainer()
+        self._patch(monkeypatch, explainer=explainer)
+
+        resp = client.post(
+            "/api/match",
+            json={"profile_text": self.PROFILE, "status": None, "explain": False},
+        )
+        body = resp.json()
+        assert body["llm_available"] is False
+        assert explainer.calls == []
+        assert all("match_explanation" not in item for item in body["items"])
+
+    def test_explain_true_annotates_top_results(self, client, monkeypatch):
+        explainer = FakeExplainer(available=True, relevance="strong")
+        self._patch(monkeypatch, explainer=explainer)
+
+        resp = client.post(
+            "/api/match",
+            json={"profile_text": self.PROFILE, "status": None, "explain": True},
+        )
+        body = resp.json()
+        assert body["llm_available"] is True
+        items = body["items"]
+        assert all(item["match_explanation"].startswith("Fake explanation") for item in items)
+        assert all(item["llm_relevance"] == "strong" for item in items)
+
+    def test_explainer_unavailable_degrades_without_error(self, client, monkeypatch):
+        explainer = FakeExplainer(available=False)
+        self._patch(monkeypatch, explainer=explainer)
+
+        resp = client.post(
+            "/api/match",
+            json={"profile_text": self.PROFILE, "status": None, "explain": True},
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["llm_available"] is False
+        assert explainer.calls == []
+        # Still gets a deterministic explanation, just not an LLM-authored one.
+        assert all("match_explanation" in item for item in body["items"])
+
+    def test_without_tagger_falls_back_to_cosine_only_ranking(self, client, monkeypatch):
+        self._patch(monkeypatch, tagger=None)
+        resp = client.post(
+            "/api/match",
+            json={"profile_text": self.PROFILE, "status": None, "explain": False},
+        )
+        body = resp.json()
+        assert all(item["tag_overlap_ratio"] == 0.0 for item in body["items"])
+
+    def test_raw_payload_is_never_exposed(self, client, monkeypatch):
+        self._patch(monkeypatch)
+        resp = client.post(
+            "/api/match", json={"profile_text": self.PROFILE, "explain": False}
+        )
+        for item in resp.json()["items"]:
+            assert "raw_payload" not in item
+
+    def test_threshold_is_passed_through_to_the_vector_search(self, client, monkeypatch):
+        index = self._index()
+        self._patch(monkeypatch, index=index)
+
+        client.post(
+            "/api/match",
+            json={"profile_text": self.PROFILE, "threshold": 0.42, "explain": False},
+        )
+        assert index.last_threshold == 0.42
+
+    def test_no_results_reports_empty_not_an_error(self, client, monkeypatch):
+        self._patch(monkeypatch, index=FakeVectorIndex([]))
+        resp = client.post(
+            "/api/match", json={"profile_text": "a sufficiently long research profile"}
+        )
+        assert resp.status_code == 200
+        body = resp.json()
+        assert body["items"] == []
+        assert body["total"] == 0
+
+
 class TestTags:
     def test_list_tags(self, client):
         body = client.get("/api/tags").json()

@@ -12,7 +12,7 @@ from fastapi.staticfiles import StaticFiles
 
 from .deps import get_app_config
 from .middleware import RateLimitMiddleware
-from .routes import export, health, opportunities, search, tags
+from .routes import export, health, match, opportunities, search, tags
 
 
 def create_app() -> FastAPI:
@@ -51,6 +51,7 @@ def create_app() -> FastAPI:
         opportunities.router, prefix="/api/opportunities", tags=["opportunities"]
     )
     app.include_router(search.router, prefix="/api/search", tags=["search"])
+    app.include_router(match.router, prefix="/api/match", tags=["match"])
     app.include_router(tags.router, prefix="/api/tags", tags=["tags"])
     app.include_router(export.router, prefix="/api/export", tags=["export"])
 

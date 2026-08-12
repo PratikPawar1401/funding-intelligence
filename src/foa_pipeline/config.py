@@ -74,6 +74,14 @@ class Config:
     title_weight: float = 0.0
     title_combine: str = "blend"  # "blend" or "max"
 
+    # ── Grant matching (defaulted) ──
+    # How many top-ranked matches get an LLM-generated explanation per
+    # request. Bounded deliberately: each one is an Ollama round trip
+    # (seconds, not milliseconds), so explaining all of `k` would not scale
+    # the way scoring them does. Tunable without a code change because the
+    # right number depends on the deployment's Ollama latency.
+    match_explain_top_k: int = 5
+
 
 def get_config() -> Config:
     """Build Config from environment variables with sensible defaults."""
@@ -125,6 +133,8 @@ def get_config() -> Config:
         # ── Title weighting ──
         title_weight=float(_env("TITLE_WEIGHT", "0.0")),
         title_combine=_env("TITLE_COMBINE", "blend"),
+        # ── Grant matching ──
+        match_explain_top_k=int(_env("MATCH_EXPLAIN_TOP_K", "5")),
         # ── General ──
         log_level=_env("LOG_LEVEL", "INFO"),
         user_agent=_env("USER_AGENT", "foa-pipeline/1.0"),

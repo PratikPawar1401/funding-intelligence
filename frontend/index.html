@@ -104,15 +104,15 @@
                 <section id="semantic-search-view" class="view-section">
                     <div class="view-header">
                         <h2>Semantic Profile Match</h2>
-                        <p class="subtitle">Paste a researcher profile, abstract, or project idea to find highly relevant grants using AI vector matching.</p>
+                        <p class="subtitle">Paste a researcher profile, abstract, or project idea to find relevant grants. Ranking combines vector similarity with ontology tag overlap, and the top results get a plain-language AI explanation of why they matched.</p>
                     </div>
                     
                     <div class="semantic-input-container glass-panel">
                         <textarea id="profile-input" placeholder="e.g. I am looking for funding to research the impact of climate change on rural agricultural communities using machine learning and geospatial analysis..."></textarea>
                         <div class="semantic-controls">
                             <div class="slider-group">
-                                <label for="match-threshold">Similarity Threshold: <span id="threshold-val">0.50</span></label>
-                                <input type="range" id="match-threshold" min="0" max="1" step="0.05" value="0.50">
+                                <label for="match-threshold">Minimum Similarity (optional filter): <span id="threshold-val">0.00</span></label>
+                                <input type="range" id="match-threshold" min="0" max="1" step="0.05" value="0.00">
                             </div>
                             <button id="semantic-search-btn" class="btn-primary">
                                 <i class="fa-solid fa-bolt"></i> Find Matches

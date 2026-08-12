@@ -42,8 +42,8 @@ Data Sources          Ingestion             Processing              Storage     
 | **Evaluation Framework** | Gold standard P/R/F1 evaluation with per-category error analysis | ✅ Complete |
 | **PDF Downloader** | Async aiohttp downloader for linked PDFs with auto-parsing | ✅ Complete |
 | **Vector Search** | FAISS IndexFlatIP for semantic similarity search across FOA embeddings | ✅ Complete (was a stretch goal) |
-| **Grant Matching** | Researcher profile → ranked FOAs via hybrid cosine + tag-overlap score | ✅ Complete |
-| **FastAPI Backend** | REST API with CRUD, search, tag, and export endpoints | ✅ Complete |
+| **Grant Matching** | Researcher profile → ranked FOAs via hybrid cosine + tag-overlap score, with LLM-generated match explanations for the top results | ✅ Complete |
+| **FastAPI Backend** | REST API with CRUD, search, match, tag, and export endpoints | ✅ Complete |
 | **Web Frontend** | Search interface with faceted filtering — the "Simpler Grants.gov" | ✅ Complete |
 | **CSV/JSON Export** | Structured export with tag evidence provenance | ✅ Complete |
 | **Docker Deployment** | Full-stack containerisation with docker-compose | ✅ Complete |

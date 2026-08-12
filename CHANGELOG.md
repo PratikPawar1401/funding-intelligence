@@ -12,6 +12,32 @@ Research (ISSR).
 ## [Unreleased]
 
 ### Added
+- `POST /api/match` — grant matching exposed via the API, not just the CLI.
+  Wraps the existing hybrid score (0.7 cosine similarity + 0.3 ontology tag
+  overlap, `MATCHING.md`) and, when `explain: true` (the default) and a local
+  LLM is reachable, layers a plain-language explanation and a `strong`/
+  `moderate`/`weak` relevance rating onto the top `MATCH_EXPLAIN_TOP_K`
+  results (`matching/explain.py`, new). The reviewed window is re-sorted by
+  relevance but a candidate outside it can never be promoted — bounds both
+  the LLM's influence and worst-case latency. Every failure (Ollama down,
+  timeout, malformed response) degrades to a deterministic templated
+  sentence; the response always carries `llm_available` so a caller can be
+  honest about degraded mode. See `MATCHING.md`'s new "LLM Match
+  Explanations" section for the full contract, including two pre-existing
+  bugs this work surfaced and fixed (below).
+- Frontend: the "Semantic Match" view now calls `/api/match` instead of the
+  cosine-only `/api/search/semantic`, and renders the hybrid score, the
+  cosine/tag-overlap breakdown, matched tag chips, and — for the top results
+  — an AI explanation box with a colour-coded relevance badge. Verified with
+  a real Ollama instance and a live Playwright browser session, not just unit
+  tests: screenshots confirm cards, explanations, and the detail modal all
+  render correctly.
+- `ontology/store.py`: `OntologyStore.__init__` takes an optional
+  `check_same_thread` parameter, defaulting to the existing (safe) behaviour.
+  Needed because the API now caches a single `TaggerPipeline` — and the
+  `OntologyStore` it holds — across requests that FastAPI may dispatch on
+  different threadpool threads; see the docstring for why this is safe (the
+  store is read-only from the API's perspective after `initialize()`).
 - `ingestion/nsf_awards.py` — NSF Award Search connector producing an
   agency-labelled evaluation corpus (~1,250 abstracts whose research directorate
   NSF assigned itself). Written to the evaluation directory only: awards are a
@@ -93,6 +119,28 @@ Research (ISSR).
   false negatives.
 
 ### Fixed
+- **`match_profile_to_foas` never forwarded its `db` argument into
+  `vector_index.search()`.** Worked by accident from the CLI, which always
+  constructs a `VectorIndex` with a database bound at construction; the
+  API's cached, cross-request index has no database of its own by design
+  (`api/deps.py`), so every API-driven match request raised
+  `ValueError: VectorIndex has no Database`. No unit test caught it — every
+  test double for `VectorIndex.search()` accepted whatever arguments it was
+  given rather than validating the real signature. Found by running the
+  actual server against actual data, not by the test suite. Now fixed, with
+  a regression test in both `test_grant_matcher.py` and `test_api.py`
+  asserting the forwarding happens.
+- **The "Semantic Match" UI's similarity threshold defaulted to 0.50**, but
+  real cosine scores between a short profile and an FOA's full text commonly
+  top out around 0.30–0.35 for genuinely relevant results — the same
+  compressed-similarity phenomenon already documented for tag-concept
+  cosines. At the old default, a realistic query could silently return zero
+  results with no indication why. This reproduces identically on the
+  pre-existing `/api/search/semantic` endpoint; it predates this session's
+  changes and was only caught by driving the real UI end-to-end in a
+  browser. Default is now 0 (no pre-filter) — relevance is communicated by
+  the LLM tier and hybrid score instead, which degrade gracefully rather
+  than vanishing.
 - **Layer 1 rejected a match *after* marking its concept as seen**, so the first
   rejected occurrence consumed the concept's single slot and any later
   legitimate mention was never considered — "energy-efficient components …

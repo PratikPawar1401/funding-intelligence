@@ -96,6 +96,7 @@ def match_profile_to_foas(
         profile_text,
         k=max(k * CANDIDATE_POOL_MULTIPLIER, k),
         threshold=threshold,
+        db=db,
     )
     if not candidates:
         return []

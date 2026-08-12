@@ -512,6 +512,59 @@ button {
     box-shadow: 0 2px 10px rgba(59, 130, 246, 0.3);
 }
 
+/* Hybrid match breakdown: cosine + tag overlap, shown under the score badge */
+.match-detail-row {
+    display: flex;
+    gap: 10px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.75rem;
+}
+
+.match-detail-row span {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* LLM-generated explanation block */
+.ai-explanation {
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: var(--radius-md);
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+}
+
+.ai-explanation .ai-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #8b5cf6;
+    margin-bottom: 4px;
+}
+
+.relevance-badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    margin-left: 6px;
+}
+
+.relevance-strong { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+.relevance-moderate { background: rgba(245, 158, 11, 0.15); color: #f59e0b; }
+.relevance-weak { background: rgba(148, 163, 184, 0.15); color: var(--text-muted); }
+
 /* ── Semantic Search View ── */
 .semantic-input-container {
     padding: 1.5rem;
