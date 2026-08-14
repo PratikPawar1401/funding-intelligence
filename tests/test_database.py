@@ -1,5 +1,7 @@
 """Tests for the database module."""
 
+import copy
+
 from foa_pipeline.storage.database import Database
 
 
@@ -72,6 +74,110 @@ def test_fts_search(tmp_path, sample_foa):
     # No results
     records, total = db.search_fts("quantum computing")
     assert total == 0
+
+
+def test_fts_search_survives_pathological_input(tmp_path, sample_foa):
+    """
+    Unsanitized, a lone '-' or an unmatched '"' reaches FTS5's query parser
+    as operator syntax and raises sqlite3.OperationalError -- this is now the
+    app's primary search bar, so it must not 500 on ordinary typing.
+    """
+    db = Database(tmp_path / "test.db")
+    db.upsert_foa(sample_foa)
+
+    records, total = db.search_fts("-")
+    assert total == 0
+
+    records, total = db.search_fts('"unterminated')
+    assert total == 0
+
+    # A quote-containing query that legitimately matches should still work.
+    records, total = db.search_fts('"climate change"')
+    assert total >= 1
+
+    db.close()
+
+
+def test_fts_search_parses_funding_tiers(tmp_path, sample_foa):
+    """
+    list_foas() already parses funding_tiers from its stored JSON string;
+    search_fts() silently didn't -- callers reading this field off a search
+    result got a raw JSON string instead of a list.
+    """
+    db = Database(tmp_path / "test.db")
+    db.upsert_foa(sample_foa)
+
+    records, _ = db.search_fts("climate")
+    assert isinstance(records[0]["funding_tiers"], list)
+
+    db.close()
+
+
+def test_facet_counts_reflect_the_corpus(tmp_path, sample_foa):
+    db = Database(tmp_path / "test.db")
+
+    open_nsf = copy.deepcopy(sample_foa)
+    db.upsert_foa(open_nsf)
+
+    closed_nih = copy.deepcopy(sample_foa)
+    closed_nih["foa_id"] = "test-uuid-002"
+    closed_nih["source_id"] = "654321"
+    closed_nih["status"] = "closed"
+    closed_nih["agency_code"] = "NIH"
+    db.upsert_foa(closed_nih)
+
+    facets = db.get_facet_counts()
+
+    assert {"value": "open", "count": 1} in facets["status"]
+    assert {"value": "closed", "count": 1} in facets["status"]
+    assert {"value": "NSF", "count": 1} in facets["agency_code"]
+    assert {"value": "NIH", "count": 1} in facets["agency_code"]
+
+    db.close()
+
+
+def test_facet_counts_exclude_their_own_dimension(tmp_path, sample_foa):
+    """
+    Facet counts reflect every OTHER active filter, not the one they're
+    counting toward. Filtering to a single agency must not make every other
+    agency option read zero -- that would defeat the point of a sidebar
+    that's supposed to let a user switch agencies, not just confirm one.
+    """
+    db = Database(tmp_path / "test.db")
+
+    nsf = copy.deepcopy(sample_foa)
+    db.upsert_foa(nsf)
+
+    nih = copy.deepcopy(sample_foa)
+    nih["foa_id"] = "test-uuid-002"
+    nih["source_id"] = "654321"
+    nih["agency_code"] = "NIH"
+    db.upsert_foa(nih)
+
+    # Filtered to NSF: the agency facet must still show NIH's real count.
+    facets = db.get_facet_counts(agency_code="NSF")
+    assert {"value": "NIH", "count": 1} in facets["agency_code"]
+    assert {"value": "NSF", "count": 1} in facets["agency_code"]
+
+    # But status, a DIFFERENT dimension, DOES respect the agency filter --
+    # only NSF's one "open" record should be counted, not NIH's.
+    assert facets["status"] == [{"value": "open", "count": 1}]
+
+    db.close()
+
+
+def test_facet_counts_omit_nulls(tmp_path, sample_foa):
+    """A record with no agency_code should not produce a {"value": null} bucket."""
+    db = Database(tmp_path / "test.db")
+
+    no_agency = copy.deepcopy(sample_foa)
+    no_agency["agency_code"] = None
+    db.upsert_foa(no_agency)
+
+    facets = db.get_facet_counts()
+    assert facets["agency_code"] == []
+
+    db.close()
 
     db.close()
 

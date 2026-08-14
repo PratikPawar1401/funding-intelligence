@@ -135,6 +135,28 @@ class TestOpportunities:
         assert client.get("/api/opportunities", params={"page": 0}).status_code == 422
         assert client.get("/api/opportunities", params={"size": 0}).status_code == 422
 
+    def test_facets_endpoint_is_not_shadowed_by_id_route(self, client):
+        """/facets must resolve to the facets handler, not /{foa_id} -> 404."""
+        resp = client.get("/api/opportunities/facets")
+        assert resp.status_code == 200
+        body = resp.json()
+        assert "status" in body
+        assert "agency" in body
+
+    def test_facets_report_both_seeded_statuses(self, client):
+        body = client.get("/api/opportunities/facets").json()
+        values = {row["value"]: row["count"] for row in body["status"]}
+        assert values == {"open": 1, "closed": 1}
+
+    def test_facets_narrow_with_the_same_filters_as_the_list_endpoint(self, client):
+        """?status=open here must mean exactly what it means on the list endpoint."""
+        body = client.get("/api/opportunities/facets", params={"status": "open"}).json()
+        # agency is a DIFFERENT dimension from the one just filtered on, so it
+        # should reflect only the one open record -- both seeded FOAs share
+        # agency_code "NSF", so this also proves the filter narrowed at all.
+        values = {row["value"]: row["count"] for row in body["agency"]}
+        assert values == {"NSF": 1}
+
 
 class TestKeywordSearch:
     def test_finds_matching_record(self, client):

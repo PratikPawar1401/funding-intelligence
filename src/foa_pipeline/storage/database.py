@@ -357,6 +357,72 @@ class Database:
 
         return record
 
+    # Dimensions get_facet_counts() reports on. Kept in step with the filters
+    # list_foas() actually accepts -- add a column here only once list_foas
+    # (and _build_where_clause below) also filters on it, so the sidebar
+    # never offers a facet that filtering it wouldn't act on.
+    FACET_DIMENSIONS = ("status", "agency_code")
+
+    def _build_where_clause(
+        self,
+        *,
+        status: Optional[str] = None,
+        agency_code: Optional[str] = None,
+        exclude: Optional[str] = None,
+    ) -> Tuple[str, List[Any]]:
+        """
+        Shared WHERE-clause builder for list_foas() and get_facet_counts(),
+        so the two can't drift apart on what "status"/"agency_code" mean.
+
+        `exclude` omits one dimension's own clause. Facet counts must reflect
+        every OTHER active filter, not the one they're counting toward --
+        counting agency options while already filtered to a single agency
+        would make every other agency read zero, which is not what a
+        faceted sidebar is for.
+        """
+        where_clauses = []
+        params: List[Any] = []
+
+        if status and exclude != "status":
+            where_clauses.append("status = ?")
+            params.append(status)
+        if agency_code and exclude != "agency_code":
+            where_clauses.append("agency_code = ?")
+            params.append(agency_code)
+
+        where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
+        return where_sql, params
+
+    def get_facet_counts(
+        self,
+        *,
+        status: Optional[str] = None,
+        agency_code: Optional[str] = None,
+    ) -> Dict[str, List[Dict[str, Any]]]:
+        """
+        Per-dimension counts for the sidebar facets (GET /api/opportunities/facets).
+
+        Each dimension is computed against every OTHER currently-active
+        filter, via `exclude` on the shared WHERE builder -- real facet
+        semantics, matching how a faceted search UI (grants.gov included) is
+        expected to behave: narrowing by status should not make every agency
+        option but the selected one read zero.
+        """
+        facets: Dict[str, List[Dict[str, Any]]] = {}
+        for dim in self.FACET_DIMENSIONS:
+            where_sql, params = self._build_where_clause(
+                status=status, agency_code=agency_code, exclude=dim
+            )
+            rows = self.conn.execute(
+                f"""SELECT {dim} AS value, COUNT(*) AS count FROM foa_records
+                    WHERE {where_sql} AND {dim} IS NOT NULL
+                    GROUP BY {dim}
+                    ORDER BY count DESC""",
+                params,
+            ).fetchall()
+            facets[dim] = [{"value": r["value"], "count": r["count"]} for r in rows]
+        return facets
+
     def list_foas(
         self,
         *,
@@ -371,17 +437,9 @@ class Database:
         List FOA records with filtering, pagination, and sorting.
         Returns (records, total_count).
         """
-        where_clauses = []
-        params: List[Any] = []
-
-        if status:
-            where_clauses.append("status = ?")
-            params.append(status)
-        if agency_code:
-            where_clauses.append("agency_code = ?")
-            params.append(agency_code)
-
-        where_sql = " AND ".join(where_clauses) if where_clauses else "1=1"
+        where_sql, params = self._build_where_clause(
+            status=status, agency_code=agency_code
+        )
 
         # Validate sort column
         allowed_sorts = {
@@ -429,8 +487,14 @@ class Database:
         size: int = 20,
     ) -> Tuple[List[Dict[str, Any]], int]:
         """Full-text search using FTS5."""
-        # Build the search query
-        params: List[Any] = [query]
+        # Quoted as a single FTS5 phrase literal so operator syntax in raw
+        # user input -- a leading "-", an unmatched '"' -- can't reach the
+        # query parser and raise sqlite3.OperationalError. FTS5 escapes an
+        # internal '"' by doubling it. The web rewrite makes this the app's
+        # primary top-of-page interaction, so it needs to survive arbitrary
+        # typing rather than 500 on it.
+        fts_query = '"' + query.replace('"', '""') + '"'
+        params: List[Any] = [fts_query]
         extra_where = ""
         if status:
             extra_where += " AND r.status = ?"
@@ -466,6 +530,7 @@ class Database:
             record = dict(row)
             record.pop("rank", None)
             record["raw_payload"] = json.loads(record.get("raw_payload") or "{}")
+            record["funding_tiers"] = json.loads(record.get("funding_tiers") or "[]")
             record["tags"] = self.get_tags_for_foa(record["foa_id"])
             records.append(record)
 

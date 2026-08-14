@@ -59,6 +59,26 @@ def recent_opportunities(
     }
 
 
+@router.get("/facets")
+def opportunity_facets(
+    status: Optional[str] = Query(default=None),
+    agency: Optional[str] = Query(default=None),
+    db: Database = Depends(get_db),
+):
+    """
+    Per-dimension counts for the sidebar facets, e.g. status: open[118].
+
+    Declared before /{foa_id} for the same reason /recent is above: a
+    dynamic path segment would otherwise shadow this literal one and every
+    request here would 404 as "FOA not found" instead of matching.
+    """
+    facets = db.get_facet_counts(status=status, agency_code=agency)
+    return {
+        "status": facets["status"],
+        "agency": facets["agency_code"],
+    }
+
+
 @router.get("/{foa_id}")
 def get_opportunity(foa_id: str, db: Database = Depends(get_db)):
     """Get a single FOA record by ID."""

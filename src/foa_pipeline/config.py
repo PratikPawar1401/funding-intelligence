@@ -61,8 +61,14 @@ class Config:
     # These carry defaults and sit last on purpose: most of the codebase builds
     # a Config without caring about API settings, and adding a required field
     # here breaks every one of those call sites at once.
+    # :3000 is the Next.js dev/prod frontend (web/) -- a separate origin from
+    # this API's :8000, since the frontend now runs as its own server rather
+    # than being served by this process's StaticFiles mount.
     api_cors_origins: List[str] = field(
-        default_factory=lambda: ["http://localhost:8000", "http://127.0.0.1:8000"]
+        default_factory=lambda: [
+            "http://localhost:8000", "http://127.0.0.1:8000",
+            "http://localhost:3000", "http://127.0.0.1:3000",
+        ]
     )
     api_rate_limit_per_minute: int = 120
     api_export_max_rows: int = 10000
@@ -118,13 +124,16 @@ def get_config() -> Config:
         api_host=_env("API_HOST", "0.0.0.0"),
         api_port=int(_env("API_PORT", "8000")),
         api_reload=_env("API_RELOAD", "true").lower() == "true",
-        # Comma-separated origins. The bundled frontend is served from the same
-        # origin as the API, so it needs no entry here; this is for separately
-        # hosted frontends. "*" is accepted but disables credentialed requests.
+        # Comma-separated origins. The Next.js frontend (web/) runs as its own
+        # server on :3000, a different origin from this API's :8000, so it
+        # needs an entry here even in local dev. "*" is accepted but disables
+        # credentialed requests.
         api_cors_origins=[
             o.strip()
             for o in _env(
-                "API_CORS_ORIGINS", "http://localhost:8000,http://127.0.0.1:8000"
+                "API_CORS_ORIGINS",
+                "http://localhost:8000,http://127.0.0.1:8000,"
+                "http://localhost:3000,http://127.0.0.1:3000",
             ).split(",")
             if o.strip()
         ],
