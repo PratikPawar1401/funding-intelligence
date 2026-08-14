@@ -44,7 +44,7 @@ Data Sources          Ingestion             Processing              Storage     
 | **Vector Search** | FAISS IndexFlatIP for semantic similarity search across FOA embeddings | ✅ Complete (was a stretch goal) |
 | **Grant Matching** | Researcher profile → ranked FOAs via hybrid cosine + tag-overlap score, with LLM-generated match explanations for the top results | ✅ Complete |
 | **FastAPI Backend** | REST API with CRUD, search, match, tag, and export endpoints | ✅ Complete |
-| **Web Frontend** | Search interface with faceted filtering — the "Simpler Grants.gov" | ✅ Complete |
+| **Web Frontend** | Next.js rewrite of the search interface — dense results table + faceted sidebar filters matching simpler.grants.gov's layout, ISSR-themed | 🚧 In progress (Opportunities list + facets shipped; AI Match and Tags views pending) |
 | **CSV/JSON Export** | Structured export with tag evidence provenance | ✅ Complete |
 | **Docker Deployment** | Full-stack containerisation with docker-compose | ✅ Complete |
 
@@ -174,8 +174,25 @@ see [EVALUATION.md](EVALUATION.md) §4e.
 ```bash
 make serve
 # API available at http://localhost:8000
-# Docs at http://localhost:8000/docs
+# Docs at http://localhost:8000/api/docs
 ```
+
+### Run the Web Frontend
+
+The frontend (`web/`) is a Next.js app and runs as its own server, separate
+from the API. It needs the API running (`make serve`, above) to have data to
+show.
+
+```bash
+make web-install   # first time only
+make web-dev
+# Frontend available at http://localhost:3000
+```
+
+`web/.env.example` documents the two API base-URL variables it reads
+(`API_BASE_URL` for server-side fetches, `NEXT_PUBLIC_API_BASE_URL` for the
+browser) — copy it to `.env.local` if the API isn't at the default
+`http://localhost:8000`.
 
 ### Run Tests
 
@@ -254,7 +271,12 @@ funding-intelligence/
 │       ├── middleware.py         #   Rate limiting
 │       └── routes/               #   REST endpoints
 │
-├── frontend/                     # Web UI ("Simpler Grants.gov")
+├── web/                           # Web UI (Next.js, "Simpler Grants.gov" layout,
+│                                  #   ISSR-themed) -- runs as its own server, see
+│                                  #   "Run the Web Frontend" above
+├── frontend/                     # Legacy vanilla-JS UI, superseded by web/
+│                                  #   (removed once the Next.js rewrite lands
+│                                  #   every view it had)
 │
 ├── data/
 │   ├── ontology/                 # Taxonomy source CSVs
@@ -265,7 +287,7 @@ funding-intelligence/
 │   ├── evaluation/               # Gold/silver eval sets + error analysis
 │   └── prompts/                  # LLM prompt templates
 │
-├── tests/                        # 195 tests
+├── tests/                        # 486 tests
 ├── Documentation/                # Blueprint, proposal, reports
 ├── scraper_config/               # Per-domain scraping rules (YAML)
 ├── phase-test-scripts/           # End-to-end smoke scripts

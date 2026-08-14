@@ -1,6 +1,7 @@
 .PHONY: install dev test lint run ingest tag serve docker-up \
         harvest-nsf-awards benchmark-disciplines diagnose-separation \
-        harvest-openalex annotate-eval-set enrich-foas export-json
+        harvest-openalex annotate-eval-set enrich-foas export-json \
+        web-install web-dev web-build
 
 install:
 	pip install -r requirements.txt
@@ -87,6 +88,20 @@ pipeline: ingest-grants ingest-nsf-rss normalise enrich-foas tag export-csv expo
 
 serve:
 	PYTHONPATH=src uvicorn foa_pipeline.api.app:app --reload --port 8000
+
+# ── Web Frontend (Next.js, web/) ──
+# Runs as its own server on :3000, separate from the API on :8000 -- see
+# MATCHING.md / the frontend rewrite plan for why. `make serve` must also be
+# running (or the containerized api service) for pages to have data to show.
+
+web-install:
+	cd web && npm install
+
+web-dev:
+	cd web && npm run dev
+
+web-build:
+	cd web && npm run build
 
 # ── Docker ──
 
