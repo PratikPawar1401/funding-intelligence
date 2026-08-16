@@ -44,7 +44,7 @@ Data Sources          Ingestion             Processing              Storage     
 | **Vector Search** | FAISS IndexFlatIP for semantic similarity search across FOA embeddings | ✅ Complete (was a stretch goal) |
 | **Grant Matching** | Researcher profile → ranked FOAs via hybrid cosine + tag-overlap score, with LLM-generated match explanations for the top results | ✅ Complete |
 | **FastAPI Backend** | REST API with CRUD, search, match, tag, and export endpoints | ✅ Complete |
-| **Web Frontend** | Next.js rewrite of the search interface — dense results table + faceted sidebar filters matching simpler.grants.gov's layout, ISSR-themed | 🚧 In progress (Opportunities list + facets shipped; AI Match and Tags views pending) |
+| **Web Frontend** | Next.js — dense results table + faceted sidebar filters matching simpler.grants.gov's layout, ISSR-themed; FOA detail view, AI Match, and Ontology Tags dashboard | ✅ Complete |
 | **CSV/JSON Export** | Structured export with tag evidence provenance | ✅ Complete |
 | **Docker Deployment** | Full-stack containerisation with docker-compose | ✅ Complete |
 
@@ -274,9 +274,6 @@ funding-intelligence/
 ├── web/                           # Web UI (Next.js, "Simpler Grants.gov" layout,
 │                                  #   ISSR-themed) -- runs as its own server, see
 │                                  #   "Run the Web Frontend" above
-├── frontend/                     # Legacy vanilla-JS UI, superseded by web/
-│                                  #   (removed once the Next.js rewrite lands
-│                                  #   every view it had)
 │
 ├── data/
 │   ├── ontology/                 # Taxonomy source CSVs

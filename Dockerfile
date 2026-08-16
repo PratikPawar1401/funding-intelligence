@@ -27,7 +27,6 @@ COPY pyproject.toml .
 COPY src/ ./src/
 COPY data/ ./data/
 COPY scraper_config/ ./scraper_config/
-COPY frontend/ ./frontend/
 
 # Set Python path so 'foa_pipeline' can be imported
 ENV PYTHONPATH=/app/src

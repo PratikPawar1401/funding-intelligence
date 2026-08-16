@@ -1,14 +1,13 @@
 """
 FastAPI application factory.
 
-Serves the FOA data through a REST API consumed by the web frontend.
+Serves the FOA data through a REST API consumed by the web frontend
+(web/ -- a standalone Next.js server, not served by this process; see
+MATCHING.md and the frontend-rewrite plan for why).
 """
-
-from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
 
 from .deps import get_app_config
 from .middleware import RateLimitMiddleware
@@ -54,15 +53,6 @@ def create_app() -> FastAPI:
     app.include_router(match.router, prefix="/api/match", tags=["match"])
     app.include_router(tags.router, prefix="/api/tags", tags=["tags"])
     app.include_router(export.router, prefix="/api/export", tags=["export"])
-
-    # Serve frontend static files
-    frontend_dir = Path(__file__).parent.parent.parent.parent / "frontend"
-    if frontend_dir.exists() and (frontend_dir / "index.html").exists():
-        app.mount(
-            "/",
-            StaticFiles(directory=str(frontend_dir), html=True),
-            name="frontend",
-        )
 
     return app
 
