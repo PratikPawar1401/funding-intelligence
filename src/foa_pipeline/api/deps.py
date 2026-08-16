@@ -40,9 +40,16 @@ def get_vector_index() -> VectorIndex:
 
 
 def get_db() -> Database:
-    """Get a database connection. Should be used as a FastAPI dependency."""
+    """
+    Get a database connection. Should be used as a FastAPI dependency.
+
+    check_same_thread=False: see Database.__init__'s docstring. A fresh
+    connection is opened per request either way -- this isn't sharing one
+    across requests, it's tolerating Starlette's own thread-hop between this
+    generator's yield and its finally within a single request.
+    """
     config = get_app_config()
-    db = Database(config.app_db_path)
+    db = Database(config.app_db_path, check_same_thread=False)
     try:
         yield db
     finally:

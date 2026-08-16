@@ -134,10 +134,27 @@ CREATE TABLE IF NOT EXISTS faiss_metadata (
 class Database:
     """SQLite database wrapper for the funding intelligence application."""
 
-    def __init__(self, db_path: Path):
+    def __init__(self, db_path: Path, check_same_thread: bool = True):
+        """
+        `check_same_thread=False` is for the API's get_db() dependency
+        (api/deps.py). Each request there gets its own freshly opened
+        Database -- never shared or cached across requests -- so there is no
+        real concurrent-access hazard to guard against. The default's
+        same-thread check still trips, though: Starlette's BaseHTTPMiddleware
+        (this API's RateLimitMiddleware included) can run a sync generator
+        dependency's `yield` and its `finally` cleanup on different
+        threadpool workers within one request's lifecycle, and sqlite3
+        raises unconditionally on that even though it isn't the cross-request
+        race the check exists to catch. Confirmed by reproducing it: a
+        request succeeded (200, real data) and still 500'd because db.close()
+        in the `finally` landed on a different OS thread than the one that
+        opened the connection. Every other caller (CLI commands, evaluation
+        scripts) keeps the default, since those are genuinely single-threaded
+        and the check is a real safety net there.
+        """
         self.db_path = db_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self.conn = sqlite3.connect(str(db_path))
+        self.conn = sqlite3.connect(str(db_path), check_same_thread=check_same_thread)
         self.conn.row_factory = sqlite3.Row
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA foreign_keys=ON")

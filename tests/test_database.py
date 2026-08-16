@@ -1,6 +1,8 @@
 """Tests for the database module."""
 
 import copy
+import sqlite3
+import threading
 
 from foa_pipeline.storage.database import Database
 
@@ -234,3 +236,71 @@ def test_stats(tmp_path, sample_foa):
     assert stats["total_tags"] == 0
 
     db.close()
+
+
+class TestCrossThreadUsage:
+    """
+    Reproduces the exact failure the API's get_db() dependency hit once the
+    Next.js frontend started issuing concurrent Server Component fetches
+    (Promise.all): a request succeeded (200, real data returned) and still
+    500'd, because Starlette's BaseHTTPMiddleware ran the sync get_db()
+    generator's `yield` and its `finally: db.close()` on different threadpool
+    workers within that one request's lifecycle. Default sqlite3 behaviour
+    raises on that even though no two requests ever touched the connection
+    concurrently -- it isn't the cross-request race the check exists to
+    catch, just Starlette's own thread-hop inside a single request.
+    """
+
+    def test_default_rejects_use_from_another_thread(self, tmp_path, sample_foa):
+        """Confirms the failure mode is real, not a misdiagnosis."""
+        db = Database(tmp_path / "test.db")
+        db.upsert_foa(sample_foa)
+
+        errors = []
+
+        def close_from_other_thread():
+            try:
+                db.close()
+            except sqlite3.ProgrammingError as exc:
+                errors.append(exc)
+
+        t = threading.Thread(target=close_from_other_thread)
+        t.start()
+        t.join()
+
+        assert len(errors) == 1
+        assert "different thread" in str(errors[0]) or "same thread" in str(errors[0])
+
+    def test_check_same_thread_false_permits_close_from_another_thread(self, tmp_path, sample_foa):
+        """The actual fix: get_db() opens with check_same_thread=False."""
+        db = Database(tmp_path / "test.db", check_same_thread=False)
+        db.upsert_foa(sample_foa)
+
+        errors = []
+
+        def use_and_close_from_other_thread():
+            try:
+                record = db.get_foa(sample_foa["foa_id"])
+                assert record is not None
+                db.close()
+            except sqlite3.ProgrammingError as exc:
+                errors.append(exc)
+
+        t = threading.Thread(target=use_and_close_from_other_thread)
+        t.start()
+        t.join()
+
+        assert errors == []
+
+    def test_default_construction_is_unaffected(self, tmp_path):
+        """
+        CLI commands and evaluation scripts construct Database() with no
+        arguments and are genuinely single-threaded -- confirms the new
+        parameter is opt-in (defaults to the prior, safer behaviour) and
+        ordinary same-thread usage isn't disturbed by adding it.
+        """
+        db = Database(tmp_path / "test.db")
+        try:
+            assert db.conn.execute("PRAGMA schema_version").fetchone() is not None
+        finally:
+            db.close()
