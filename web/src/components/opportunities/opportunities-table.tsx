@@ -8,7 +8,8 @@ import {
   type LegacyColumnDef,
 } from "@tanstack/react-table/legacy";
 import type { SortingState } from "@tanstack/table-core";
-import { ArrowDown, ArrowUp, ArrowUpDown, ExternalLink } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
@@ -21,6 +22,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { awardRange, formatDate } from "@/lib/format";
 import { buildSearchParams } from "@/lib/search-params";
 import type { FoaListItem } from "@/lib/types";
 
@@ -50,28 +52,6 @@ const SORTABLE_COLUMNS = new Set([
 
 const columnHelper = legacyCreateColumnHelper<FoaListItem>();
 
-function formatDate(value: string | null): string {
-  if (!value) return "Continuous";
-  const d = new Date(value);
-  if (Number.isNaN(d.getTime())) return value;
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
-function formatMoney(value: number | null): string {
-  if (value === null || value === undefined) return "—";
-  if (value >= 1_000_000) return `$${(value / 1_000_000).toFixed(1)}M`;
-  if (value >= 1_000) return `$${(value / 1_000).toFixed(0)}K`;
-  return `$${value}`;
-}
-
-function awardRange(floor: number | null, ceiling: number | null): string {
-  if (floor === null && ceiling === null) return "Not specified";
-  if (floor === null) return `Up to ${formatMoney(ceiling)}`;
-  if (ceiling === null) return `From ${formatMoney(floor)}`;
-  if (floor === ceiling) return formatMoney(floor);
-  return `${formatMoney(floor)} – ${formatMoney(ceiling)}`;
-}
-
 // Each column below has its own concrete TValue (string, string | null,
 // number | null, a union of accessor return types...). ColumnDef's render
 // functions take TValue as a parameter, a contravariant position, so a
@@ -94,21 +74,18 @@ const columns: LegacyColumnDef<FoaListItem, any>[] = [
     header: "Title",
     cell: (info) => {
       const foa = info.row.original;
-      // Phase 3 gives every FOA a real /opportunities/[foa_id] detail page;
-      // until then, the title links straight to the source listing so the
-      // table is useful today rather than shipping a dead link.
-      return foa.source_url ? (
-        <a
-          href={foa.source_url}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-start gap-1.5 font-medium text-foreground hover:text-primary hover:underline"
+      // Links into the app's own detail route (intercepted as a modal when
+      // navigated from this list, a real page on direct load -- see
+      // opportunities/@modal). The external source listing is still one
+      // click away, from inside the detail view, rather than being this
+      // row's primary link target.
+      return (
+        <Link
+          href={`/opportunities/${foa.foa_id}`}
+          className="font-medium text-foreground hover:text-primary hover:underline"
         >
           {info.getValue()}
-          <ExternalLink className="mt-1 size-3 shrink-0 text-muted-foreground" />
-        </a>
-      ) : (
-        <span className="font-medium text-foreground">{info.getValue()}</span>
+        </Link>
       );
     },
   }),
