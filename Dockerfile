@@ -18,12 +18,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN python -m spacy download en_core_web_lg
 RUN python -m nltk.downloader wordnet omw-1.4
 
-# Copy source code and config
+# Copy source code and config. LLM prompt templates live under data/prompts/
+# (see disambiguation.txt, match_explanation.txt) and are already covered by
+# the data/ copy below -- a separate top-level ./prompts/ has never existed
+# in this repo's current layout; a stray `COPY prompts/ ./prompts/` here
+# failed every real build with "not found" until removed.
 COPY pyproject.toml .
 COPY src/ ./src/
 COPY data/ ./data/
 COPY scraper_config/ ./scraper_config/
-COPY prompts/ ./prompts/
 COPY frontend/ ./frontend/
 
 # Set Python path so 'foa_pipeline' can be imported

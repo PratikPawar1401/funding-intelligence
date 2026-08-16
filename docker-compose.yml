@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # The main application containing the API and CLI tools
   issr-app:
