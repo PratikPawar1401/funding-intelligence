@@ -5,7 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
 
-import { cn } from "@/lib/utils";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 
 const NAV_ITEMS: { href: string; label: string; icon: ComponentType<{ className?: string }> }[] = [
   { href: "/opportunities", label: "Opportunities", icon: Table2 },
@@ -15,36 +23,64 @@ const NAV_ITEMS: { href: string; label: string; icon: ComponentType<{ className?
 
 export function SidebarNav() {
   const pathname = usePathname();
+  const { setOpenMobile, isMobile } = useSidebar();
+
+  // Off-canvas by default (see SidebarProvider defaultOpen={false} in
+  // layout.tsx) and toggled by the hamburger (SidebarTrigger) in Topbar --
+  // the user wants it hidden until opened, not a persistent column. On
+  // mobile the sidebar is a Sheet overlay; closing it after a nav click
+  // matches how every mobile drawer nav behaves (desktop can stay open
+  // across navigations since it doesn't cover content).
+  const handleNavigate = () => {
+    if (isMobile) setOpenMobile(false);
+  };
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-sidebar-border bg-sidebar md:flex">
-      <Link href="/opportunities" className="flex items-center gap-2 px-5 py-6">
-        <Brain className="size-6 text-primary" />
-        <span className="font-heading text-lg font-semibold text-sidebar-foreground">
-          ISSR<span className="text-primary">Intel</span>
-        </span>
-      </Link>
+    <Sidebar collapsible="offcanvas">
+      <SidebarHeader>
+        <Link
+          href="/opportunities"
+          onClick={handleNavigate}
+          className="flex items-center gap-2 px-2 py-2"
+        >
+          <Brain className="size-6 text-primary" />
+          <span className="font-heading text-lg font-semibold text-sidebar-foreground">
+            ISSR<span className="text-primary">Intel</span>
+          </span>
+        </Link>
+      </SidebarHeader>
 
-      <nav className="flex flex-col gap-1 px-3">
-        {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
-          const active = pathname?.startsWith(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-              )}
-            >
-              <Icon className="size-4" />
-              {label}
-            </Link>
-          );
-        })}
-      </nav>
-    </aside>
+      <SidebarContent>
+        <SidebarMenu className="px-2">
+          {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
+            const active = pathname?.startsWith(href);
+            return (
+              <SidebarMenuItem key={href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={active}
+                  onClick={handleNavigate}
+                  // The base component styles the active state via
+                  // data-active:bg-sidebar-accent (a muted highlight). An
+                  // unconditional bg-sidebar-primary override lost that fight
+                  // silently: cn()/tailwind-merge treats a bare bg-* utility
+                  // and a data-active:bg-* variant as non-conflicting, so
+                  // both applied and CSS source order picked the base one.
+                  // Targeting the SAME data-active: variant, always present
+                  // (gated by the data-active attribute itself, exactly like
+                  // the base classes are), gives predictable override order.
+                  className="data-active:bg-sidebar-primary data-active:text-sidebar-primary-foreground data-active:hover:bg-sidebar-primary data-active:hover:text-sidebar-primary-foreground"
+                >
+                  <Link href={href}>
+                    <Icon />
+                    <span>{label}</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarContent>
+    </Sidebar>
   );
 }

@@ -4,6 +4,7 @@ import "./globals.css";
 
 import { SidebarNav } from "@/components/layout/sidebar-nav";
 import { ThemeProvider } from "@/components/layout/theme-provider";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 
 // Free equivalent to issr.ua.edu's Proxima Nova (Adobe Typekit, paid, not
 // bundleable into this public repo). Montserrat's condensed-adjacent
@@ -34,10 +35,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${montserrat.variable} ${inter.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex font-sans">
+      <body className="min-h-full font-sans">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          <SidebarNav />
-          <div className="flex min-h-full flex-1 flex-col">{children}</div>
+          {/* defaultOpen=false: hidden until the hamburger (SidebarTrigger,
+              in Topbar) opens it -- not a persistent column. */}
+          <SidebarProvider defaultOpen={false}>
+            <SidebarNav />
+            <SidebarInset>{children}</SidebarInset>
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>
