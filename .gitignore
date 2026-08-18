@@ -61,3 +61,7 @@ models/
 # derived from it (discipline_benchmark.json) are committed instead.
 # Regenerate with: make harvest-nsf-awards
 data/evaluation/nsf_awards.jsonl
+
+# SetFit/HF Trainer checkpoint dumps from experiment scripts (scripts/test_setfit_reranker.py) --
+# regenerable, hundreds of MB of model weights, never meant to be committed.
+checkpoints/

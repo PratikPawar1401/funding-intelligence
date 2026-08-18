@@ -1056,6 +1056,110 @@ to touch.
 
 ---
 
+## 4k. Three Literature-Backed Reranking Approaches — All Tested, None Shipped
+
+§4i's oracle analysis concluded that closing the remaining F1 gap needs a
+scoring function that separates correct from incorrect candidates better
+than untrained cosine similarity — necessarily a trained or pretrained
+component, not another hand-written rule. Three concrete, literature-backed
+candidates were tested directly against the gold set. None survived contact
+with it. Recorded in full because the diagnoses are as valuable as a
+positive result would have been, and because each rules out a specific,
+plausible-sounding direction with a specific, identified reason rather than
+a vague "didn't work".
+
+Scoped to `method` and `population` throughout — the two categories where
+§4c's separation diagnostic found Layer 2's cosine score actively
+anti-correlated with correctness (AUC 0.476 / 0.400), i.e. exactly where a
+better scoring function should have the most room to help.
+
+### Attempt 1 — Zero-shot NLI cross-encoder (no training)
+
+`cross-encoder/nli-deberta-v3-base`, scoring entailment between each
+candidate's `context_snippet` (the exact chunk Layer 2 already matched) and
+a template hypothesis ("This grant program requires or uses {label} as a
+research method."). Two evaluations against the gold set, same methodology
+as §4i's oracle: best-possible threshold, and the realistic drop-in
+(top-3-per-category, matching production's own selection rule).
+
+| | Current production | NLI oracle (best threshold) | NLI drop-in (top-3) |
+|---|---|---|---|
+| method F1 | 0.480 | 0.296 | 0.085 |
+| population F1 | 0.522 | 0.455 | 0.176 |
+
+Worse than the baseline it was meant to fix, at every operating point.
+**Diagnosis**: `nli-deberta-v3-base` is trained on short, clean SNLI/MultiNLI
+sentence pairs with explicit lexical entailment cues. Grant text describes
+what a researcher would *do*, not what method it *is* — "analyze
+longitudinal survey data" never says "Survey Research" — so there's rarely
+an explicit cue for an NLI model to key on, and these models default to
+"neutral" exactly when a connection requires inference rather than surface
+matching. The same domain-mismatch problem §4c/§4d already found for the
+bi-encoder turns out to apply just as hard to an off-the-shelf cross-encoder;
+zero-shot doesn't get to skip domain adaptation.
+
+### Attempt 2 — SetFit fine-tuned on the gold set's own TP/FP as hard negatives
+
+Reused `true_positives_gold.json`/`false_positives_gold.json` directly as
+training pairs (no new annotation) — input `"CONCEPT: {label}\nTEXT:
+{context_snippet}"`, label 1/0. Evaluated via FOA-level 5-fold
+cross-validation (never train and test on the same FOA's candidates, for the
+same reason gold/silver are kept separate).
+
+First pass: **F1 = 0.000 on both categories.** Positives are ~2% of
+candidates (11/480 method, 8/400 population); SetFit's default
+classification head has no imbalance correction and collapsed to
+"always negative" — 0-2 positive predictions total across every fold.
+Oversampled positives to ~20% of the head-training set (a standard
+correction for this severity of imbalance) and reran: **still F1 = 0.000.**
+
+A `predict_proba` diagnostic on held-out folds settled why before spending
+more time tuning: gold-positive mean P(relevant) = 0.0100, non-gold mean =
+0.0101 — statistically identical, not a threshold-calibration problem, no
+separating signal learned at all. **Root cause**: collapsing 25 semantically
+unrelated method concepts into one binary "relevant" label breaks SetFit's
+core assumption that same-class examples are similar to each other. Its
+contrastive sampler was pairing "Machine Learning is relevant" with "Field
+Experiment is relevant" as a positive pair to pull together in embedding
+space, even though those texts share nothing but the label. The binary
+reformulation is the wrong shape for this task regardless of data volume —
+a genuine pairwise cross-encoder (`sentence_transformers.CrossEncoder.fit`,
+real pairwise loss, not SetFit's same-class-similarity objective) is the
+architecturally correct next attempt, not attempted here given two
+approaches had already failed and the remaining time budget.
+
+### Attempt 3 — Recall ceiling: are the 28 missing gold tags reachable at any threshold?
+
+Not a reranking attempt — a prerequisite question for whether
+threshold-loosening is worth pursuing at all. For each of the 28 gold tags
+Layer 2 currently misses entirely, checked whether it scores above zero
+*anywhere* in Layer 2's unthresholded output for that FOA.
+
+**All 28/28 score nonzero.** None are absent from the embedding space
+entirely — the recall gap is a scoring-quality problem, not a coverage
+problem, which confirms §4i's oracle ceiling (F1 0.791) is reachable in
+principle. But the gaps between each miss's actual score and its production
+threshold (0.003 to 0.171) sit in exactly the range §4i's re-cutting sweep
+already measured: recovering them by lowering the threshold pulls in
+comparable false positives from the same weak scoring function, topping out
+at the already-known F1 0.535 ceiling. This is independent confirmation of
+an existing finding, not a new lever.
+
+### What this establishes
+
+Every concrete, literature-supported idea tried against this specific
+20-FOA gold set failed for a specific, identified reason — general-purpose
+pretrained models don't transfer to this domain's implicit phrasing without
+adaptation, and naive few-shot fine-tuning needs a task formulation that
+respects what the training signal actually is. Both are real, generalisable
+lessons, not dead ends particular to this codebase. The oracle analysis's
+conclusion stands: closing the remaining gap needs a properly-formulated
+trained discriminator (a real pairwise cross-encoder, not a relabelled
+single-text classifier) — none of the three approaches here disprove that,
+they narrow down what "properly-formulated" has to mean.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:
