@@ -1,4 +1,4 @@
-import { FacetSidebar } from "@/components/opportunities/facet-sidebar";
+import { FacetFilterMenu } from "@/components/opportunities/facet-filter-menu";
 import { OpportunitiesTable } from "@/components/opportunities/opportunities-table";
 import { PaginationBar } from "@/components/opportunities/pagination-bar";
 import { SearchInput } from "@/components/opportunities/search-input";
@@ -31,21 +31,19 @@ export default async function OpportunitiesPage({
     <>
       <Topbar>
         <SearchInput />
-      </Topbar>
-      <main className="flex flex-1 gap-6 overflow-y-auto p-6">
-        <FacetSidebar
+        <FacetFilterMenu
           statusOptions={facets.status}
           agencyOptions={facets.agency}
           activeStatus={status}
           activeAgency={agency}
         />
-        <div className="min-w-0 flex-1">
-          <p className="mb-4 text-sm text-muted-foreground">
-            {total.toLocaleString()} {status ?? ""} opportunit{total === 1 ? "y" : "ies"}
-          </p>
-          <OpportunitiesTable items={items} />
-          <PaginationBar page={page} pages={pages} currentParams={params} />
-        </div>
+      </Topbar>
+      <main className="flex-1 overflow-y-auto p-6">
+        <p className="mb-4 text-sm text-muted-foreground">
+          {total.toLocaleString()} {status ?? ""} opportunit{total === 1 ? "y" : "ies"}
+        </p>
+        <OpportunitiesTable items={items} />
+        <PaginationBar page={page} pages={pages} currentParams={params} />
       </main>
     </>
   );
