@@ -325,11 +325,12 @@ Every FOA record is normalised into a canonical JSON schema (`data/foa_schema.js
 
 ## Semantic Tagging Architecture
 
-The tagging engine uses a three-layer cascade:
+The tagging engine uses a three-layer cascade, plus a CFDA crosswalk and an opt-in LLM backstop for recall:
 
 1. **Layer 1 — Terminological (spaCy PhraseMatcher)**: Exact and synonym matching against ontology concepts. High precision, used as ground truth.
 2. **Layer 2 — Semantic (all-mpnet-base-v2)**: Sentence-transformer embeddings with cosine similarity scoring. Fills gaps missed by exact matching.
 3. **Layer 3 — LLM Disambiguation (Mistral-7B)**: Resolves ambiguous cross-domain tags via Ollama using JSON-mode structured output. Triggers only when Layer 2's top two candidates in a category are within 0.05 cosine similarity. Degrades gracefully to Layer 2 scores if Ollama is unavailable.
+4. **Layer 5 — LLM Classification Backstop (opt-in, `tag-all --llm-backstop`)**: Runs only on FOAs that L1+L2+L3+CFDA leave with zero tags in a category — real, on-topic content that fell just under threshold or outside the 84-concept ontology's coverage. One prompt per category against the whole ontology, off by default because it's slower and more failure-prone than the cascade ahead of it.
 
 Each tag carries provenance metadata:
 ```json
@@ -368,11 +369,11 @@ Current accuracy against the 20-FOA hand-labelled gold standard:
 
 | Metric | Score |
 |---|---|
-| Precision | 0.409 |
-| Recall | 0.642 |
-| **F1** | **0.500** |
+| Precision | 0.442 |
+| Recall | 0.654 |
+| **F1** | **0.527** |
 
-Per-category F1 ranges from 0.635 (sponsor themes) to 0.261 (UN SDGs). The gold
+Per-category F1 ranges from 0.646 (sponsor themes) to 0.261 (UN SDGs). The gold
 standard is single-annotator; inter-annotator agreement has not been measured —
 see [ANNOTATION_CODEBOOK.md](ANNOTATION_CODEBOOK.md) for the protocol to close
 that gap. For full methodology, per-change results, and error analysis, see
