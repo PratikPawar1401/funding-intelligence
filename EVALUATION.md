@@ -1056,12 +1056,12 @@ to touch.
 
 ---
 
-## 4k. Three Literature-Backed Reranking Approaches — All Tested, None Shipped
+## 4k. Four Literature-Backed Reranking Approaches — All Tested, None Shipped
 
 §4i's oracle analysis concluded that closing the remaining F1 gap needs a
 scoring function that separates correct from incorrect candidates better
 than untrained cosine similarity — necessarily a trained or pretrained
-component, not another hand-written rule. Three concrete, literature-backed
+component, not another hand-written rule. Four concrete, literature-backed
 candidates were tested directly against the gold set. None survived contact
 with it. Recorded in full because the diagnoses are as valuable as a
 positive result would have been, and because each rules out a specific,
@@ -1145,18 +1145,79 @@ comparable false positives from the same weak scoring function, topping out
 at the already-known F1 0.535 ceiling. This is independent confirmation of
 an existing finding, not a new lever.
 
+### Attempt 4 — A genuine pairwise cross-encoder, fixing attempt 2's diagnosed flaw
+
+Attempt 2 failed because collapsing 25 unrelated concepts into one binary
+class broke SetFit's same-class-similarity assumption — that's a task-shape
+problem, not a data-volume one, so it's fixable independently of how little
+data exists. Built the correctly-shaped version: `CrossEncoder(num_labels=1)`
+scoring `(snippet, concept)` pairs directly via `BCEWithLogitsLoss` on the
+real labels — genuine pairwise supervised learning, no contrastive
+same-class assumption to violate. Three further corrections over attempt 2:
+
+- **Started from `cross-encoder/ms-marco-MiniLM-L-6-v2`**, a model already
+  pretrained for "is this passage relevant to this query" — much closer to
+  the actual task than a plain LM or an NLI-only model, which should matter
+  a lot when the fine-tuning set is this small.
+- **Class imbalance via `pos_weight`** in the loss (principled reweighting),
+  not oversampling/duplication.
+- **Concept side uses the full ontology description**, not just the label —
+  this project's own history (§4c, §4f) found description richness matters
+  for embedding-based concept matching.
+- Threshold picked on a held-out slice of each fold's *training* FOAs, never
+  the test fold, so the reported number isn't threshold-tuned against the
+  data it's scored on.
+
+One real implementation bug on the way: `BCEWithLogitsLoss`'s `pos_weight`
+tensor has to live on the same device the model trains on (MPS here) or the
+loss call raises a device-mismatch error at the first batch — `CrossEncoder`
+only exposes its resolved device as `model._target_device`, and only after
+construction. Fixed by building the model before the loss function, not
+before.
+
+**Result, FOA-level 5-fold CV:**
+
+| | Current production | Cross-encoder |
+|---|---|---|
+| method F1 | 0.480 | **0.065** (P=0.037, R=0.273, TP=3 FP=79 FN=8) |
+| population F1 | 0.522 | **0.182** (P=0.333, R=0.125, TP=1 FP=2 FN=7) |
+
+Worse than production on both, and worse than attempt 1's oracle on both.
+But qualitatively different from attempt 2: this one produced real,
+non-degenerate predictions rather than collapsing to all-negative, so the
+same `predict_proba`-style diagnostic was run again to check what kind of
+failure this is. On held-out test folds, gold-positive scores ranged
+0.0003–0.0207 against a non-gold range of 0.0001–0.0254 (mean 0.0045) —
+heavily overlapping, but with a faint lean (2 of 5 positives scored above
+the negative mean). **Not a dead signal like attempt 2's exact statistical
+tie — a real but far too weak and noisy one.**
+
+**Diagnosis**: the architecture fix worked as intended — this is not
+attempt 2's failure mode recurring. What's left is a data-volume ceiling
+that no task reformulation can route around: 11 method / 8 population gold
+positives, split across 5 CV folds, leaves roughly 8-9 positive examples to
+fine-tune on per fold. That is below what even a well-matched pretrained
+cross-encoder needs to learn a reliable decision boundary, regardless of
+how correctly the task is shaped. The two failures are structurally
+different and both informative: attempt 2 was the wrong tool for the task;
+attempt 4 is the right tool with not enough fuel.
+
 ### What this establishes
 
-Every concrete, literature-supported idea tried against this specific
-20-FOA gold set failed for a specific, identified reason — general-purpose
-pretrained models don't transfer to this domain's implicit phrasing without
-adaptation, and naive few-shot fine-tuning needs a task formulation that
-respects what the training signal actually is. Both are real, generalisable
-lessons, not dead ends particular to this codebase. The oracle analysis's
-conclusion stands: closing the remaining gap needs a properly-formulated
-trained discriminator (a real pairwise cross-encoder, not a relabelled
-single-text classifier) — none of the three approaches here disprove that,
-they narrow down what "properly-formulated" has to mean.
+Four concrete, literature-supported approaches were tried against this
+specific 20-FOA gold set. None shipped. Two distinct, identified causes:
+general-purpose pretrained models don't transfer to this domain's implicit
+phrasing without adaptation (attempts 1 and, partially, 4's starting point),
+and a naive few-shot task formulation can actively fight its own training
+objective (attempt 2) — fixing that (attempt 4) surfaces the deeper
+constraint underneath both: **20 gold FOAs cannot support training any new
+model component**, independent of which architecture is chosen. This
+directly changes the priority of the gold-set-expansion and inter-annotator
+work already under way elsewhere in this project — it is not just a
+methodology-hygiene fix, it is the actual precondition for a trained
+discriminator ever being attemptable at all. The oracle ceiling (F1 0.791)
+remains real and reachable in principle; reaching it is gated on data that
+does not yet exist, not on a better algorithm applied to the data that does.
 
 ---
 
