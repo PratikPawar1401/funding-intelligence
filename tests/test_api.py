@@ -1,6 +1,7 @@
 """Tests for the FastAPI layer (routes, dependency wiring, validation)."""
 
 import copy
+import json
 
 import pytest
 from fastapi.testclient import TestClient
@@ -415,6 +416,167 @@ class TestMatch:
         body = resp.json()
         assert body["items"] == []
         assert body["total"] == 0
+
+
+class TestMatchStream:
+    """
+    /api/match/stream: same ranking/explanation as /api/match, delivered as
+    newline-delimited JSON. Deliberately not a TestMatch subclass -- pytest
+    would rediscover and rerun every inherited test method against this
+    class too, redundantly re-testing the atomic endpoint under a class
+    named for the streaming one. _index/_patch/PROFILE are duplicated from
+    TestMatch instead, small enough that the duplication is cheaper than
+    that footgun.
+    """
+
+    PROFILE = "machine learning for rural health"
+
+    def _index(self):
+        return FakeVectorIndex([
+            {
+                "foa_id": "api-foa-open",
+                "title": "Rural Health Machine Learning Initiative",
+                "status": "open",
+                "program_description": "Studies rural health using machine learning.",
+                "similarity_score": 0.81,
+            },
+            {
+                "foa_id": "api-foa-closed",
+                "title": "Archived Coastal Erosion Study",
+                "status": "closed",
+                "program_description": "Coastal erosion research.",
+                "similarity_score": 0.40,
+            },
+        ])
+
+    def _patch(self, monkeypatch, index=None, tagger=None, explainer=None):
+        from foa_pipeline.api.routes import match as match_route
+
+        monkeypatch.setattr(match_route, "get_vector_index", lambda: index or self._index())
+        monkeypatch.setattr(match_route, "get_tagger_pipeline", lambda: tagger)
+        monkeypatch.setattr(
+            match_route, "get_match_explainer", lambda: explainer or FakeExplainer()
+        )
+
+    def _events(self, resp):
+        return [json.loads(line) for line in resp.text.strip().split("\n") if line]
+
+    def test_missing_index_reports_gracefully(self, client, tmp_path, monkeypatch):
+        from foa_pipeline.api.routes import match as match_route
+        from foa_pipeline.matching.vector_index import VectorIndex
+
+        empty_index = VectorIndex(db=None, model_name="unused", cache_dir=tmp_path / "no-index")
+        monkeypatch.setattr(match_route, "get_vector_index", lambda: empty_index)
+
+        resp = client.post("/api/match/stream", json={"profile_text": self.PROFILE})
+        assert resp.status_code == 200
+        events = self._events(resp)
+        assert events[0]["type"] == "ranked"
+        assert events[0]["items"] == []
+        assert "FAISS index not found" in events[0]["message"]
+        assert events[-1] == {"type": "done", "llm_available": False}
+
+    def test_ranked_event_arrives_first_with_all_items(self, client, monkeypatch):
+        self._patch(monkeypatch)
+        resp = client.post(
+            "/api/match/stream",
+            json={"profile_text": self.PROFILE, "status": None, "explain": False},
+        )
+        events = self._events(resp)
+        assert events[0]["type"] == "ranked"
+        assert {i["foa_id"] for i in events[0]["items"]} == {"api-foa-open", "api-foa-closed"}
+
+    def test_explain_window_size_is_zero_when_explain_is_false(self, client, monkeypatch):
+        self._patch(monkeypatch)
+        resp = client.post(
+            "/api/match/stream",
+            json={"profile_text": self.PROFILE, "status": None, "explain": False},
+        )
+        events = self._events(resp)
+        assert events[0]["explain_window_size"] == 0
+
+    def test_explain_false_skips_llm_and_streams_no_explanation_events(self, client, monkeypatch):
+        explainer = FakeExplainer()
+        self._patch(monkeypatch, explainer=explainer)
+
+        resp = client.post(
+            "/api/match/stream",
+            json={"profile_text": self.PROFILE, "status": None, "explain": False},
+        )
+        events = self._events(resp)
+        assert explainer.calls == []
+        assert [e["type"] for e in events] == ["ranked", "done"]
+        assert events[-1]["llm_available"] is False
+
+    def test_explain_true_streams_one_explanation_event_per_item_then_reorders(
+        self, client, monkeypatch
+    ):
+        explainer = FakeExplainer(available=True, relevance="strong")
+        self._patch(monkeypatch, explainer=explainer)
+
+        resp = client.post(
+            "/api/match/stream",
+            json={"profile_text": self.PROFILE, "status": None, "explain": True},
+        )
+        events = self._events(resp)
+        types = [e["type"] for e in events]
+        assert types == ["ranked", "explanation", "explanation", "reorder", "done"]
+        # Both fixture items fit under top_k, so a client should expect an
+        # "explanation" event for each of them.
+        assert events[0]["explain_window_size"] == 2
+
+        explanation_events = [e for e in events if e["type"] == "explanation"]
+        assert {e["foa_id"] for e in explanation_events} == {"api-foa-open", "api-foa-closed"}
+        assert all(e["llm_relevance"] == "strong" for e in explanation_events)
+        assert all(
+            e["match_explanation"].startswith("Fake explanation") for e in explanation_events
+        )
+
+        reorder = events[-2]
+        assert set(reorder["foa_ids"]) == {"api-foa-open", "api-foa-closed"}
+        assert events[-1] == {"type": "done", "llm_available": True}
+
+    def test_explainer_unavailable_degrades_without_reorder_event(self, client, monkeypatch):
+        explainer = FakeExplainer(available=False)
+        self._patch(monkeypatch, explainer=explainer)
+
+        resp = client.post(
+            "/api/match/stream",
+            json={"profile_text": self.PROFILE, "status": None, "explain": True},
+        )
+        events = self._events(resp)
+        assert explainer.calls == []
+        # Still gets deterministic fallback explanations, just no LLM-ordered
+        # reorder event -- the atomic endpoint's window keeps hybrid order.
+        assert [e["type"] for e in events] == ["ranked", "explanation", "explanation", "done"]
+        assert events[-1]["llm_available"] is False
+
+    def test_status_filter_applied_before_streaming_starts(self, client, monkeypatch):
+        self._patch(monkeypatch)
+        resp = client.post(
+            "/api/match/stream",
+            json={"profile_text": self.PROFILE, "status": "open", "explain": False},
+        )
+        events = self._events(resp)
+        assert [i["foa_id"] for i in events[0]["items"]] == ["api-foa-open"]
+
+    def test_matches_the_atomic_endpoint_s_final_content(self, client, monkeypatch):
+        """The two endpoints should agree on substance -- same ranking, same
+        explanations, same final order -- differing only in delivery shape."""
+        self._patch(monkeypatch, explainer=FakeExplainer(available=True, relevance="moderate"))
+        atomic = client.post(
+            "/api/match", json={"profile_text": self.PROFILE, "status": None, "explain": True}
+        ).json()
+
+        self._patch(monkeypatch, explainer=FakeExplainer(available=True, relevance="moderate"))
+        events = self._events(
+            client.post(
+                "/api/match/stream",
+                json={"profile_text": self.PROFILE, "status": None, "explain": True},
+            )
+        )
+        reorder = next(e for e in events if e["type"] == "reorder")
+        assert reorder["foa_ids"] == [i["foa_id"] for i in atomic["items"]]
 
 
 class TestTags:

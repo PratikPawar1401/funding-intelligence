@@ -13,7 +13,7 @@
  * Conflating the two is the standard Next.js footgun this avoids: using the
  * Docker-internal URL from the browser would simply fail to resolve.
  */
-function baseUrl(): string {
+export function baseUrl(): string {
   if (typeof window === "undefined") {
     return (
       process.env.API_BASE_URL ??

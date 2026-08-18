@@ -89,6 +89,32 @@ export interface MatchResponse {
   message: string;
 }
 
+/**
+ * POST /api/match/stream: same ranking/explanation as MatchResponse, spread
+ * across newline-delimited events instead of one response at the end --
+ * see matching/explain.py for why (explaining each candidate is a
+ * sequential local-LLM call, seconds apiece, so an atomic response makes
+ * the caller wait for all of them before seeing any). A discriminated
+ * union on `type` so a switch over it is exhaustively checked.
+ */
+export type MatchStreamEvent =
+  | {
+      type: "ranked";
+      items: MatchResult[];
+      total: number;
+      /** Leading item count to expect an "explanation" event for. */
+      explain_window_size: number;
+      message: string;
+    }
+  | {
+      type: "explanation";
+      foa_id: string;
+      match_explanation: string;
+      llm_relevance: "strong" | "moderate" | "weak" | null;
+    }
+  | { type: "reorder"; foa_ids: string[] }
+  | { type: "done"; llm_available: boolean };
+
 export interface TagCategorySummary {
   category: string;
   concept_count: number;

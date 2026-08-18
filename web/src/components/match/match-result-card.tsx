@@ -1,4 +1,4 @@
-import { Sparkles, Target, Zap } from "lucide-react";
+import { Loader2, Sparkles, Target, Zap } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/ui/badge";
@@ -11,7 +11,14 @@ const RELEVANCE_STYLE: Record<string, string> = {
   weak: "bg-muted text-muted-foreground",
 };
 
-export function MatchResultCard({ result }: { result: MatchResult }) {
+interface MatchResultCardProps {
+  result: MatchResult;
+  /** True while this specific card is awaiting its "explanation" stream
+   * event -- it's within the explained window but hasn't arrived yet. */
+  isExplaining?: boolean;
+}
+
+export function MatchResultCard({ result, isExplaining = false }: MatchResultCardProps) {
   return (
     <div className="rounded-md border border-border bg-card p-4">
       <div className="mb-2 flex items-start justify-between gap-3">
@@ -40,24 +47,31 @@ export function MatchResultCard({ result }: { result: MatchResult }) {
         <span>{(result.tag_overlap_ratio * 100).toFixed(0)}% tag overlap</span>
       </div>
 
-      {result.match_explanation && (
-        <div className="mb-3 rounded-md border border-primary/20 bg-primary/5 p-3">
-          <div className="mb-1 flex items-center gap-2 text-[0.65rem] font-bold tracking-wide text-primary uppercase">
-            <Sparkles className="size-3" />
-            AI Explanation
-            {result.llm_relevance && (
-              <Badge
-                className={cn(
-                  "px-1.5 py-0 text-[0.6rem] uppercase",
-                  RELEVANCE_STYLE[result.llm_relevance],
-                )}
-              >
-                {result.llm_relevance}
-              </Badge>
-            )}
-          </div>
-          <p className="text-sm text-foreground">{result.match_explanation}</p>
+      {isExplaining ? (
+        <div className="mb-3 flex items-center gap-2 rounded-md border border-primary/20 bg-primary/5 p-3 text-sm text-muted-foreground">
+          <Loader2 className="size-3.5 shrink-0 animate-spin text-primary" />
+          Generating AI explanation...
         </div>
+      ) : (
+        result.match_explanation && (
+          <div className="mb-3 rounded-md border border-primary/20 bg-primary/5 p-3">
+            <div className="mb-1 flex items-center gap-2 text-[0.65rem] font-bold tracking-wide text-primary uppercase">
+              <Sparkles className="size-3" />
+              AI Explanation
+              {result.llm_relevance && (
+                <Badge
+                  className={cn(
+                    "px-1.5 py-0 text-[0.6rem] uppercase",
+                    RELEVANCE_STYLE[result.llm_relevance],
+                  )}
+                >
+                  {result.llm_relevance}
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-foreground">{result.match_explanation}</p>
+          </div>
+        )
       )}
 
       {result.matched_tags.length > 0 && (
