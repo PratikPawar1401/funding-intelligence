@@ -212,8 +212,34 @@ class TaggerPipeline:
         merged_dict: Dict[str, TagEvidence] = {}
         l1_concept_ids: Set[str] = set()
 
-        # Add L1 first (highest priority)
+        # L2 already applies its own threshold before returning evidence
+        # (layer2_embedding.py), so "in l2_concept_ids" means L2 independently
+        # scored this exact concept above that threshold -- not merely that
+        # the text is generically similar to something.
+        l2_concept_ids: Set[str] = {ev.concept_id for ev in l2_evidence}
+
+        # Add L1 first (highest priority). Exact-match confidence (always 1.0)
+        # answers "does this string appear", not "is this concept what the FOA
+        # is about" -- e.g. "biology" appearing once as an application area of
+        # a circuits/sensing FOA still fires nsf_bio at full confidence. For
+        # categories in l1_corroboration_categories, suppress an L1 hit unless
+        # L2 independently found the same concept too. Deliberately scoped:
+        # this helps where L2 is a reliable signal (research_discipline,
+        # sponsor_theme) and would actively hurt where it isn't (method,
+        # population score worse than chance on the separation diagnostic --
+        # see config.py).
         for ev in l1_evidence:
+            if (
+                ev.category in self.config.l1_corroboration_categories
+                and ev.concept_id not in l2_concept_ids
+            ):
+                logger.debug(
+                    "Suppressing uncorroborated L1 hit %s (%s): L2 found no "
+                    "independent support",
+                    ev.concept_id,
+                    ev.category,
+                )
+                continue
             merged_dict[ev.concept_id] = ev
             l1_concept_ids.add(ev.concept_id)
 

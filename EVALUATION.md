@@ -970,6 +970,92 @@ tuning campaign began.
 
 ---
 
+## 4j. L1/L2 Corroboration Gate — Tested, Rejected
+
+### The hypothesis
+
+Layer 1's exact-match confidence is always 1.0, which answers "does this
+string appear" rather than "is this concept what the FOA is about". A
+concrete case: **`nsf_bio` fired at confidence 1.0 on "Circuits and Systems
+for Communications and Sensing"** (an Engineering/CISE program) because the
+text mentions "breakthroughs in biology and medicine" as an *application
+area* of the sensing technology, not its discipline. This is the same
+aboutness failure §4h already partially addressed with context-based scope
+filters — a different instance of it, not covered by those five filters.
+
+The hypothesis: require Layer 2 to independently corroborate an L1 hit
+(score the same concept above its own threshold, on the same text) before
+accepting it, for categories where Layer 2 is a reliable signal per §4c's
+separation diagnostic (`research_discipline` AUC 0.940, `sponsor_theme`
+0.667 — deliberately excluding `method`/`population`, AUC 0.476/0.400,
+worse than chance, where this gate would suppress good tags rather than
+bad ones).
+
+Confirmed before implementing: running Layer 2 directly on the CSCS FOA's
+text found `nsf_cise` at cosine 0.41 as its only `research_discipline`
+candidate — `nsf_bio` isn't even a candidate, let alone corroborated.
+
+### Implementation
+
+`TaggerPipeline._merge_and_disambiguate` (`tagging/pipeline.py`): an L1 hit
+in a category listed in `config.l1_corroboration_categories` is suppressed
+unless the same `concept_id` also appears in Layer 2's evidence for that
+FOA (which already means it cleared Layer 2's own threshold —
+`layer2_embedding.py` filters before returning). Config-gated per category,
+following the same pattern as `title_weight`; four unit tests in
+`test_tagger_pipeline.py::TestL1L2Corroboration` cover the gated,
+ungated, and disabled-entirely paths.
+
+### Result: the targeted case worked; the aggregate didn't
+
+The CSCS FOA now has **zero** false positives — the mechanism did exactly
+what it was built to do on the case that motivated it.
+
+| Metric | V8 (baseline) | Gate enabled | Δ |
+|---|---|---|---|
+| **Precision** | 0.442 | 0.437 | −0.005 |
+| **Recall** | 0.654 | 0.556 | **−0.098** |
+| **F1** | 0.527 | 0.489 | **−0.038** |
+| TP / FP / FN | 53 / 67 / 28 | 45 / 58 / 36 | FP −9, **FN +8** |
+
+| Category | F1 before | F1 after | Δ |
+|---|---|---|---|
+| **research_discipline** | 0.523 | **0.415** | **−0.108** |
+| sponsor_theme | 0.646 | 0.633 | −0.013 |
+| method / population / research_domain | unchanged | unchanged | 0 (correctly ungated) |
+
+### Why it backfired
+
+The gate can't distinguish a good L1 hit from a bad one — it only checks
+whether Layer 2 agrees, and for `research_discipline` specifically, §4f
+already established that Layer 2 is barely in the loop on real FOAs at all:
+zero of the gold set's `nsf_eng` decisions came from Layer 2, because FOAs
+routinely name their own directorate verbatim ("Directorate for
+Engineering") and Layer 1's exact match fires directly on that. Layer 2 was
+never calibrated to *confirm* a directorate assignment made this way, so
+requiring its corroboration knocked out roughly as many correct L1 hits as
+incorrect ones — `research_discipline` lost 6 TP alongside 6 FP, a wash on
+precision and a pure loss on recall.
+
+This is the same shape of result as §4b (boilerplate stripping) and §4d
+(title weighting): a mechanism that is locally correct on the example that
+motivated it, and net-negative in aggregate, because the failure mode it
+targets is entangled with cases where the same layer is doing the only
+correct thing available.
+
+### What was kept
+
+The gate, its config flag, and its tests are kept — `l1_corroboration_categories`
+defaults to empty, reproducing pre-existing behaviour exactly, verified by
+re-running `tag-all` + `evaluate --gold` after reverting and confirming V8's
+numbers return unchanged. It costs nothing disabled, and the mechanism may
+be worth revisiting per-concept (e.g. only `nsf_bio` specifically) rather
+than per-category, since the category-wide version's damage was concentrated
+in exactly the directorate-self-naming cases the mechanism was never meant
+to touch.
+
+---
+
 ## 5. Error Analysis
 
 The evaluation framework generates detailed error logs for debugging:

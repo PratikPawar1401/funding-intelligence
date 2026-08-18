@@ -2,22 +2,22 @@
   {
     "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
     "title": "Circuits and Systems for Communications and Sensing (CSCS)",
-    "concept": "nsf_bio",
-    "label": "Biological Sciences",
-    "category": "research_discipline",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "ultra precise measurement and imaging, which promise breakthroughs in biology and medicine. Communication Systems CSCS research in communication systems"
-  },
-  {
-    "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
-    "title": "Circuits and Systems for Communications and Sensing (CSCS)",
     "concept": "great_04",
     "label": "Energy",
     "category": "sponsor_theme",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": "they make much of today\u2019s AI, communications, energy, transportation, health care, and robotics possible.\u200b CSCS"
+  },
+  {
+    "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
+    "title": "Circuits and Systems for Communications and Sensing (CSCS)",
+    "concept": "nsf_bio",
+    "label": "Biological Sciences",
+    "category": "research_discipline",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "ultra precise measurement and imaging, which promise breakthroughs in biology and medicine. Communication Systems CSCS research in communication systems"
   },
   {
     "foa_id": "59933d5a-c9c6-4af5-b4a4-71ff30a32737",
@@ -52,16 +52,6 @@
   {
     "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
     "title": "Catalysis",
-    "concept": "method_17",
-    "label": "Data Science",
-    "category": "method",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "include novel catalyst compositions, structures, operating environment, data science tools, theory, and modeling \u2013 preferably in various"
-  },
-  {
-    "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
-    "title": "Catalysis",
     "concept": "nsf_eng",
     "label": "Engineering",
     "category": "research_discipline",
@@ -82,6 +72,16 @@
   {
     "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
     "title": "Catalysis",
+    "concept": "method_17",
+    "label": "Data Science",
+    "category": "method",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "include novel catalyst compositions, structures, operating environment, data science tools, theory, and modeling \u2013 preferably in various"
+  },
+  {
+    "foa_id": "150c3b26-f85b-43b0-8398-e02c2312c7eb",
+    "title": "Catalysis",
     "concept": "sdg_07",
     "label": "Affordable and Clean Energy",
     "category": "research_domain",
@@ -92,12 +92,22 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
-    "concept": "method_09",
-    "label": "Community-Based Participatory Research",
-    "category": "method",
+    "concept": "pop_09",
+    "label": "Women and Girls",
+    "category": "population",
     "layer": "layer_2_embedding",
-    "confidence": 0.4197,
+    "confidence": 0.5117,
     "context": "must be appropriate to the questions asked; and (4) the proposed research must advance our understanding of social processes, structures and methods. NSF also offers a number of specialized funding op"
+  },
+  {
+    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
+    "title": "Sociology",
+    "concept": "pop_11",
+    "label": "Immigrants and Refugees",
+    "category": "population",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4617,
+    "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
   },
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
@@ -112,22 +122,12 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
-    "concept": "great_13",
-    "label": "Community and Regional Development",
-    "category": "sponsor_theme",
+    "concept": "method_09",
+    "label": "Community-Based Participatory Research",
+    "category": "method",
     "layer": "layer_2_embedding",
-    "confidence": 0.3862,
-    "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
-  },
-  {
-    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
-    "title": "Sociology",
-    "concept": "pop_08",
-    "label": "Racial and Ethnic Minorities",
-    "category": "population",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4598,
-    "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
+    "confidence": 0.4197,
+    "context": "must be appropriate to the questions asked; and (4) the proposed research must advance our understanding of social processes, structures and methods. NSF also offers a number of specialized funding op"
   },
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
@@ -138,16 +138,6 @@
     "layer": "layer_3_llm",
     "confidence": 0.95,
     "context": "[Resolved against Network Analysis] Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes o"
-  },
-  {
-    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
-    "title": "Sociology",
-    "concept": "pop_09",
-    "label": "Women and Girls",
-    "category": "population",
-    "layer": "layer_2_embedding",
-    "confidence": 0.5117,
-    "context": "must be appropriate to the questions asked; and (4) the proposed research must advance our understanding of social processes, structures and methods. NSF also offers a number of specialized funding op"
   },
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
@@ -172,32 +162,22 @@
   {
     "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
     "title": "Sociology",
-    "concept": "pop_11",
-    "label": "Immigrants and Refugees",
+    "concept": "pop_08",
+    "label": "Racial and Ethnic Minorities",
     "category": "population",
     "layer": "layer_2_embedding",
-    "confidence": 0.4617,
+    "confidence": 0.4598,
     "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
   },
   {
-    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
-    "title": "Centers of Research Excellence in Science and Technology (CREST)",
-    "concept": "nsf_eng",
-    "label": "Engineering",
-    "category": "research_discipline",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology ("
-  },
-  {
-    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
-    "title": "Centers of Research Excellence in Science and Technology (CREST)",
-    "concept": "nsf_geo",
-    "label": "Geosciences",
-    "category": "research_discipline",
+    "foa_id": "d4a1f68a-0eed-4b9e-8fcf-eec0a568e7de",
+    "title": "Sociology",
+    "concept": "great_13",
+    "label": "Community and Regional Development",
+    "category": "sponsor_theme",
     "layer": "layer_2_embedding",
-    "confidence": 0.4093,
-    "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology (CREST) program provides sup"
+    "confidence": 0.3862,
+    "context": "Sociology The Sociology Program supports basic research on all forms of human social organization \u2014 societies, institutions, groups and demography \u2014 and processes of individual and institutional chang"
   },
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
@@ -212,12 +192,12 @@
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
     "title": "Centers of Research Excellence in Science and Technology (CREST)",
-    "concept": "method_17",
-    "label": "Data Science",
-    "category": "method",
+    "concept": "nsf_eng",
+    "label": "Engineering",
+    "category": "research_discipline",
     "layer": "layer_1_terminological",
     "confidence": 1.0,
-    "context": "areas of national interest, such as artificial intelligence, data science and analytics; advanced materials, manufacturing, robotics;"
+    "context": "in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology ("
   },
   {
     "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
@@ -228,6 +208,36 @@
     "layer": "layer_2_embedding",
     "confidence": 0.3309,
     "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology (CREST) program provides sup"
+  },
+  {
+    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
+    "title": "Centers of Research Excellence in Science and Technology (CREST)",
+    "concept": "method_17",
+    "label": "Data Science",
+    "category": "method",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "areas of national interest, such as artificial intelligence, data science and analytics; advanced materials, manufacturing, robotics;"
+  },
+  {
+    "foa_id": "5d49d916-221b-4a83-bc69-274c33621b0c",
+    "title": "Centers of Research Excellence in Science and Technology (CREST)",
+    "concept": "nsf_geo",
+    "label": "Geosciences",
+    "category": "research_discipline",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4093,
+    "context": "Centers of Research Excellence in Science and Technology - Research Infrastructure for Science and Engineering The Centers of Research Excellence in Science and Technology (CREST) program provides sup"
+  },
+  {
+    "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
+    "title": "NSF INCLUDES Initiative",
+    "concept": "great_08",
+    "label": "Transportation",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3005,
+    "context": "design elements of collaborative infrastructure - (1) shared vision, (2) partnerships, (3) goals and metrics, (4) leadership and communication, and (5) expansion, sustainability, and scale - to create"
   },
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
@@ -252,32 +262,22 @@
   {
     "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
     "title": "NSF INCLUDES Initiative",
-    "concept": "great_13",
-    "label": "Community and Regional Development",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3048,
-    "context": "design elements of collaborative infrastructure - (1) shared vision, (2) partnerships, (3) goals and metrics, (4) leadership and communication, and (5) expansion, sustainability, and scale - to create"
-  },
-  {
-    "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
-    "title": "NSF INCLUDES Initiative",
-    "concept": "great_08",
-    "label": "Transportation",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3005,
-    "context": "design elements of collaborative infrastructure - (1) shared vision, (2) partnerships, (3) goals and metrics, (4) leadership and communication, and (5) expansion, sustainability, and scale - to create"
-  },
-  {
-    "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
-    "title": "NSF INCLUDES Initiative",
     "concept": "sdg_17",
     "label": "Partnerships for the Goals",
     "category": "research_domain",
     "layer": "layer_3_llm",
     "confidence": 0.95,
     "context": "[Resolved against Industry Innovation and Infrastructure] change, resulting in a STEM workforce that reflects the Nation\u2019s population. More specifically, the INCLUDES Initiative seeks to motivate and "
+  },
+  {
+    "foa_id": "052dbdbf-7b76-45c5-b2ec-71d14733b8d6",
+    "title": "NSF INCLUDES Initiative",
+    "concept": "great_13",
+    "label": "Community and Regional Development",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3048,
+    "context": "design elements of collaborative infrastructure - (1) shared vision, (2) partnerships, (3) goals and metrics, (4) leadership and communication, and (5) expansion, sustainability, and scale - to create"
   },
   {
     "foa_id": "a6c4bfa8-fa67-4d10-8de4-472e1f25d220",
@@ -302,6 +302,16 @@
   {
     "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
     "title": "Unleashing Tribal Energy Development",
+    "concept": "great_06",
+    "label": "Natural Resources and Environment",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3255,
+    "context": "Unleashing Tribal Energy Development DE-FOA-0003548: Unleashing Tribal Energy Development Under this Notice of Funding Opportunity (NOFO), the DOE Office of Indian Energy Policy and Programs is solici"
+  },
+  {
+    "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
+    "title": "Unleashing Tribal Energy Development",
     "concept": "pop_20",
     "label": "Tribal Communities",
     "category": "population",
@@ -310,14 +320,34 @@
     "context": "Unleashing Tribal Energy Development DE-FOA-0003548: Unleashing Tribal Energy Development Under this Notice of Funding Opportunity (NOFO), the DOE Office of Indian Energy Policy and Programs is solici"
   },
   {
-    "foa_id": "6fd2fb9a-fec4-4fdd-b4ba-837f8a7eb8a0",
-    "title": "Unleashing Tribal Energy Development",
+    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
+    "title": "Engineering for Civil Infrastructure",
+    "concept": "sdg_13",
+    "label": "Climate Action",
+    "category": "research_domain",
+    "layer": "layer_1_terminological",
+    "confidence": 1.0,
+    "context": "nation\u2019s physical civil infrastructure and that can contribute to climate change adaptation and mitigation, and hazards and disaster resilience."
+  },
+  {
+    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
+    "title": "Engineering for Civil Infrastructure",
+    "concept": "nsf_geo",
+    "label": "Geosciences",
+    "category": "research_discipline",
+    "layer": "layer_2_embedding",
+    "confidence": 0.4078,
+    "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI) program supports fundamental research in geotechnical, structural, materials, architectural, and coastal engineering"
+  },
+  {
+    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
+    "title": "Engineering for Civil Infrastructure",
     "concept": "great_06",
     "label": "Natural Resources and Environment",
     "category": "sponsor_theme",
     "layer": "layer_2_embedding",
-    "confidence": 0.3255,
-    "context": "Unleashing Tribal Energy Development DE-FOA-0003548: Unleashing Tribal Energy Development Under this Notice of Funding Opportunity (NOFO), the DOE Office of Indian Energy Policy and Programs is solici"
+    "confidence": 0.4241,
+    "context": "ECI program only supports fundamental research topics for civil infrastructure with a strong grounding in theory. Topics which fall within the mission for research and/or development of other federal "
   },
   {
     "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
@@ -340,34 +370,24 @@
     "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI) program supports fundamental research in geotechnical, structural, materials, architectural, and coastal engineering"
   },
   {
-    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
-    "title": "Engineering for Civil Infrastructure",
-    "concept": "nsf_geo",
-    "label": "Geosciences",
-    "category": "research_discipline",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4078,
-    "context": "Engineering for Civil Infrastructure The Engineering for Civil Infrastructure (ECI) program supports fundamental research in geotechnical, structural, materials, architectural, and coastal engineering"
+    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
+    "title": "Cognitive Neuroscience",
+    "concept": "method_09",
+    "label": "Community-Based Participatory Research",
+    "category": "method",
+    "layer": "layer_3_llm",
+    "confidence": 0.95,
+    "context": "[Resolved against Meta-Analysis] The program is particularly interested in proposals that achieve or enable convergence across multiple techniques. Critically, proposals will be returned without revie"
   },
   {
-    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
-    "title": "Engineering for Civil Infrastructure",
-    "concept": "sdg_13",
-    "label": "Climate Action",
-    "category": "research_domain",
-    "layer": "layer_1_terminological",
-    "confidence": 1.0,
-    "context": "nation\u2019s physical civil infrastructure and that can contribute to climate change adaptation and mitigation, and hazards and disaster resilience."
-  },
-  {
-    "foa_id": "6e2262d5-8596-4fdf-b8f0-e6e426395319",
-    "title": "Engineering for Civil Infrastructure",
-    "concept": "great_06",
-    "label": "Natural Resources and Environment",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.4241,
-    "context": "ECI program only supports fundamental research topics for civil infrastructure with a strong grounding in theory. Topics which fall within the mission for research and/or development of other federal "
+    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
+    "title": "Cognitive Neuroscience",
+    "concept": "pop_04",
+    "label": "Children and Youth",
+    "category": "population",
+    "layer": "layer_3_llm",
+    "confidence": 0.95,
+    "context": "[Resolved against Women and Girls] The program is particularly interested in proposals that achieve or enable convergence across multiple techniques. Critically, proposals will be returned without rev"
   },
   {
     "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
@@ -388,26 +408,6 @@
     "layer": "layer_1_terminological",
     "confidence": 1.0,
     "context": ", 2) directly involving undergraduates and high-school students in research, 3) making tools and applications for"
-  },
-  {
-    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
-    "title": "Cognitive Neuroscience",
-    "concept": "method_09",
-    "label": "Community-Based Participatory Research",
-    "category": "method",
-    "layer": "layer_3_llm",
-    "confidence": 0.95,
-    "context": "[Resolved against Meta-Analysis] The program is particularly interested in proposals that achieve or enable convergence across multiple techniques. Critically, proposals will be returned without revie"
-  },
-  {
-    "foa_id": "2b26ca51-7268-4e56-95d9-5de05d8aac42",
-    "title": "Cognitive Neuroscience",
-    "concept": "pop_04",
-    "label": "Children and Youth",
-    "category": "population",
-    "layer": "layer_3_llm",
-    "confidence": 0.95,
-    "context": "[Resolved against Women and Girls] The program is particularly interested in proposals that achieve or enable convergence across multiple techniques. Critically, proposals will be returned without rev"
   },
   {
     "foa_id": "f4a9e9f4-ba18-411c-a2ac-d99449d96f9f",
@@ -452,16 +452,6 @@
   {
     "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
     "title": "EPSCoR FEC",
-    "concept": "nsf_tip",
-    "label": "Technology Innovation and Partnerships",
-    "category": "research_discipline",
-    "layer": "layer_3_llm",
-    "confidence": 0.95,
-    "context": "[Resolved against STEM Education] EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is "
-  },
-  {
-    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
-    "title": "EPSCoR FEC",
     "concept": "nsf_geo",
     "label": "Geosciences",
     "category": "research_discipline",
@@ -488,6 +478,16 @@
     "layer": "layer_2_embedding",
     "confidence": 0.4128,
     "context": "EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is designed to fulfill the mandate of"
+  },
+  {
+    "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
+    "title": "EPSCoR FEC",
+    "concept": "nsf_tip",
+    "label": "Technology Innovation and Partnerships",
+    "category": "research_discipline",
+    "layer": "layer_3_llm",
+    "confidence": 0.95,
+    "context": "[Resolved against STEM Education] EPSCoR Research Infrastructure Improvement Program: Focused EPSCoR Collaborations Program (FEC) The Established Program to Stimulate Competitive Research (EPSCoR) is "
   },
   {
     "foa_id": "662f4450-bb2e-48e7-84ae-41103516a1dd",
@@ -542,21 +542,11 @@
   {
     "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
     "title": "Science of Science: Biomedical Research Enterprise",
-    "concept": "method_24",
-    "label": "Systems Thinking",
-    "category": "method",
-    "layer": "layer_3_llm",
-    "confidence": 0.95,
-    "context": "[Resolved against Meta-Analysis] A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Healt"
-  },
-  {
-    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
-    "title": "Science of Science: Biomedical Research Enterprise",
-    "concept": "pop_10",
-    "label": "People with Disabilities",
+    "concept": "pop_09",
+    "label": "Women and Girls",
     "category": "population",
     "layer": "layer_2_embedding",
-    "confidence": 0.3542,
+    "confidence": 0.3618,
     "context": "A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Health (NIH) are interested in proposa"
   },
   {
@@ -572,21 +562,11 @@
   {
     "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
     "title": "Science of Science: Biomedical Research Enterprise",
-    "concept": "nsf_edu",
-    "label": "STEM Education",
-    "category": "research_discipline",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3747,
-    "context": "A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Health (NIH) are interested in proposa"
-  },
-  {
-    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
-    "title": "Science of Science: Biomedical Research Enterprise",
-    "concept": "pop_09",
-    "label": "Women and Girls",
+    "concept": "pop_10",
+    "label": "People with Disabilities",
     "category": "population",
     "layer": "layer_2_embedding",
-    "confidence": 0.3618,
+    "confidence": 0.3542,
     "context": "A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Health (NIH) are interested in proposa"
   },
   {
@@ -600,6 +580,26 @@
     "context": "[Resolved against Racial and Ethnic Minorities] A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Inst"
   },
   {
+    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
+    "title": "Science of Science: Biomedical Research Enterprise",
+    "concept": "method_24",
+    "label": "Systems Thinking",
+    "category": "method",
+    "layer": "layer_3_llm",
+    "confidence": 0.95,
+    "context": "[Resolved against Meta-Analysis] A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Healt"
+  },
+  {
+    "foa_id": "b4a823b7-0ee7-429b-937b-52cf569e09ba",
+    "title": "Science of Science: Biomedical Research Enterprise",
+    "concept": "nsf_edu",
+    "label": "STEM Education",
+    "category": "research_discipline",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3747,
+    "context": "A Science of Science Approach to Analyzing and Innovating the Biomedical Research Enterprise The National Science Foundation (NSF) and the National Institutes of Health (NIH) are interested in proposa"
+  },
+  {
     "foa_id": "facd39aa-a0de-4980-bd40-a35ab68f8811",
     "title": "Correctness for Scientific Computing Systems",
     "concept": "nsf_mps",
@@ -608,26 +608,6 @@
     "layer": "layer_2_embedding",
     "confidence": 0.3568,
     "context": "research laboratories, professional societies and similar organizations located in the U.S. that are directly associated with educational or research activities. - Institutions of Higher Education (IH"
-  },
-  {
-    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
-    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
-    "concept": "nsf_tip",
-    "label": "Technology Innovation and Partnerships",
-    "category": "research_discipline",
-    "layer": "layer_2_embedding",
-    "confidence": 0.39,
-    "context": "Findable Accessible Interoperable Reusable Open Science The FAIROS Program seeks to support a broad range of transformative open science activities including but not limited to i.) Research, education"
-  },
-  {
-    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
-    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
-    "concept": "great_06",
-    "label": "Natural Resources and Environment",
-    "category": "sponsor_theme",
-    "layer": "layer_2_embedding",
-    "confidence": 0.3398,
-    "context": "proposal includes funding to be provided to an international branch campus of a US institution of higher education (including through use of sub-awards and consultant arrangements), the proposer must "
   },
   {
     "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
@@ -648,6 +628,26 @@
     "layer": "layer_2_embedding",
     "confidence": 0.3689,
     "context": "Findable Accessible Interoperable Reusable Open Science The FAIROS Program seeks to support a broad range of transformative open science activities including but not limited to i.) Research, education"
+  },
+  {
+    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
+    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
+    "concept": "nsf_tip",
+    "label": "Technology Innovation and Partnerships",
+    "category": "research_discipline",
+    "layer": "layer_2_embedding",
+    "confidence": 0.39,
+    "context": "Findable Accessible Interoperable Reusable Open Science The FAIROS Program seeks to support a broad range of transformative open science activities including but not limited to i.) Research, education"
+  },
+  {
+    "foa_id": "b4a0ea87-6c52-47be-909d-3a3fd3c29764",
+    "title": "FAIROS - Findable Accessible Interoperable Reusable Open Science",
+    "concept": "great_06",
+    "label": "Natural Resources and Environment",
+    "category": "sponsor_theme",
+    "layer": "layer_2_embedding",
+    "confidence": 0.3398,
+    "context": "proposal includes funding to be provided to an international branch campus of a US institution of higher education (including through use of sub-awards and consultant arrangements), the proposer must "
   },
   {
     "foa_id": "160c5a72-dfcd-4061-995e-a05e1d239145",

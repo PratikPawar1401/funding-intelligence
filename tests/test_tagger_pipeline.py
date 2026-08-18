@@ -281,3 +281,99 @@ class TestTaggerPipelineMerging:
             # L1 should take priority with confidence 1.0
             assert poverty_tags[0]["source_layer"] == "layer_1_terminological"
             assert poverty_tags[0]["confidence"] == 1.0
+
+
+class TestL1L2Corroboration:
+    """An L1 exact-match answers "does this string appear", not "is this
+    concept what the FOA is about" -- e.g. nsf_bio firing on a circuits FOA
+    because "biology" appears once as an application area (see EVALUATION.md,
+    the CSCS false positive). For categories in l1_corroboration_categories,
+    an L1 hit must also be found by L2 independently, or it's suppressed."""
+
+    def _l1_evidence(self, concept_id, category, label="Some Concept"):
+        return TagEvidence(
+            concept_id=concept_id,
+            label=label,
+            category=category,
+            source_layer="layer_1_terminological",
+            confidence=1.0,
+            context_snippet="stand-in L1 evidence",
+            ontology_concept_id=concept_id,
+        )
+
+    def _l2_evidence(self, concept_id, category, confidence=0.5, label="Some Concept"):
+        return TagEvidence(
+            concept_id=concept_id,
+            label=label,
+            category=category,
+            source_layer="layer_2_embedding",
+            confidence=confidence,
+            context_snippet="stand-in L2 evidence",
+            ontology_concept_id=concept_id,
+        )
+
+    def _pipeline(self, pipeline_config, ontology_store, l1_evidence, l2_evidence,
+                  corroboration_categories=("sponsor_theme",)):
+        from dataclasses import replace
+
+        config = replace(pipeline_config, l1_corroboration_categories=list(corroboration_categories))
+        p = TaggerPipeline(config, ontology_store)
+        p.l1 = MagicMock()
+        p.l1.tag_text.return_value = l1_evidence
+        p.l2 = MagicMock()
+        p.l2.tag_text.return_value = l2_evidence
+        p.is_initialized = True
+        return p
+
+    def _foa(self):
+        return {
+            "foa_id": "corroboration-test",
+            "title": "Some Program",
+            "program_description": "Substantive program text.",
+            "eligibility_description": "",
+        }
+
+    def test_uncorroborated_l1_hit_suppressed_in_gated_category(self, pipeline_config, ontology_store):
+        # L1 finds great_02 (sponsor_theme, gated); L2 finds nothing for it.
+        p = self._pipeline(
+            pipeline_config, ontology_store,
+            l1_evidence=[self._l1_evidence("great_02", "sponsor_theme")],
+            l2_evidence=[self._l2_evidence("sdg_01", "research_domain")],  # unrelated concept
+        )
+        tags = p.tag_record(self._foa())
+        assert not any(t["ontology_concept_id"] == "great_02" for t in tags)
+
+    def test_corroborated_l1_hit_survives_in_gated_category(self, pipeline_config, ontology_store):
+        # L1 and L2 both independently find great_02 -- should survive, at L1's confidence.
+        p = self._pipeline(
+            pipeline_config, ontology_store,
+            l1_evidence=[self._l1_evidence("great_02", "sponsor_theme")],
+            l2_evidence=[self._l2_evidence("great_02", "sponsor_theme", confidence=0.4)],
+        )
+        tags = p.tag_record(self._foa())
+        matches = [t for t in tags if t["ontology_concept_id"] == "great_02"]
+        assert len(matches) == 1
+        assert matches[0]["source_layer"] == "layer_1_terminological"
+        assert matches[0]["confidence"] == 1.0
+
+    def test_uncorroborated_l1_hit_survives_in_ungated_category(self, pipeline_config, ontology_store):
+        # research_domain is not in the gated set here -- old behaviour (L1
+        # always wins) must be unchanged for every category not opted in.
+        p = self._pipeline(
+            pipeline_config, ontology_store,
+            l1_evidence=[self._l1_evidence("sdg_13", "research_domain")],
+            l2_evidence=[],
+            corroboration_categories=("sponsor_theme",),
+        )
+        tags = p.tag_record(self._foa())
+        assert any(t["ontology_concept_id"] == "sdg_13" for t in tags)
+
+    def test_empty_corroboration_list_disables_the_gate_entirely(self, pipeline_config, ontology_store):
+        p = self._pipeline(
+            pipeline_config, ontology_store,
+            l1_evidence=[self._l1_evidence("great_02", "sponsor_theme")],
+            l2_evidence=[],
+            corroboration_categories=(),
+        )
+        tags = p.tag_record(self._foa())
+        assert any(t["ontology_concept_id"] == "great_02" for t in tags)
