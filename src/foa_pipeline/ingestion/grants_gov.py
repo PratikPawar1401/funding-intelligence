@@ -120,7 +120,15 @@ def poll_grants(config: Config, *, dry_run: bool = False) -> Dict[str, int]:
             break
 
         query = dict(base_query)
-        query.update({"startRecordNum": start_record, "numRecords": page_size})
+        # The live search2 API silently ignores "numRecords" and always
+        # returns 25 hits regardless of what's requested -- confirmed by
+        # direct testing. "rows" is the parameter it actually honours
+        # (verified up to 1000+ per page, disjoint across pages via
+        # startRecordNum). With the wrong key, every poll silently capped
+        # at 25 results and this loop's own "len(hits) < page_size" check
+        # then terminated pagination after page 1, believing results were
+        # exhausted.
+        query.update({"startRecordNum": start_record, "rows": page_size})
 
         response = client.search2(query)
         hits = list(_iter_hits(response))
@@ -137,6 +145,8 @@ def poll_grants(config: Config, *, dry_run: bool = False) -> Dict[str, int]:
             details = {}
             if not dry_run:
                 details = client.fetch_opportunity(opportunity_id)
+                if config.grants_gov_request_delay_seconds > 0:
+                    time.sleep(config.grants_gov_request_delay_seconds)
 
             record = build_raw_record(
                 source="grants_gov",

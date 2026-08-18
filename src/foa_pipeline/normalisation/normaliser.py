@@ -166,7 +166,18 @@ def _normalise_grants_gov(raw: Dict[str, Any]) -> Dict[str, Any]:
     hit = raw.get("raw_payload", {}).get("search_hit", {})
     details = raw.get("raw_payload", {}).get("details", {})
     detail_data = details.get("data", {})
-    synopsis = detail_data.get("synopsis", {})
+    # fetchOpportunity returns a "synopsis" object for docType=="synopsis"
+    # (posted/closed) records, but a differently-shaped "forecast" object
+    # instead for docType=="forecast" ones -- "synopsis" is simply absent,
+    # not present-and-empty. Broadening the search query to oppStatuses
+    # "forecasted|posted" (previously posted-only) surfaced this: every
+    # field below silently went missing -- agency_code, award amounts,
+    # eligibility, funding instrument -- for every forecasted record, since
+    # they all read from `synopsis` alone. Most field names are identical
+    # between the two shapes (agencyCode, awardFloor/Ceiling, numberOfAwards,
+    # applicantTypes, applicantEligibilityDesc, fundingInstruments,
+    # postingDate...), so falling back to "forecast" here recovers them.
+    synopsis = detail_data.get("synopsis") or detail_data.get("forecast") or {}
 
     # Extract attachment IDs for PDF files
     att_folders = detail_data.get("synopsisAttachmentFolders", [])
@@ -191,6 +202,11 @@ def _normalise_grants_gov(raw: Dict[str, Any]) -> Dict[str, Any]:
             raw.get("close_date"),
             synopsis.get("responseDateStr"),
             synopsis.get("responseDate"),
+            # forecast-shaped records have no confirmed response date yet --
+            # this is the closest honest equivalent (an estimate, since the
+            # opportunity isn't open for applications until it's posted).
+            synopsis.get("estApplicationResponseDateStr"),
+            synopsis.get("estApplicationResponseDate"),
         )
     )
 
@@ -208,10 +224,17 @@ def _normalise_grants_gov(raw: Dict[str, Any]) -> Dict[str, Any]:
         ),
         "title": normalise_text(_coalesce(raw.get("title"), synopsis.get("opportunityTitle"))),
         "agency": normalise_text(
-            _coalesce(synopsis.get("agencyName"), hit.get("AgencyName"))
+            _coalesce(
+                synopsis.get("agencyName"),
+                # forecast-shaped records have no top-level agencyName, only
+                # this nested form (present on both shapes where synopsis
+                # has it too, so this is a safe fallback either way).
+                detail_data.get("agencyDetails", {}).get("agencyName"),
+                hit.get("agency"),
+            )
         ),
         "agency_code": _coalesce(
-            synopsis.get("agencyCode"), hit.get("AgencyCode")
+            synopsis.get("agencyCode"), hit.get("agencyCode")
         ),
         "opportunity_number": _coalesce(
             detail_data.get("opportunityNumber"), hit.get("OpportunityNumber")
@@ -232,6 +255,7 @@ def _normalise_grants_gov(raw: Dict[str, Any]) -> Dict[str, Any]:
         "program_description": normalise_text(
             _coalesce(
                 synopsis.get("synopsisDesc"),
+                synopsis.get("forecastDesc"),
                 hit.get("Description"),
             )
         ),

@@ -45,13 +45,38 @@ def load_scraping_rules(config_path: Path) -> Dict[str, Any]:
     return rules
 
 
-def _parse_html_content(url: str, html: str) -> Dict[str, Any]:
-    """Parse the raw HTML to extract structured metadata."""
+# Signatures of nsf.gov's own rate-limit/bot-check response page, observed
+# directly: a run without inter-batch throttling got blocked partway through
+# and 261/297 pages came back as this instead of real content -- every one
+# saved as a "successful" scrape, since the page load itself succeeds (200),
+# it just isn't the page that was asked for.
+_BLOCK_SIGNATURES = (
+    "request blocked",
+    "exceeded the maximum number of requests",
+)
+
+
+def _looks_like_a_block_page(title: Optional[str], html: str) -> bool:
+    haystack = f"{title or ''} {html[:2000]}".lower()
+    return any(sig in haystack for sig in _BLOCK_SIGNATURES)
+
+
+def _parse_html_content(url: str, html: str) -> Optional[Dict[str, Any]]:
+    """Parse the raw HTML to extract structured metadata.
+
+    Returns None if the page is a bot-check/rate-limit response rather than
+    real content, so the caller can mark it failed (and so eligible for a
+    later retry) instead of silently recording it as a successful scrape.
+    """
     soup = BeautifulSoup(html, "html.parser")
 
     # Extract title
     title_el = soup.find("h1")
     title = title_el.get_text(strip=True) if title_el else None
+
+    if _looks_like_a_block_page(title, html):
+        logger.warning("Blocked/rate-limited response for %s, treating as failed", url)
+        return None
 
     # Extract description
     description = ""
@@ -107,10 +132,19 @@ def _parse_html_content(url: str, html: str) -> Dict[str, Any]:
     }
 
 
-async def _run_playwright_scraper(urls: List[str], max_concurrent: int) -> Dict[str, Any]:
+async def _run_playwright_scraper(
+    urls: List[str], max_concurrent: int, rate_limit_seconds: float = 0.0
+) -> Dict[str, Any]:
     """Execute the async scraper using raw Playwright.
 
     Bypasses Crawlee due to Python 3.14 Pydantic incompatibilities.
+
+    `rate_limit_seconds` pauses between concurrency chunks, not within one --
+    max_concurrent already bounds simultaneous requests, but nothing
+    previously paced the chunks themselves. Confirmed necessary the hard
+    way: an unthrottled 297-URL run got rate-limited by nsf.gov partway
+    through, and every subsequent chunk came back as a bot-check page
+    instead of real content (see _looks_like_a_block_page).
     """
     global async_playwright
     if async_playwright is None:
@@ -128,7 +162,8 @@ async def _run_playwright_scraper(urls: List[str], max_concurrent: int) -> Dict[
     async with async_playwright() as p:
         browser = await p.chromium.launch(headless=True)
         # Process URLs concurrently in chunks
-        for i in range(0, len(urls), max_concurrent):
+        chunk_starts = list(range(0, len(urls), max_concurrent))
+        for chunk_index, i in enumerate(chunk_starts):
             chunk = urls[i:i + max_concurrent]
 
             async def scrape_single_url(url: str):
@@ -142,11 +177,15 @@ async def _run_playwright_scraper(urls: List[str], max_concurrent: int) -> Dict[
 
                 html = await page.content()
                 parsed_data = _parse_html_content(url, html)
-                results[url] = parsed_data
+                if parsed_data is not None:
+                    results[url] = parsed_data
                 await context.close()
 
             # Run chunk concurrently
             await asyncio.gather(*(scrape_single_url(u) for u in chunk))
+
+            if rate_limit_seconds > 0 and chunk_index < len(chunk_starts) - 1:
+                await asyncio.sleep(rate_limit_seconds)
 
         await browser.close()
 
@@ -201,7 +240,11 @@ def drain_nsf_queue(
                 asyncio.set_event_loop(loop)
 
             scraped_results = loop.run_until_complete(
-                _run_playwright_scraper(urls_to_scrape, config.nsf_scraper_max_concurrent)
+                _run_playwright_scraper(
+                    urls_to_scrape,
+                    config.nsf_scraper_max_concurrent,
+                    rate_limit_seconds=config.nsf_scraper_rate_limit,
+                )
             )
         except Exception as exc:
             logger.exception("Playwright async execution failed: %s", exc)

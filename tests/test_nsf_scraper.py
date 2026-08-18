@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 from foa_pipeline.ingestion.nsf_scraper import (
     _extract_dates_from_html,
     _extract_nsf_id,
+    _looks_like_a_block_page,
     _parse_html_content,
     _run_playwright_scraper,
     drain_nsf_queue,
@@ -143,6 +144,46 @@ class TestParseHtmlContent:
 
 
 # ═══════════════════════════════════════════════
+# Bot-check / rate-limit block-page detection
+#
+# Found the hard way: an unthrottled 297-URL run got rate-limited by
+# nsf.gov partway through, and 261/297 "successful" scrapes were actually
+# this page, saved as if it were real content.
+# ═══════════════════════════════════════════════
+
+
+class TestLooksLikeABlockPage:
+    def test_detects_request_blocked_title(self):
+        assert _looks_like_a_block_page("Request Blocked", "<html></html>") is True
+
+    def test_detects_rate_limit_phrase_in_body(self):
+        html = "<html><body>You have exceeded the maximum number of requests.</body></html>"
+        assert _looks_like_a_block_page("Access Denied", html) is True
+
+    def test_real_title_is_not_flagged(self):
+        assert _looks_like_a_block_page("Climate Research Program", "<html></html>") is False
+
+    def test_none_title_is_not_flagged(self):
+        assert _looks_like_a_block_page(None, "<html><body>Ordinary content</body></html>") is False
+
+
+class TestParseHtmlContentBlockDetection:
+    def test_block_page_returns_none(self):
+        html = (
+            "<html><body><h1>Request Blocked</h1>"
+            "<p>You have exceeded the maximum number of requests.</p>"
+            "</body></html>"
+        )
+        assert _parse_html_content("https://nsf.gov/test", html) is None
+
+    def test_real_page_is_unaffected(self):
+        html = "<html><body><h1>Climate Research Program</h1></body></html>"
+        result = _parse_html_content("https://nsf.gov/test", html)
+        assert result is not None
+        assert result["title"] == "Climate Research Program"
+
+
+# ═══════════════════════════════════════════════
 # Playwright and Queue draining mock tests
 # ═══════════════════════════════════════════════
 
@@ -177,6 +218,69 @@ class TestPlaywrightScraper:
         assert mock_page.goto.call_count == 2
         assert mock_page.content.call_count == 2
         assert mock_browser.close.call_count == 1
+
+    @pytest.mark.asyncio
+    @patch("foa_pipeline.ingestion.nsf_scraper.async_playwright")
+    async def test_blocked_pages_are_excluded_from_results(self, mock_async_playwright):
+        """A blocked response must not be recorded as a successful scrape --
+        this is the exact failure mode that produced 261 garbage records."""
+        mock_page = AsyncMock()
+        mock_page.content.return_value = "<html><body><h1>Request Blocked</h1></body></html>"
+
+        mock_context = AsyncMock()
+        mock_context.new_page.return_value = mock_page
+        mock_browser = AsyncMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_p = AsyncMock()
+        mock_p.chromium.launch.return_value = mock_browser
+        mock_async_playwright.return_value.__aenter__.return_value = mock_p
+
+        results = await _run_playwright_scraper(["https://nsf.gov/test1"], max_concurrent=1)
+
+        assert results == {}
+
+    @pytest.mark.asyncio
+    @patch("asyncio.sleep", new_callable=AsyncMock)
+    @patch("foa_pipeline.ingestion.nsf_scraper.async_playwright")
+    async def test_rate_limit_sleeps_between_chunks_not_after_the_last(
+        self, mock_async_playwright, mock_sleep
+    ):
+        mock_page = AsyncMock()
+        mock_page.content.return_value = "<html><body><h1>Success</h1></body></html>"
+        mock_context = AsyncMock()
+        mock_context.new_page.return_value = mock_page
+        mock_browser = AsyncMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_p = AsyncMock()
+        mock_p.chromium.launch.return_value = mock_browser
+        mock_async_playwright.return_value.__aenter__.return_value = mock_p
+
+        # 3 URLs at max_concurrent=1 -> 3 chunks -> 2 inter-chunk sleeps.
+        urls = ["https://nsf.gov/a", "https://nsf.gov/b", "https://nsf.gov/c"]
+        await _run_playwright_scraper(urls, max_concurrent=1, rate_limit_seconds=2.5)
+
+        assert mock_sleep.call_count == 2
+        mock_sleep.assert_called_with(2.5)
+
+    @pytest.mark.asyncio
+    @patch("asyncio.sleep", new_callable=AsyncMock)
+    @patch("foa_pipeline.ingestion.nsf_scraper.async_playwright")
+    async def test_zero_rate_limit_never_sleeps(self, mock_async_playwright, mock_sleep):
+        mock_page = AsyncMock()
+        mock_page.content.return_value = "<html><body><h1>Success</h1></body></html>"
+        mock_context = AsyncMock()
+        mock_context.new_page.return_value = mock_page
+        mock_browser = AsyncMock()
+        mock_browser.new_context.return_value = mock_context
+        mock_p = AsyncMock()
+        mock_p.chromium.launch.return_value = mock_browser
+        mock_async_playwright.return_value.__aenter__.return_value = mock_p
+
+        await _run_playwright_scraper(
+            ["https://nsf.gov/a", "https://nsf.gov/b"], max_concurrent=1, rate_limit_seconds=0.0
+        )
+
+        mock_sleep.assert_not_called()
 
 
 class TestDrainNsfQueue:

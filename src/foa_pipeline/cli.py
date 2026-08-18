@@ -27,6 +27,12 @@ def _parse_args() -> argparse.Namespace:
     # ── Ingestion ──
     subparsers.add_parser("grants-poll", help="Poll Grants.gov API")
     subparsers.add_parser("nsf-rss-poll", help="Poll NSF RSS feed")
+    subparsers.add_parser(
+        "nsf-listing-crawl",
+        help="Crawl NSF's full funding-search results (not just the RSS "
+        "feed's recent-postings window), dedup against existing FOAs by "
+        "fuzzy title match, and queue genuinely new ones for nsf-scrape",
+    )
     sub_scrape = subparsers.add_parser("nsf-scrape", help="Scrape pending NSF URLs")
     sub_scrape.add_argument(
         "--max-pages", type=int, default=50, help="Max pages to scrape"
@@ -87,6 +93,16 @@ def _parse_args() -> argparse.Namespace:
         "skipping closed FOAs makes gold-set metrics decay as the calendar "
         "advances and gold FOAs expire. Search results are unaffected either "
         "way, since the vector index filters to open FOAs separately.",
+    )
+    tag_all_p.add_argument(
+        "--llm-backstop",
+        action="store_true",
+        default=False,
+        help="Run an LLM classification pass on FOAs that L1+L2+L3+CFDA leave "
+        "with zero tags. Off by default: unlike L3's narrow A-or-B calls, "
+        "this is an open-ended classification per zero-evidence FOA against "
+        "the whole ontology, slow enough that it should not run on every "
+        "routine tag-all/evaluate iteration.",
     )
 
     # ── Embeddings ──
@@ -206,6 +222,12 @@ def main() -> None:
     elif args.command == "nsf-rss-poll":
         stats = poll_nsf_rss(config, dry_run=args.dry_run)
         logging.info("NSF RSS poll complete: %s", stats)
+
+    elif args.command == "nsf-listing-crawl":
+        from .ingestion.nsf_listing_scraper import discover_nsf_listings
+
+        stats = discover_nsf_listings(config, dry_run=args.dry_run)
+        logging.info("NSF listing crawl complete: %s", stats)
 
     elif args.command == "nsf-scrape":
         from .ingestion.nsf_scraper import drain_nsf_queue
@@ -563,7 +585,7 @@ def _run_tag_all(config, args) -> None:
 
     db = Database(config.app_db_path)
     store = OntologyStore(config.app_db_path)
-    pipeline = TaggerPipeline(config, store)
+    pipeline = TaggerPipeline(config, store, enable_llm_backstop=args.llm_backstop)
 
     pipeline.initialize()
 

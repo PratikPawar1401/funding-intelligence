@@ -88,6 +88,15 @@ class Config:
     # right number depends on the deployment's Ollama latency.
     match_explain_top_k: int = 5
 
+    # ── Grants.gov politeness (defaulted) ──
+    # fetch_opportunity is called once per new opportunity ID with no other
+    # throttle -- broadening the search from a single-agency keyword to all
+    # ~26 agencies turns this into a burst of ~1,500+ sequential POSTs to a
+    # public, unauthenticated government API. A small fixed delay between
+    # calls is cheap insurance against soft-blocking; it does not apply to
+    # search2 itself since that's at most ~30 calls per poll (max_pages).
+    grants_gov_request_delay_seconds: float = 0.15
+
 
 def get_config() -> Config:
     """Build Config from environment variables with sensible defaults."""
@@ -96,9 +105,9 @@ def get_config() -> Config:
         grants_gov_base_url=_env("GRANTS_GOV_BASE_URL", "https://api.grants.gov/v1/api"),
         grants_gov_search_endpoint=_env("GRANTS_GOV_SEARCH_ENDPOINT", "search2"),
         grants_gov_fetch_endpoint=_env("GRANTS_GOV_FETCH_ENDPOINT", "fetchOpportunity"),
-        grants_gov_page_size=int(_env("GRANTS_GOV_PAGE_SIZE", "25")),
-        grants_gov_max_pages=int(_env("GRANTS_GOV_MAX_PAGES", "5")),
-        grants_gov_query=_env("GRANTS_GOV_QUERY", '{"keyword": "NSF"}'),
+        grants_gov_page_size=int(_env("GRANTS_GOV_PAGE_SIZE", "100")),
+        grants_gov_max_pages=int(_env("GRANTS_GOV_MAX_PAGES", "30")),
+        grants_gov_query=_env("GRANTS_GOV_QUERY", '{"oppStatuses": "forecasted|posted"}'),
         # ── NSF ──
         nsf_rss_url=_env("NSF_RSS_URL", "https://www.nsf.gov/rss/rss_www_funding.xml"),
         nsf_scraper_rate_limit=float(_env("NSF_SCRAPER_RATE_LIMIT", "1.0")),
@@ -144,6 +153,9 @@ def get_config() -> Config:
         title_combine=_env("TITLE_COMBINE", "blend"),
         # ── Grant matching ──
         match_explain_top_k=int(_env("MATCH_EXPLAIN_TOP_K", "5")),
+        grants_gov_request_delay_seconds=float(
+            _env("GRANTS_GOV_REQUEST_DELAY_SECONDS", "0.15")
+        ),
         # ── General ──
         log_level=_env("LOG_LEVEL", "INFO"),
         user_agent=_env("USER_AGENT", "foa-pipeline/1.0"),

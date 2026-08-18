@@ -186,6 +186,79 @@ class TestTaggerPipelineHierarchy:
             assert "sdg_13" in concept_ids, "Parent SDG not propagated from child"
 
 
+class TestLLMBackstopTrigger:
+    """The LLM classification backstop must fire only when every cheaper
+    layer (L1, L2, L3, CFDA) found literally nothing -- never as a way to
+    add more tags to an FOA that already has some."""
+
+    def _empty_pipeline(self, pipeline_config, ontology_store, enable_llm_backstop):
+        p = TaggerPipeline(pipeline_config, ontology_store, enable_llm_backstop=enable_llm_backstop)
+        p.l1 = MagicMock()
+        p.l1.tag_text.return_value = []
+        p.l2 = MagicMock()
+        p.l2.tag_text.return_value = []
+        p.llm_classifier = MagicMock()
+        p.llm_classifier.classify.return_value = [
+            TagEvidence(
+                concept_id="sdg_01",
+                label="No Poverty",
+                category="research_domain",
+                source_layer="layer_5_llm_classify",
+                confidence=0.75,
+                context_snippet="stand-in evidence from the mocked backstop",
+                ontology_concept_id="sdg_01",
+            ),
+        ]
+        p.is_initialized = True
+        p.llm_backstop_active = enable_llm_backstop
+        return p
+
+    def _foa(self):
+        return {
+            "foa_id": "backstop-test",
+            "title": "Some Program",
+            "program_description": "Substantive but otherwise unmatched program text.",
+            "eligibility_description": "",
+        }
+
+    def test_fires_when_nothing_else_found_and_flag_enabled(self, pipeline_config, ontology_store):
+        p = self._empty_pipeline(pipeline_config, ontology_store, enable_llm_backstop=True)
+        tags = p.tag_record(self._foa())
+        assert any(t["source_layer"] == "layer_5_llm_classify" for t in tags)
+        p.llm_classifier.classify.assert_called_once()
+
+    def test_does_not_fire_when_flag_disabled(self, pipeline_config, ontology_store):
+        p = self._empty_pipeline(pipeline_config, ontology_store, enable_llm_backstop=False)
+        tags = p.tag_record(self._foa())
+        assert tags == []
+        p.llm_classifier.classify.assert_not_called()
+
+    def test_does_not_fire_when_l1_already_found_something(self, pipeline_config, ontology_store):
+        p = self._empty_pipeline(pipeline_config, ontology_store, enable_llm_backstop=True)
+        p.l1.tag_text.return_value = [
+            TagEvidence(
+                concept_id="sdg_13",
+                label="Climate Action",
+                category="research_domain",
+                source_layer="layer_1_terminological",
+                confidence=1.0,
+                context_snippet="climate action",
+                ontology_concept_id="sdg_13",
+            ),
+        ]
+        tags = p.tag_record(self._foa())
+        assert any(t["ontology_concept_id"] == "sdg_13" for t in tags)
+        assert not any(t["source_layer"] == "layer_5_llm_classify" for t in tags)
+        p.llm_classifier.classify.assert_not_called()
+
+    def test_does_not_fire_on_empty_text_regardless_of_flag(self, pipeline_config, ontology_store):
+        p = self._empty_pipeline(pipeline_config, ontology_store, enable_llm_backstop=True)
+        empty_foa = {"foa_id": "empty", "title": "", "program_description": ""}
+        tags = p.tag_record(empty_foa)
+        assert tags == []
+        p.llm_classifier.classify.assert_not_called()
+
+
 class TestTaggerPipelineMerging:
     """Test L1/L2 merge logic."""
 

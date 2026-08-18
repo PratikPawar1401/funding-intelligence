@@ -17,6 +17,7 @@ from .evidence import TagEvidence
 from .layer1_spacy import L1Tagger
 from .layer2_embedding import L2Tagger
 from .layer3_llm import L3Tagger
+from .layer5_llm_classify import LLMClassifier
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +29,7 @@ ELIGIBILITY_EXCLUDED_CATEGORIES = frozenset({"population"})
 class TaggerPipeline:
     """Coordinates the full semantic tagging pipeline."""
 
-    def __init__(self, config: Config, store: OntologyStore):
+    def __init__(self, config: Config, store: OntologyStore, enable_llm_backstop: bool = False):
         self.config = config
         self.store = store
 
@@ -43,11 +44,23 @@ class TaggerPipeline:
             model=config.ollama_model,
             prompt_template_path=config.raw_output_dir.parent / "prompts" / "disambiguation.txt"
         )
+        self.llm_classifier = LLMClassifier(
+            base_url=config.ollama_base_url,
+            model=config.ollama_model,
+        )
+
+        # Requested via the tag-all --llm-backstop flag, not config: unlike
+        # L3's narrow A-or-B calls, this asks an open-ended question against
+        # the whole ontology for every zero-evidence FOA, which is slow
+        # enough that it should stay opt-in rather than run on every fast
+        # tag-all/evaluate iteration.
+        self._llm_backstop_requested = enable_llm_backstop
 
         self.is_initialized = False
-        # Set definitively in initialize(); declared here so the attribute
-        # always exists even if a caller inspects it beforehand.
+        # Set definitively in initialize(); declared here so the attributes
+        # always exist even if a caller inspects them beforehand.
         self.l3_active = False
+        self.llm_backstop_active = False
 
     def initialize(self) -> None:
         """Load models and build indices. Call before tag_record."""
@@ -73,6 +86,17 @@ class TaggerPipeline:
                     "continuing with Layer 1 + Layer 2 only."
                 )
                 self.l3_active = False
+
+        self.llm_backstop_active = self._llm_backstop_requested
+        if self.llm_backstop_active:
+            if self.llm_classifier.is_available():
+                logger.info("LLM classification backstop enabled and available.")
+            else:
+                logger.warning(
+                    "LLM classification backstop requested but Ollama is not "
+                    "available; continuing without it."
+                )
+                self.llm_backstop_active = False
 
         self.is_initialized = True
 
@@ -157,6 +181,12 @@ class TaggerPipeline:
                             ontology_concept_id=concept.concept_id,
                         )
                     )
+
+        # 6. Recall Backstop (LLM Classification) -- last resort, only when
+        # every cheaper layer above (including the CFDA crosswalk) found
+        # nothing at all. Opt-in via --llm-backstop; see layer5_llm_classify.py.
+        if not final_evidence and self.llm_backstop_active:
+            final_evidence.extend(self.llm_classifier.classify(full_text, self.store))
 
         # Return serialized tags
         return [ev.to_tag_record() for ev in final_evidence]
