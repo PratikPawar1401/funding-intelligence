@@ -1219,6 +1219,119 @@ discriminator ever being attemptable at all. The oracle ceiling (F1 0.791)
 remains real and reachable in principle; reaching it is gated on data that
 does not yet exist, not on a better algorithm applied to the data that does.
 
+## 4l. Revisiting Attempt 4 With Real Human-Labeled Data — Still Not Shipped, But Confirms and Localizes the Diagnosis
+
+§4k's closing finding was that 20 gold FOAs cannot support training any new
+model component. To test that directly, built a fast, scoped annotation
+task rather than expanding full 5-category gold annotation: a binary
+yes/no judgment per `(FOA, concept)` candidate — much cheaper per label
+than the codebook's full annotation, and sufficient for the cross-encoder's
+actual supervision signal.
+
+### Data collection
+
+`scripts/generate_labeling_batch.py` sampled 300 FOAs (seed 7) excluding
+every FOA already reserved by the gold set or its expansion candidates,
+pulled `method`/`population` candidates from Layer 2 at thresholds
+deliberately below production (0.31/0.28 vs. 0.40/0.35) to capture the
+gray zone where a reranker's judgment would actually matter, and rendered
+1,090 rows (`data/evaluation/labeling_batch.csv`: 440 method, 650
+population) with a per-concept, sentence-level-rescored snippet — not
+Layer 2's coarse 250-word context chunk, which was found to be
+byte-identical across every candidate concept for 113/200 multi-candidate
+FOAs before this fix (most FOA text is under 250 words, so it produces
+exactly one chunk regardless of how many concepts are being judged against
+it).
+
+Labeled by hand against `data/evaluation/LABELING_INSTRUCTIONS.md`'s
+primary-focus rule (same principle as the full annotation codebook), judging
+from the snippet alone since that's what the model would ever see. Returned
+1,083 answered rows (7 left blank, correctly skipped rather than counted as
+"no" — see `scripts/merge_labeling_batch.py`): **44/434 method positive
+(10.1%), 72/649 population positive (11.1%)**, spanning 175 and 168 distinct
+FOAs respectively — a real multiple of attempt 4's 11/8 positives from 20
+FOAs, though still short of `LABELING_INSTRUCTIONS.md`'s stated 80-100/category
+target.
+
+### Two evaluations, and why only one is comparable to production
+
+`scripts/test_crossencoder_human_labels.py` reran attempt 4's exact
+architecture (same base model, same `pos_weight` loss, same
+threshold-on-held-out-training-FOAs discipline) via FOA-level 5-fold CV
+**on the labeling-batch pool itself**: method F1 0.390, population F1
+0.380. These are real, non-degenerate numbers, but **not comparable** to
+production's 0.480/0.522 — that CV scores held-out slices of a
+deliberately gray-zone, sub-threshold candidate pool from 300 different,
+non-gold FOAs, not the same benchmark production is measured against.
+Quoting this pair of numbers next to production would be comparing
+different candidate pools, not evaluating a substitute for production.
+
+The valid comparison — `scripts/test_crossencoder_human_labels_eval_gold.py`
+— trains **once** on all 1,083 human-labeled candidates (confirmed zero FOA
+overlap with the eval set: 230 train FOAs, 20 eval FOAs) and evaluates that
+single model directly against `setfit_candidates.json`, the exact same
+20-gold-FOA candidate pool attempt 4 was scored against and the same one
+production's 0.480/0.522 is quoted from:
+
+| | Current production | Attempt 4 (20 gold FOAs) | Attempt 4, retrained on human labels |
+|---|---|---|---|
+| method F1 | 0.480 | 0.065 | **0.154** (P=0.500, R=0.091, TP=1 FP=1 FN=10) |
+| population F1 | 0.522 | 0.182 | **0.462** (P=0.600, R=0.375, TP=3 FP=2 FN=5) |
+
+Neither beats production. Still not shipped. But more real data closed a
+large share of the gap for `population` (0.182 → 0.462, 78% of the distance
+to 0.522) while barely moving `method` (0.065 → 0.154, 14% of the distance
+to 0.480) — a large enough asymmetry between two runs of the identical
+architecture and training procedure to be a signal about the data, not
+noise.
+
+### Diagnosis: method's positives are concentrated in too few concepts, population's aren't
+
+Checked whether each gold-eval positive's concept had *any* positive
+training example at all:
+
+| | Positive training examples | Distinct concepts covered | Gold-eval positives | ...belonging to a covered concept |
+|---|---|---|---|---|
+| method | 44 | 11 of 25 | 11 | **6 (55%)** |
+| population | 72 | 17 of 20 | 8 | **8 (100%)** |
+
+`method_20` alone accounts for 20 of the 44 method positives (45%); 14 of
+25 method concepts have zero positive training examples. Five of the 20
+gold-set's method positives (`method_06`, `method_14` ×2, `method_08`,
+`method_21`) belong to concepts the model never saw a single positive
+example of during training — no architecture or amount of *fitting* can
+recover those, since there is nothing in the training data to generalize
+from. This caps method's achievable recall on this benchmark at 6/11 =
+0.545 before the model even starts learning, and the actual result (1/11)
+shows it fell well short of even that ceiling — consistent with 6 covered
+positives still being too few to learn a reliable boundary per concept.
+Population's threshold (0.28, vs. method's 0.31) evidently sampled a
+gray zone with much better concept coverage, which is the direct,
+identified reason its retrained result closed so much further toward
+production while method's did not.
+
+### What this changes and doesn't
+
+Confirms §4k's core finding — data volume, not architecture, was attempt
+4's bottleneck — directionally: population's result moved by 0.28 F1 points
+from an 8x-larger, still-modest amount of real data. It also localizes a
+second, more specific constraint the FOA-count framing alone didn't
+capture: **coverage across concepts matters as much as raw candidate
+count.** A future labeling pass aimed at fixing method specifically should
+be concept-stratified (deliberately surfacing candidates for
+under-represented method concepts) rather than more FOA-random sampling at
+the same gray-zone threshold, which by construction keeps re-drawing from
+whichever concepts already dominate the candidate distribution
+(`method_20`/Bioinformatics-adjacent concepts, per the count above).
+
+Not wired into `pipeline.py` — both categories still lose to production on
+the standard benchmark, and shipping a regression to "prove a trend" would
+violate this project's own gold-before/after discipline. Kept as evidence:
+`data/evaluation/labeled_candidates.json`,
+`data/evaluation/crossencoder_human_labels_cv_results.json`, and
+`data/evaluation/crossencoder_human_labels_eval_gold_results.json` are all
+committed alongside this section.
+
 ---
 
 ## 5. Error Analysis
