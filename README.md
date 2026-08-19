@@ -1,5 +1,7 @@
 # ISSR AI-Powered Funding Intelligence
 
+![Google Summer of Code 2026 x HumanAI Foundation](assets/screenshots/gsoc-humanai-banner.png)
+
 > An end-to-end system that automatically discovers, parses, normalises, and semantically tags federal Funding Opportunity Announcements (FOAs) — built as a **Google Summer of Code 2026** project for the [HumanAI Foundation](https://humanai.foundation/) / [University of Alabama ISSR](https://issr.ua.edu/).
 
 **Contributor:** Pratik Pawar
@@ -9,20 +11,14 @@
 
 ## Architecture
 
-```
-Data Sources          Ingestion             Processing              Storage            Serving
-┌──────────┐    ┌─────────────────┐    ┌──────────────────┐    ┌─────────────┐    ┌──────────┐
-│Grants.gov│───>│ API Poller      │───>│ Normaliser       │───>│ SQLite DB   │───>│ FastAPI  │
-│ REST API │    │ (retry+backoff) │    │ (date/text/amt)  │    │ (FTS5)      │    │ Backend  │
-└──────────┘    ├─────────────────┤    ├──────────────────┤    ├─────────────┤    ├──────────┤
-┌──────────┐    │ RSS Detector    │    │ JSON Schema      │    │ FAISS Index │    │   Web    │
-│  NSF.gov │───>│ + Playwright    │───>│ Validator        │    │ (vectors)   │    │ Frontend │
-│  Website │    │   Scraper       │    ├──────────────────┤    └─────────────┘    └──────────┘
-└──────────┘    ├─────────────────┤    │ L1: spaCy        │
-┌──────────┐    │ Layout-Aware    │    │ L2: Embeddings   │
-│ FOA PDFs │───>│ PDF Parser      │    │ L3: LLM (Mistral)│
-└──────────┘    └─────────────────┘    └──────────────────┘
-```
+At a glance, the system moves data through five stages:
+
+![High-level architecture](assets/screenshots/architecture-simple.png)
+
+The full picture, including all five tagging layers, the ontology store, and
+the offline evaluation loop that feeds back into tuning Layer 2:
+
+![Detailed component architecture](assets/screenshots/architecture-detailed.png)
 
 ---
 
@@ -48,6 +44,26 @@ Data Sources          Ingestion             Processing              Storage     
 | **Web Frontend** | Next.js — dense results table + faceted sidebar filters matching simpler.grants.gov's layout, ISSR-themed; FOA detail view, AI Match, and Ontology Tags dashboard | Complete |
 | **CSV/JSON Export** | Structured export with tag evidence provenance | Complete |
 | **Docker Deployment** | Full-stack containerisation with docker-compose | Complete |
+
+---
+
+## Screenshots
+
+**Opportunities** — dense, sortable table with faceted filters, matching simpler.grants.gov's layout:
+
+![Opportunities table](assets/screenshots/opportunities-table.png)
+
+**FOA Detail** — every field plus the semantic tags applied to it, each with its source layer, confidence, and the exact evidence snippet:
+
+![FOA detail view](assets/screenshots/foa-detail.png)
+
+**AI Match** — a researcher profile ranked against the corpus by hybrid relevance score, with an LLM-generated explanation per result:
+
+![AI Match view](assets/screenshots/ai-match.png)
+
+**Ontology Tags** — how much of the controlled vocabulary is actually in use across the ingested corpus:
+
+![Ontology tags dashboard](assets/screenshots/ontology-tags.png)
 
 ---
 
@@ -139,6 +155,10 @@ PYTHONPATH=src python -m foa_pipeline.cli search \
 Each result shows its cosine score, tag-overlap ratio, and the specific matched
 tags, so a ranking can be explained rather than taken on trust.
 
+The same flow, as served through the web frontend's streamed `/api/match` endpoint:
+
+![AI Match request sequence](assets/screenshots/ai-match-sequence.png)
+
 ### Evaluate Tagging Accuracy
 
 ```bash
@@ -211,6 +231,12 @@ PYTHONPATH=src pytest --cov=src/foa_pipeline tests/
 make docker-up     # Build and start all services
 make docker-down   # Stop services
 ```
+
+The API and web frontend run as separate containers, with the web container
+reaching the API server-to-server and the browser talking to it directly only
+for the AI Match view (the two-CORS-path split documented in `config.py`):
+
+![Deployment diagram](assets/screenshots/deployment.png)
 
 ---
 
