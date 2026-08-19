@@ -12,7 +12,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
  */
 export function Topbar({ children }: { children?: ReactNode }) {
   return (
-    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b border-border bg-background px-6">
+    <header className="flex h-16 shrink-0 items-center justify-between gap-4 border-b-2 border-primary bg-background px-6">
       <div className="flex flex-1 items-center gap-3">
         <SidebarTrigger />
         {children}

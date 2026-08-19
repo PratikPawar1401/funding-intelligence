@@ -80,7 +80,7 @@ export function FacetFilterMenu({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="start" className="w-72">
+      <PopoverContent align="start" className="w-72 max-h-[70vh] overflow-y-auto">
         <nav aria-label="Filter opportunities" className="flex flex-col gap-6">
           <FacetGroup title="Status">
             {statusOptions.map((opt) => (

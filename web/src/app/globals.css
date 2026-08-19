@@ -9,6 +9,7 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-heading: var(--font-heading);
+  --font-wordmark: var(--font-wordmark);
   --color-status-open: var(--status-open);
   --color-status-closed: var(--status-closed);
   --color-status-forecasted: var(--status-forecasted);
@@ -103,19 +104,24 @@
 }
 
 .dark {
-  /* issr.ua.edu is light-only, so dark mode has no source to copy directly --
-   * derived from the same crimson accent, lightened for AA contrast as text
-   * (a filled button can stay closer to the brand hex since it's a large
-   * solid shape, not small text). */
+  /* issr.ua.edu is light-only, so dark mode has no source to copy directly.
+   * The brand crimson (#9e1b32) is kept IDENTICAL to :root's by deliberate
+   * choice, not derived/lightened -- previously this was a lightened pink
+   * (#e08a9b) for AA text contrast against the dark background (raw crimson
+   * as small text here is ~2.3:1, below the 4.5:1 AA minimum). Every
+   * text-primary usage in the app (badges, labels, links) inherits that
+   * tradeoff now that the token is unified; the color reads correctly on
+   * every *filled* primary surface (buttons, active nav, badges -- all
+   * paired with primary-foreground) either way. */
   --background: #14171c;
   --foreground: #e5e7eb;
   --card: #1c2027;
   --card-foreground: #e5e7eb;
   --popover: #1c2027;
   --popover-foreground: #e5e7eb;
-  --primary: #e08a9b;
-  --primary-foreground: #1c1b22;
-  --primary-hover: #eaa7b4;
+  --primary: #9e1b32;
+  --primary-foreground: #ffffff;
+  --primary-hover: #7e1628;
   --secondary: #262b33;
   --secondary-foreground: #e5e7eb;
   --muted: #262b33;
@@ -125,7 +131,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: #e08a9b;
+  --ring: #9e1b32;
   --chart-1: oklch(0.87 0 0);
   --chart-2: oklch(0.556 0 0);
   --chart-3: oklch(0.439 0 0);
@@ -136,12 +142,12 @@
   --status-forecasted: #f59e0b;
   --sidebar: #1c2027;
   --sidebar-foreground: #e5e7eb;
-  --sidebar-primary: #e08a9b;
-  --sidebar-primary-foreground: #1c1b22;
+  --sidebar-primary: #9e1b32;
+  --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #2f3540;
   --sidebar-accent-foreground: #e5e7eb;
   --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: #e08a9b;
+  --sidebar-ring: #9e1b32;
 }
 
 @layer base {

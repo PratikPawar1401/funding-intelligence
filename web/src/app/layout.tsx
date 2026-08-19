@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Montserrat } from "next/font/google";
+import { Fraunces, Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 
 import { SidebarNav } from "@/components/layout/sidebar-nav";
@@ -22,6 +22,16 @@ const inter = Inter({
   weight: ["400", "500", "600"],
 });
 
+// A distinct serif wordmark treatment for the "ISSR" brand mark only (see
+// sidebar-nav.tsx) -- a serif logotype over a sans-serif UI is a deliberate
+// brand contrast, not an inconsistency; kept isolated to its own variable so
+// it never leaks into body/heading text elsewhere.
+const fraunces = Fraunces({
+  variable: "--font-wordmark",
+  subsets: ["latin"],
+  weight: ["700"],
+});
+
 export const metadata: Metadata = {
   title: "ISSR Funding Intelligence | Simpler Grants.gov",
   description:
@@ -32,7 +42,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${montserrat.variable} ${inter.variable} h-full antialiased`}
+      className={`${montserrat.variable} ${inter.variable} ${fraunces.variable} h-full antialiased`}
       suppressHydrationWarning
     >
       <body className="min-h-full font-sans">

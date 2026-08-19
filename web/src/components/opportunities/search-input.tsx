@@ -44,14 +44,14 @@ export function SearchInput() {
   }, [debounced]);
 
   return (
-    <div className="relative w-full max-w-xl">
-      <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" />
+    <div className="relative w-full max-w-2xl">
+      <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
       <Input
         type="search"
         placeholder="Search funding opportunities, agencies, or CFDA numbers..."
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        className="pl-9"
+        className="h-12 pl-11 text-base"
         aria-label="Search funding opportunities"
       />
     </div>

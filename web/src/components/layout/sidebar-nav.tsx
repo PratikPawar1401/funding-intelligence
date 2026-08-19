@@ -1,6 +1,6 @@
 "use client";
 
-import { Brain, Table2, Tags, WandSparkles } from "lucide-react";
+import { Table2, Tags, WandSparkles } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ComponentType } from "react";
@@ -41,11 +41,13 @@ export function SidebarNav() {
         <Link
           href="/opportunities"
           onClick={handleNavigate}
-          className="flex items-center gap-2 px-2 py-2"
+          className="flex flex-col items-center px-2 py-3 text-center"
         >
-          <Brain className="size-6 text-primary" />
-          <span className="font-heading text-lg font-semibold text-sidebar-foreground">
-            ISSR<span className="text-primary">Intel</span>
+          <span className="font-wordmark text-base font-bold tracking-tight whitespace-nowrap text-sidebar-foreground">
+            Funding Intelligence
+          </span>
+          <span className="text-[10px] font-semibold whitespace-nowrap text-sidebar-primary">
+            Institute for Social Sciences and Research
           </span>
         </Link>
       </SidebarHeader>
