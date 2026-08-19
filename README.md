@@ -2,7 +2,8 @@
 
 > An end-to-end system that automatically discovers, parses, normalises, and semantically tags federal Funding Opportunity Announcements (FOAs) — built as a **Google Summer of Code 2026** project for the [HumanAI Foundation](https://humanai.foundation/) / [University of Alabama ISSR](https://issr.ua.edu/).
 
-**The goal**: A "Simpler Grants.gov" — an intelligent, searchable platform that replaces the manual, fragmented process research development officers use to find funding opportunities.
+**Contributor:** Pratik Pawar
+**Mentor:** Andrya Allen
 
 ---
 
@@ -29,24 +30,24 @@ Data Sources          Ingestion             Processing              Storage     
 
 | Feature | Description | Status |
 |---|---|---|
-| **Grants.gov Ingestion** | Polls the Grants.gov REST API with pagination, retry backoff, and deduplication | ✅ Complete |
-| **NSF Web Scraping** | RSS feed detection → headless Playwright scraping of JS-rendered NSF pages | ✅ Complete |
-| **Layout-Aware PDF Parsing** | pymupdf4llm preserves column reading order; pdfplumber extracts tables | ✅ Complete |
-| **Data Normalisation** | Harmonises dates, amounts, text encoding across all sources into a canonical schema | ✅ Complete |
-| **JSON Schema Validation** | Draft-7 validation enforcing required fields, date formats, and enum values | ✅ Complete |
-| **Ontology Store** | SQLite-backed taxonomy with GREAT Act categories, UN SDGs, research methods, populations | ✅ Complete |
-| **Synonym Expansion** | WordNet-based expansion for improved recall in terminological matching | ✅ Complete |
-| **Layer 1 Tagging (spaCy)** | spaCy PhraseMatcher for exact/synonym terminological matching | ✅ Complete |
-| **Layer 2 Tagging (Embeddings)** | all-mpnet-base-v2 cosine similarity for semantic gap-filling | ✅ Complete |
-| **Layer 3 Tagging (LLM)** | Mistral-7B via Ollama for ambiguous/cross-domain disambiguation | ✅ Complete (was a stretch goal) |
-| **Evaluation Framework** | Gold standard P/R/F1 evaluation with per-category error analysis | ✅ Complete |
-| **PDF Downloader** | Async aiohttp downloader for linked PDFs with auto-parsing | ✅ Complete |
-| **Vector Search** | FAISS IndexFlatIP for semantic similarity search across FOA embeddings | ✅ Complete (was a stretch goal) |
-| **Grant Matching** | Researcher profile → ranked FOAs via hybrid cosine + tag-overlap score, with LLM-generated match explanations for the top results | ✅ Complete |
-| **FastAPI Backend** | REST API with CRUD, search, match, tag, and export endpoints | ✅ Complete |
-| **Web Frontend** | Next.js — dense results table + faceted sidebar filters matching simpler.grants.gov's layout, ISSR-themed; FOA detail view, AI Match, and Ontology Tags dashboard | ✅ Complete |
-| **CSV/JSON Export** | Structured export with tag evidence provenance | ✅ Complete |
-| **Docker Deployment** | Full-stack containerisation with docker-compose | ✅ Complete |
+| **Grants.gov Ingestion** | Polls the Grants.gov REST API with pagination, retry backoff, and deduplication | Complete |
+| **NSF Web Scraping** | RSS feed detection → headless Playwright scraping of JS-rendered NSF pages | Complete |
+| **Layout-Aware PDF Parsing** | pymupdf4llm preserves column reading order; pdfplumber extracts tables | Complete |
+| **Data Normalisation** | Harmonises dates, amounts, text encoding across all sources into a canonical schema | Complete |
+| **JSON Schema Validation** | Draft-7 validation enforcing required fields, date formats, and enum values | Complete |
+| **Ontology Store** | SQLite-backed taxonomy with GREAT Act categories, UN SDGs, research methods, populations | Complete |
+| **Synonym Expansion** | WordNet-based expansion for improved recall in terminological matching | Complete |
+| **Layer 1 Tagging (spaCy)** | spaCy PhraseMatcher for exact/synonym terminological matching | Complete |
+| **Layer 2 Tagging (Embeddings)** | all-mpnet-base-v2 cosine similarity for semantic gap-filling | Complete |
+| **Layer 3 Tagging (LLM)** | Mistral-7B via Ollama for ambiguous/cross-domain disambiguation | Complete (was a stretch goal) |
+| **Evaluation Framework** | Gold standard P/R/F1 evaluation with per-category error analysis | Complete |
+| **PDF Downloader** | Async aiohttp downloader for linked PDFs with auto-parsing | Complete |
+| **Vector Search** | FAISS IndexFlatIP for semantic similarity search across FOA embeddings | Complete (was a stretch goal) |
+| **Grant Matching** | Researcher profile → ranked FOAs via hybrid cosine + tag-overlap score, with LLM-generated match explanations for the top results | Complete |
+| **FastAPI Backend** | REST API with CRUD, search, match, tag, and export endpoints | Complete |
+| **Web Frontend** | Next.js — dense results table + faceted sidebar filters matching simpler.grants.gov's layout, ISSR-themed; FOA detail view, AI Match, and Ontology Tags dashboard | Complete |
+| **CSV/JSON Export** | Structured export with tag evidence provenance | Complete |
+| **Docker Deployment** | Full-stack containerisation with docker-compose | Complete |
 
 ---
 
@@ -54,13 +55,13 @@ Data Sources          Ingestion             Processing              Storage     
 
 | Phase | Timeline | Deliverable | Status |
 |---|---|---|---|
-| **Phase 0** | Community Bonding | Ontology setup, directory structure, dev environment | ✅ Done |
-| **Phase 1** | Weeks 1–3 | Hybrid ingestion engine + PDF parser + normalisation | ✅ Done |
-| **Phase 2** | Weeks 4–6 | Schema enforcement + Layer 1 spaCy tagger + evaluation | ✅ Done |
-| **Phase 3** | Weeks 7–8 | Embedding layer (L2) + merge integration | ✅ Done |
-| **Phase 4** | Week 9 | Evaluation metrics (P/R/F1) + matching foundation | ✅ Done |
-| **Phase 5** | Weeks 10–12 | Integration testing + Docker + API + frontend | 🔨 Active |
-| **Phase 6** | Week 13 | Final report + documentation + handoff | ⏳ Upcoming |
+| **Phase 0** | Community Bonding | Ontology setup, directory structure, dev environment | Done |
+| **Phase 1** | Weeks 1–3 | Hybrid ingestion engine + PDF parser + normalisation | Done |
+| **Phase 2** | Weeks 4–6 | Schema enforcement + Layer 1 spaCy tagger + evaluation | Done |
+| **Phase 3** | Weeks 7–8 | Embedding layer (L2) + merge integration | Done |
+| **Phase 4** | Week 9 | Evaluation metrics (P/R/F1) + matching foundation | Done |
+| **Phase 5** | Weeks 10–12 | Integration testing + Docker + API + frontend | Active |
+| **Phase 6** | Week 13 | Final report + documentation + handoff | Upcoming |
 
 ---
 
@@ -285,9 +286,8 @@ funding-intelligence/
 │   └── prompts/                  # LLM prompt templates
 │
 ├── tests/                        # 486 tests
-├── Documentation/                # ANNOTATION_CODEBOOK.md, DEMO.md, MATCHING.md,
-│                                  #   ONTOLOGY.md, EVALUATION.md, plus the
-│                                  #   blueprint, proposal, and reports
+├── Documentation/                # ANNOTATION_CODEBOOK.md, MATCHING.md,
+│                                  #   ONTOLOGY.md, EVALUATION.md
 ├── scraper_config/               # Per-domain scraping rules (YAML)
 ├── phase-test-scripts/           # End-to-end smoke scripts
 │
@@ -408,8 +408,6 @@ Good first contributions:
 Please also read the [Code of Conduct](CODE_OF_CONDUCT.md). For security issues,
 follow [SECURITY.md](SECURITY.md) rather than opening a public issue.
 
-**Origin**: Google Summer of Code 2026, HumanAI Foundation / University of Alabama ISSR.
-**Mentor**: Dr. Christopher Cotropia (University of Alabama)
 
 ## License
 
