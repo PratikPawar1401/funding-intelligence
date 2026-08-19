@@ -286,7 +286,7 @@ class TestTaggerPipelineMerging:
 class TestL1L2Corroboration:
     """An L1 exact-match answers "does this string appear", not "is this
     concept what the FOA is about" -- e.g. nsf_bio firing on a circuits FOA
-    because "biology" appears once as an application area (see EVALUATION.md,
+    because "biology" appears once as an application area (see Documentation/EVALUATION.md,
     the CSCS false positive). For categories in l1_corroboration_categories,
     an L1 hit must also be found by L2 independently, or it's suppressed."""
 

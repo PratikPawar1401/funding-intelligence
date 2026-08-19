@@ -5,7 +5,7 @@ setfit_candidates.json.
 
 The original attempt was architecturally correct but data-starved: ~9
 positive examples per training fold (11-19 positives total, drawn from only
-20 gold FOAs), which EVALUATION.md 4k diagnosed as "right architecture,
+20 gold FOAs), which Documentation/EVALUATION.md 4k diagnosed as "right architecture,
 insufficient data." data/evaluation/labeled_candidates.json (from
 labeling_batch.csv, human-judged) supplies 44 method positives / 175 FOAs
 and 72 population positives / 168 FOAs -- still short of the ~80-100/category

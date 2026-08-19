@@ -5,7 +5,7 @@ That script's CV numbers (method F1 0.390, population F1 0.380) are scored
 against held-out slices of the labeling_batch pool itself -- a deliberately
 harder, gray-zone candidate set from 300 different, non-gold FOAs. They are
 NOT comparable to the "current production" F1 (0.480 method, 0.522
-population) quoted throughout EVALUATION.md, since that number is always
+population) quoted throughout Documentation/EVALUATION.md, since that number is always
 scored against the fixed 20-gold-FOA candidate pool in
 data/evaluation/setfit_candidates.json.
 
@@ -17,7 +17,7 @@ evaluate that single trained model directly against setfit_candidates.json
 (the 20 gold FOAs' real L2 candidates, TP/FP-labeled). No FOA overlap
 between train and eval, so this is a clean held-out test and the resulting
 F1 is directly comparable to the 0.480/0.522 production numbers quoted
-everywhere else in EVALUATION.md's §4k.
+everywhere else in Documentation/EVALUATION.md's §4k.
 
 Threshold is picked on a held-out 20% slice of the *training* FOAs (never
 touching setfit_candidates.json), same discipline as every other threshold

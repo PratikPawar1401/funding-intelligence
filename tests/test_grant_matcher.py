@@ -53,7 +53,7 @@ def _tag(concept_id, label=None):
 
 
 class TestComputeTagOverlap:
-    """The tag overlap ratio defined in MATCHING.md."""
+    """The tag overlap ratio defined in Documentation/MATCHING.md."""
 
     def test_no_profile_tags_returns_zero(self):
         ratio, matched = compute_tag_overlap(set(), {"sdg_03"})
@@ -71,7 +71,7 @@ class TestComputeTagOverlap:
         assert matched == ["method_01", "sdg_03"]
 
     def test_matches_matching_md_worked_example(self):
-        """MATCHING.md: profile has 4 tags, 2 match -> ratio 0.5."""
+        """Documentation/MATCHING.md: profile has 4 tags, 2 match -> ratio 0.5."""
         profile = {"pop_06", "method_01", "sdg_03", "great_02"}
         foa = {"pop_06", "method_01"}
         ratio, matched = compute_tag_overlap(profile, foa)

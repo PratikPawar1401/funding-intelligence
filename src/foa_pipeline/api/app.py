@@ -3,7 +3,7 @@ FastAPI application factory.
 
 Serves the FOA data through a REST API consumed by the web frontend
 (web/ -- a standalone Next.js server, not served by this process; see
-MATCHING.md and the frontend-rewrite plan for why).
+Documentation/MATCHING.md and the frontend-rewrite plan for why).
 """
 
 from fastapi import FastAPI

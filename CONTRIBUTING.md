@@ -99,7 +99,7 @@ lowers global F1 needs a stated reason to keep it.
   *silver* standard produced by the same model family used for Layer 3, so
   scoring against it is partly circular. Use it for threshold tuning only.
   Headline numbers come from the 20-FOA hand-labelled `eval_set_gold.json`.
-  See [EVALUATION.md](EVALUATION.md).
+  See [EVALUATION.md](Documentation/EVALUATION.md).
 - **Re-run `setup-ontology` after editing synonyms.** Synonyms are stored in
   SQLite; editing `ontology/synonyms.py` alone changes nothing until the store
   is rebuilt.
@@ -116,7 +116,7 @@ lowers global F1 needs a stated reason to keep it.
 
 Concepts live in CSVs under `data/ontology/`. To add one: add the row, run
 `setup-ontology`, run `precompute-embeddings`, re-tag, and evaluate. Document
-the rationale in [ONTOLOGY.md](ONTOLOGY.md) — the design reasoning matters as
+the rationale in [ONTOLOGY.md](Documentation/ONTOLOGY.md) — the design reasoning matters as
 much as the concept itself.
 
 ---

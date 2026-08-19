@@ -1,6 +1,6 @@
 /**
  * Shapes mirror the FastAPI backend exactly (src/foa_pipeline/api/routes/,
- * src/foa_pipeline/storage/database.py) -- see MATCHING.md and this repo's
+ * src/foa_pipeline/storage/database.py) -- see Documentation/MATCHING.md and this repo's
  * root README for the source of truth.
  */
 

@@ -14,7 +14,7 @@ Research (ISSR).
 ### Added
 - `POST /api/match` — grant matching exposed via the API, not just the CLI.
   Wraps the existing hybrid score (0.7 cosine similarity + 0.3 ontology tag
-  overlap, `MATCHING.md`) and, when `explain: true` (the default) and a local
+  overlap, `Documentation/MATCHING.md`) and, when `explain: true` (the default) and a local
   LLM is reachable, layers a plain-language explanation and a `strong`/
   `moderate`/`weak` relevance rating onto the top `MATCH_EXPLAIN_TOP_K`
   results (`matching/explain.py`, new). The reviewed window is re-sorted by
@@ -22,7 +22,7 @@ Research (ISSR).
   the LLM's influence and worst-case latency. Every failure (Ollama down,
   timeout, malformed response) degrades to a deterministic templated
   sentence; the response always carries `llm_available` so a caller can be
-  honest about degraded mode. See `MATCHING.md`'s new "LLM Match
+  honest about degraded mode. See `Documentation/MATCHING.md`'s new "LLM Match
   Explanations" section for the full contract, including two pre-existing
   bugs this work surfaced and fixed (below).
 - Frontend: the "Semantic Match" view now calls `/api/match` instead of the
@@ -62,10 +62,10 @@ Research (ISSR).
   prediction in it a false positive and collapse global gold F1. It supplies
   descriptions from an external authority, synonyms for 23 of 26 fields, and
   the first real `parent_id` values in the project — which would activate the
-  dormant hierarchy propagation. See `EVALUATION.md` §4g.
+  dormant hierarchy propagation. See `Documentation/EVALUATION.md` §4g.
 - Namespaced evaluation error logs (`false_positives_gold.json` /
   `_silver.json`, etc.). Both runs previously shared filenames, so a silver run
-  silently replaced the gold error analysis that `EVALUATION.md` §5 documents.
+  silently replaced the gold error analysis that `Documentation/EVALUATION.md` §5 documents.
   `diagnose-separation` gains `--eval-set`, defaulting to gold.
 - `research_discipline` prompt in `evaluation/synthetic_annotator.py`, plus
   per-category annotation. The silver set was annotated before that category
@@ -84,15 +84,15 @@ Research (ISSR).
   tagging. Only HTML markup stripping is enabled by default; the text-level
   pattern groups (eligibility blocks, deadline tables, PAPPG references) are
   retained but disabled because measurement showed they don't improve tagging.
-  See `EVALUATION.md` §4b for why, and the module docstring for per-group
+  See `Documentation/EVALUATION.md` §4b for why, and the module docstring for per-group
   numbers.
 - `grant_matcher.py` — researcher profile → ranked FOA matching using the hybrid
   relevance score (`0.7 × cosine + 0.3 × tag_overlap`) documented in
-  `MATCHING.md`. Retrieves a wider FAISS candidate pool than requested before
+  `Documentation/MATCHING.md`. Retrieves a wider FAISS candidate pool than requested before
   re-ranking, so tag overlap can genuinely promote results rather than only
   reorder the top-k. Every result carries `cosine_score`, `tag_overlap_ratio`,
   `matched_tags`, and `hybrid_score` so a ranking can be explained.
-- `ANNOTATION_CODEBOOK.md` — annotation guidelines and inter-annotator agreement
+- `Documentation/ANNOTATION_CODEBOOK.md` — annotation guidelines and inter-annotator agreement
   protocol for producing a multi-annotator gold standard.
 - `tests/test_api.py` — 29 tests covering the previously untested FastAPI layer
   (routes, filtering, pagination, validation, export, OpenAPI registration).
@@ -110,10 +110,10 @@ Research (ISSR).
 - `VectorIndex.search()` accepts an optional per-call `Database`, so a shared
   cached index can use request-scoped connections rather than holding one
   (SQLite connections cannot cross threads).
-- `ONTOLOGY.md` documents the `research_discipline` (NSF Directorates) category
+- `Documentation/ONTOLOGY.md` documents the `research_discipline` (NSF Directorates) category
   and records that it supersedes UN SDGs for domain classification, with the
   measured F1 gap as justification. Concept count corrected 76 → 84.
-- `EVALUATION.md` documents `eval_set_50.json` as an LLM-generated *silver*
+- `Documentation/EVALUATION.md` documents `eval_set_50.json` as an LLM-generated *silver*
   standard that cannot substitute for a second human annotator.
 - Enriched `research_methods.csv` descriptions for concepts that were producing
   false negatives.
@@ -167,7 +167,7 @@ Research (ISSR).
   Innovation and Partnerships separately. All were exclusive to `nsf_eng`.
   `accessibility` was blacklisted from People with Disabilities on the same
   basis. Gold F1 0.517 → **0.527** (P 0.427 → 0.442, recall unchanged).
-  See EVALUATION.md §4h — including the measurement that the top-3-per-category
+  See Documentation/EVALUATION.md §4h — including the measurement that the top-3-per-category
   cap re-admits five of the nine removals through Layer 2.
 - **`source_url` was null on every Grants.gov record** (115 of 136), a field the
   scope of work lists as required. The search API returns no link of any kind —
@@ -242,9 +242,9 @@ Gold-standard metrics (20-FOA hand-labelled set) across this work:
 | F1 | 0.471 | **0.517** |
 
 Layer 2 separation AUC 0.633 → 0.666 (added as a second metric because F1 on an
-81-tag set cannot resolve changes this small — see `EVALUATION.md` §4c).
+81-tag set cannot resolve changes this small — see `Documentation/EVALUATION.md` §4c).
 
-Largest per-category gain: `method` F1 0.250 → 0.462. See `EVALUATION.md` §4a,
+Largest per-category gain: `method` F1 0.250 → 0.462. See `Documentation/EVALUATION.md` §4a,
 §4b, and §4c for the per-change breakdown, including several candidate changes
 that were tested and rejected for making held-out F1 worse.
 
@@ -263,7 +263,7 @@ over the eight directorates:
 
 This immediately surfaced a defect invisible at gold-set scale: **Engineering
 recall 0.014** (2 of 146), with its concept vector ranking sixth of eight on
-awards NSF itself labelled Engineering. See `EVALUATION.md` §4e.
+awards NSF itself labelled Engineering. See `Documentation/EVALUATION.md` §4e.
 
 Rewriting the Engineering description fixed it, measured on a held-out half of
 the corpus that played no part in choosing the wording (n=615):
@@ -278,7 +278,7 @@ the corpus that played no part in choosing the wording (n=615):
 Rewriting *all eight* directorate descriptions was tried first and **rejected**:
 it redistributed error rather than reducing it (four categories better, four
 worse, top-1 0.639 → 0.613), and its apparent Engineering gain came largely from
-degrading Engineering's competitors. See `EVALUATION.md` §4f.
+degrading Engineering's competitors. See `Documentation/EVALUATION.md` §4f.
 
 ---
 

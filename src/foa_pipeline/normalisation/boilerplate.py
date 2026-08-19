@@ -83,7 +83,7 @@ BOILERPLATE_PATTERNS: List[Tuple[str, str, Pattern]] = [
     # The NSF "Who May Submit" block appears in 46 of 131 FOAs and is pure
     # submission legalese. It also causes a conceptual error: eligibility says
     # who may *apply*, while the population category is about who the research
-    # serves (ONTOLOGY.md 2.3). Tagging populations from it is wrong by
+    # serves (Documentation/ONTOLOGY.md 2.3). Tagging populations from it is wrong by
     # definition, not merely noisy.
     ("eligibility", "Who May Submit header", _c(r"\*?\s*Who May Submit Proposals\s*:")),
     ("eligibility", "Submitter enumeration lead-in",

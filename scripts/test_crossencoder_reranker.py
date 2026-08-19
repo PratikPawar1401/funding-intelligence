@@ -1,5 +1,5 @@
 """
-The real pairwise cross-encoder attempt (see EVALUATION.md 4k for why the
+The real pairwise cross-encoder attempt (see Documentation/EVALUATION.md 4k for why the
 prior two -- zero-shot NLI, SetFit's binary reformulation -- both failed and
 what a correctly-shaped attempt needs to fix).
 

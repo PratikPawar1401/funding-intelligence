@@ -24,7 +24,7 @@ Because of this, the crosswalk is a **documentation and analysis artefact**, not
 a relabelling tool. Pushing gold-set `nsf_*` tags through it would manufacture
 labels no human checked, and the resulting numbers would measure the crosswalk
 rather than the tagger. Re-labelling for an OpenAlex evaluation has to be a
-human pass; see ANNOTATION_CODEBOOK.md.
+human pass; see Documentation/ANNOTATION_CODEBOOK.md.
 """
 
 from typing import Dict, FrozenSet, List, Optional, Tuple

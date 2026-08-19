@@ -12,7 +12,7 @@ result. The field they are written to is called `human_tags` for backwards
 compatibility with the evaluation runner, which is a misleading name — so every
 annotated FOA also carries `annotation_provenance` recording which categories
 came from a model, which model, and when. Do not conflate the two sets; see
-EVALUATION.md 2 and ANNOTATION_CODEBOOK.md.
+Documentation/EVALUATION.md 2 and Documentation/ANNOTATION_CODEBOOK.md.
 
 The known weakness of LLM annotation is domain expertise and rare classes,
 which is exactly `method` and `population` here, so silver numbers should be

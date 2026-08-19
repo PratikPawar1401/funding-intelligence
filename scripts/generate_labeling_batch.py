@@ -1,6 +1,6 @@
 """
 Generates data/evaluation/labeling_batch.csv -- binary relevance judgments
-needed to get the cross-encoder reranker (EVALUATION.md 4k, attempt 4) past
+needed to get the cross-encoder reranker (Documentation/EVALUATION.md 4k, attempt 4) past
 its data-volume ceiling. NOT full gold-standard annotation: one fast yes/no
 judgment per (FOA, concept) candidate, not five-category tagging with
 rationale. See data/evaluation/LABELING_INSTRUCTIONS.md for how to fill it

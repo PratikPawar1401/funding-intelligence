@@ -187,7 +187,7 @@ class TestTitleScoreCombination:
     Measured on both eval sets and left disabled by default: the silver set got
     worse at every weight tried, and the gold set's +0.005 came with precision
     up and recall down, i.e. it behaved as a threshold change rather than as
-    title evidence. See EVALUATION.md 4d.
+    title evidence. See Documentation/EVALUATION.md 4d.
     """
 
     def test_zero_weight_is_a_no_op(self):

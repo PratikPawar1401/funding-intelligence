@@ -38,7 +38,7 @@ class TestEvalSetNamespacing:
     Gold and silver runs must not overwrite each other's error logs.
 
     They previously shared filenames, so a silver run left files that kept the
-    gold names while describing 46 different FOAs — and EVALUATION.md presents
+    gold names while describing 46 different FOAs — and Documentation/EVALUATION.md presents
     those files as the reported gold error analysis.
     """
 

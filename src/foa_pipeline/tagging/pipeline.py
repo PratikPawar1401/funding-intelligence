@@ -129,7 +129,7 @@ class TaggerPipeline:
         if not full_text.strip():
             return []
 
-        # ONTOLOGY.md 2.3 defines a population as who the research is about or
+        # Documentation/ONTOLOGY.md 2.3 defines a population as who the research is about or
         # serves; eligibility text says who may *apply*. Inferring populations
         # from it is wrong by definition, and was the largest single source of
         # population false positives on the gold set — applicant lists such as

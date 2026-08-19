@@ -253,7 +253,7 @@ class TestL1TaggerExcludedSpans:
     """Category suppression over character ranges.
 
     Populations must not be inferred from eligibility text, which states who
-    may apply rather than who the research serves (ONTOLOGY.md 2.3).
+    may apply rather than who the research serves (Documentation/ONTOLOGY.md 2.3).
     """
 
     POPULATION = frozenset({"population"})

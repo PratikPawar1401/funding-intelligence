@@ -42,7 +42,7 @@ body:
     id: expected
     attributes:
       label: What should have happened, and why?
-      description: Cite the inclusion criteria in ONTOLOGY.md where relevant.
+      description: Cite the inclusion criteria in Documentation/ONTOLOGY.md where relevant.
     validations:
       required: true
 

@@ -2,7 +2,7 @@
 Grant matching: researcher profile -> ranked FOA recommendations.
 
 Wraps matching/matcher.py's hybrid score (0.7 cosine similarity + 0.3 ontology
-tag overlap, MATCHING.md) and, when a local LLM is reachable, layers a
+tag overlap, Documentation/MATCHING.md) and, when a local LLM is reachable, layers a
 plain-language explanation and a coarse relevance judgement onto the top
 results via matching/explain.py. The hybrid ranking itself never depends on
 the LLM being available -- explanations are additive and degrade to a

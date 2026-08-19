@@ -31,7 +31,7 @@ def eval_set_slug(use_gold: bool) -> str:
     Short name for the eval set, used to namespace this run's output files.
 
     Both modes previously wrote to the same paths, so a silver run silently
-    replaced the gold error logs that EVALUATION.md 5 presents as the reported
+    replaced the gold error logs that Documentation/EVALUATION.md 5 presents as the reported
     error analysis — the files kept their names while describing a different
     set of FOAs. Namespacing makes the two runs coexist.
     """

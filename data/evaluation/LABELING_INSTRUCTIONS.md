@@ -7,7 +7,7 @@ does this specific concept genuinely apply to this specific grant, based on
 this snippet.
 
 **1,090 rows: 440 `method`, 650 `population`.** This is meant to get the
-cross-encoder reranker (see `EVALUATION.md` §4k, "Attempt 4") past the
+cross-encoder reranker (see `Documentation/EVALUATION.md` §4k, "Attempt 4") past the
 data-volume wall it hit — it showed a real but too-weak-and-noisy signal on
 ~9 positive examples per training fold, and needs roughly 80-100 real
 positives per category to have a realistic shot. Based on this batch's
@@ -31,7 +31,7 @@ put **`yes`** or **`no`** in the `relevant_yes_no` column based on:
 - **`text_snippet`** — the actual passage from the grant text that triggered
   this candidate
 
-**The rule** (same principle as `ANNOTATION_CODEBOOK.md`): answer **yes**
+**The rule** (same principle as `Documentation/ANNOTATION_CODEBOOK.md`): answer **yes**
 only if the concept is a **primary focus** of what's described in the
 snippet — not merely mentioned, adjacent, or an example among several. If
 "machine learning" appears as one of many optional approaches a proposer

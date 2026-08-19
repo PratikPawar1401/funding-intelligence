@@ -16,12 +16,12 @@ explicit whitelist of filenames, and `openalex_fields.csv` is not on it. That is
 intentional: adding a sixth category to the live ontology while no evaluation
 set carries a single OpenAlex label would make every prediction in it a false
 positive and collapse global gold F1 — the identical failure the silver set had
-with `research_discipline`, documented in EVALUATION.md 2. Registering the file
+with `research_discipline`, documented in Documentation/EVALUATION.md 2. Registering the file
 is a decision that has to follow labelling, not precede it.
 
 Three things this data gives that the current ontology lacks:
   - `description` on every field, from an external authority rather than
-    hand-written (see EVALUATION.md 4f for why hand-written label text has a
+    hand-written (see Documentation/EVALUATION.md 4f for why hand-written label text has a
     ceiling).
   - `display_name_alternatives`, a ready-made synonym set — 23 of 26 fields
     carry them, against 29 concepts in the current ontology that have none.

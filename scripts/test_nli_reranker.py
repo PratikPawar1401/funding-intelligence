@@ -11,7 +11,7 @@ compare two things against gold:
 
   1. Oracle: best achievable P/R/F1 if concepts were selected purely by NLI
      entailment score at the single best cutoff (same methodology as
-     EVALUATION.md 4i's oracle analysis).
+     Documentation/EVALUATION.md 4i's oracle analysis).
   2. Drop-in: same selection rule production uses today (top-3 by score per
      category) but with NLI score substituted for cosine score.
 

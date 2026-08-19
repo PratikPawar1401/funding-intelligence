@@ -65,7 +65,7 @@ harvest-nsf-awards:
 	PYTHONPATH=src python -m foa_pipeline.cli harvest-nsf-awards
 
 # Vendors the CC0 OpenAlex field taxonomy to data/ontology/. The resulting CSV
-# is staged, NOT loaded: see EVALUATION.md 4g before registering it.
+# is staged, NOT loaded: see Documentation/EVALUATION.md 4g before registering it.
 harvest-openalex:
 	PYTHONPATH=src python -m foa_pipeline.cli harvest-openalex
 
@@ -91,7 +91,7 @@ serve:
 
 # ── Web Frontend (Next.js, web/) ──
 # Runs as its own server on :3000, separate from the API on :8000 -- see
-# MATCHING.md / the frontend rewrite plan for why. `make serve` must also be
+# Documentation/MATCHING.md / the frontend rewrite plan for why. `make serve` must also be
 # running (or the containerized api service) for pages to have data to show.
 
 web-install:

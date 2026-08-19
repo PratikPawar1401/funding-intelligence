@@ -105,13 +105,13 @@ class Config:
     # here, an L1 hit is suppressed unless Layer 2 independently scores that
     # same concept above its own threshold too (see
     # TaggerPipeline._merge_and_disambiguate). Scoped to categories where
-    # Layer 2 is a reliable signal (EVALUATION.md 4c: research_discipline AUC
+    # Layer 2 is a reliable signal (Documentation/EVALUATION.md 4c: research_discipline AUC
     # 0.940, sponsor_theme 0.667) -- deliberately excludes method/population,
     # where Layer 2's score is worse than chance (AUC 0.476/0.400) and this
     # gate would suppress good tags rather than bad ones.
     # Empty by default: measured on the gold set and net-negative (F1 0.527 ->
     # 0.489, driven by research_discipline 0.523 -> 0.415) despite working
-    # exactly as intended on the case that motivated it (see EVALUATION.md
+    # exactly as intended on the case that motivated it (see Documentation/EVALUATION.md
     # 4j). Kept, tested, and documented rather than deleted -- costs nothing
     # disabled, same treatment as title_weight above.
     l1_corroboration_categories: List[str] = field(default_factory=list)
@@ -176,7 +176,7 @@ def get_config() -> Config:
             _env("GRANTS_GOV_REQUEST_DELAY_SECONDS", "0.15")
         ),
         # Empty by default -- see the field's own comment above for why
-        # (measured net-negative on the gold set, EVALUATION.md 4j).
+        # (measured net-negative on the gold set, Documentation/EVALUATION.md 4j).
         l1_corroboration_categories=[
             c.strip()
             for c in _env("L1_CORROBORATION_CATEGORIES", "").split(",")

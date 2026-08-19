@@ -126,7 +126,7 @@ unchanged data produces a byte-identical file, so a diff means the data moved.
 ### Match a Researcher Profile to Funding Opportunities
 
 Ranks FOAs for a researcher using the hybrid relevance score
-(`0.7 × cosine similarity + 0.3 × ontology tag overlap` — see [MATCHING.md](MATCHING.md)).
+(`0.7 × cosine similarity + 0.3 × ontology tag overlap` — see [MATCHING.md](Documentation/MATCHING.md)).
 Requires the FAISS index, so run `make tag` first.
 
 ```bash
@@ -167,7 +167,7 @@ Awards are written to the evaluation directory only. They are deliberately kept
 out of the FOA database: an award describes work that was funded, an FOA solicits
 it, and mixing the two genres would change what the corpus and search index mean.
 Treat the resulting numbers as a complementary benchmark, not a gold-set result —
-see [EVALUATION.md](EVALUATION.md) §4e.
+see [EVALUATION.md](Documentation/EVALUATION.md) §4e.
 
 ### Run the API Server
 
@@ -285,7 +285,9 @@ funding-intelligence/
 │   └── prompts/                  # LLM prompt templates
 │
 ├── tests/                        # 486 tests
-├── Documentation/                # Blueprint, proposal, reports
+├── Documentation/                # ANNOTATION_CODEBOOK.md, DEMO.md, MATCHING.md,
+│                                  #   ONTOLOGY.md, EVALUATION.md, plus the
+│                                  #   blueprint, proposal, and reports
 ├── scraper_config/               # Per-domain scraping rules (YAML)
 ├── phase-test-scripts/           # End-to-end smoke scripts
 │
@@ -361,7 +363,7 @@ categories and measurably outperforms UN SDGs for subject classification
 (F1 0.515 vs 0.261), since NSF solicitations are organised around directorates
 rather than policy goals. SDGs are retained for policy-level thematic framing.
 
-For full design rationale, category definitions, and tagging logic, see [ONTOLOGY.md](ONTOLOGY.md).
+For full design rationale, category definitions, and tagging logic, see [ONTOLOGY.md](Documentation/ONTOLOGY.md).
 
 ## Evaluation
 
@@ -375,9 +377,9 @@ Current accuracy against the 20-FOA hand-labelled gold standard:
 
 Per-category F1 ranges from 0.646 (sponsor themes) to 0.261 (UN SDGs). The gold
 standard is single-annotator; inter-annotator agreement has not been measured —
-see [ANNOTATION_CODEBOOK.md](ANNOTATION_CODEBOOK.md) for the protocol to close
+see [ANNOTATION_CODEBOOK.md](Documentation/ANNOTATION_CODEBOOK.md) for the protocol to close
 that gap. For full methodology, per-change results, and error analysis, see
-[EVALUATION.md](EVALUATION.md).
+[EVALUATION.md](Documentation/EVALUATION.md).
 
 ---
 
@@ -399,7 +401,7 @@ Good first contributions:
   triggering text. These become evaluation cases and are genuinely useful.
 - **A second annotator pass.** Inter-annotator agreement is the project's
   biggest documented methodological gap — see
-  [ANNOTATION_CODEBOOK.md](ANNOTATION_CODEBOOK.md).
+  [ANNOTATION_CODEBOOK.md](Documentation/ANNOTATION_CODEBOOK.md).
 - **New data sources.** `ingestion/` is designed so a new connector only has to
   emit records that `normalisation/` can canonicalise.
 

@@ -2,7 +2,7 @@
 Grant matching: researcher profile → ranked FOA recommendations.
 
 Combines dense vector similarity (FAISS) with explicit ontology tag overlap
-using the hybrid relevance score documented in MATCHING.md:
+using the hybrid relevance score documented in Documentation/MATCHING.md:
 
     hybrid_score = (COSINE_WEIGHT * cosine_similarity)
                  + (TAG_WEIGHT * tag_overlap_ratio)
@@ -22,7 +22,7 @@ from .vector_index import VectorIndex
 
 logger = logging.getLogger(__name__)
 
-# Weights from MATCHING.md. They should sum to 1.0 to keep hybrid_score in [0, 1].
+# Weights from Documentation/MATCHING.md. They should sum to 1.0 to keep hybrid_score in [0, 1].
 COSINE_WEIGHT = 0.7
 TAG_WEIGHT = 0.3
 
@@ -57,7 +57,7 @@ def compute_tag_overlap(
     """
     Fraction of the profile's concepts that the FOA also carries.
 
-    Uses the containment ratio from MATCHING.md (|profile ∩ foa| / |profile|)
+    Uses the containment ratio from Documentation/MATCHING.md (|profile ∩ foa| / |profile|)
     rather than full Jaccard: a broad FOA carrying many extra tags should not be
     penalised for covering everything the researcher actually asked for.
     """
