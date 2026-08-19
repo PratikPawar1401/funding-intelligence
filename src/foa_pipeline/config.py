@@ -4,6 +4,16 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List
 
+from dotenv import load_dotenv
+
+# Repo-root-relative rather than CWD-relative, since CLI commands, tests, and
+# the API server are documented to run from different working directories
+# (PYTHONPATH=src python -m foa_pipeline.cli ..., make serve, pytest from
+# repo root) -- CWD-based discovery would silently miss .env in some of them.
+# A no-op if the file doesn't exist (e.g. it was never copied from
+# .env.example); _env()'s defaults still apply either way.
+load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
 DEFAULT_COSINE_THRESHOLDS = (
     '{"method": 0.40, "population": 0.35, "research_domain": 0.35, '
     '"research_discipline": 0.35, "sponsor_theme": 0.30, "default": 0.35, '
