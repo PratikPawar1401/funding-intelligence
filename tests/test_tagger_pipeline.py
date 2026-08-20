@@ -316,7 +316,9 @@ class TestL1L2Corroboration:
                   corroboration_categories=("sponsor_theme",)):
         from dataclasses import replace
 
-        config = replace(pipeline_config, l1_corroboration_categories=list(corroboration_categories))
+        config = replace(
+            pipeline_config, l1_corroboration_categories=list(corroboration_categories)
+        )
         p = TaggerPipeline(config, ontology_store)
         p.l1 = MagicMock()
         p.l1.tag_text.return_value = l1_evidence
@@ -333,7 +335,9 @@ class TestL1L2Corroboration:
             "eligibility_description": "",
         }
 
-    def test_uncorroborated_l1_hit_suppressed_in_gated_category(self, pipeline_config, ontology_store):
+    def test_uncorroborated_l1_hit_suppressed_in_gated_category(
+        self, pipeline_config, ontology_store
+    ):
         # L1 finds great_02 (sponsor_theme, gated); L2 finds nothing for it.
         p = self._pipeline(
             pipeline_config, ontology_store,
@@ -356,7 +360,9 @@ class TestL1L2Corroboration:
         assert matches[0]["source_layer"] == "layer_1_terminological"
         assert matches[0]["confidence"] == 1.0
 
-    def test_uncorroborated_l1_hit_survives_in_ungated_category(self, pipeline_config, ontology_store):
+    def test_uncorroborated_l1_hit_survives_in_ungated_category(
+        self, pipeline_config, ontology_store
+    ):
         # research_domain is not in the gated set here -- old behaviour (L1
         # always wins) must be unchanged for every category not opted in.
         p = self._pipeline(
@@ -368,7 +374,9 @@ class TestL1L2Corroboration:
         tags = p.tag_record(self._foa())
         assert any(t["ontology_concept_id"] == "sdg_13" for t in tags)
 
-    def test_empty_corroboration_list_disables_the_gate_entirely(self, pipeline_config, ontology_store):
+    def test_empty_corroboration_list_disables_the_gate_entirely(
+        self, pipeline_config, ontology_store
+    ):
         p = self._pipeline(
             pipeline_config, ontology_store,
             l1_evidence=[self._l1_evidence("great_02", "sponsor_theme")],
