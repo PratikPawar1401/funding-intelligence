@@ -49,7 +49,7 @@ the offline evaluation loop that feeds back into tuning Layer 2:
 
 ## Screenshots
 
-**Opportunities** — dense, sortable table with faceted filters, matching simpler.grants.gov's layout:
+**Opportunities** — dense, sortable table with faceted filters:
 
 ![Opportunities table](assets/screenshots/opportunities-table.png)
 
